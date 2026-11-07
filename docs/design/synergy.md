@@ -5,7 +5,7 @@ A synergy pays off on something that already exists in the game. The player's jo
 ## The rule
 
 - **Synergies key off broad tags that many items share,** such as "any red wedge" or "any wedge with a multiplier". They never name a specific item. Any build then has several fitting items in a typical shop, so shopping stays a choice (see `economy.md`).
-- **Items shift the odds; they never guarantee outcomes.** No item picks a spin's result, not even a rare one: there's no ace in the hole. Items reshape the wheel instead, so what you want comes up more often.
+- **Items shift the odds; they never guarantee outcomes.** No item picks a spin's result, not even a rare one: there's no ace in the hole. Items reshape the bag and the wheels instead, so what you want comes up more often.
 
 ## Example: the fishing pond
 
