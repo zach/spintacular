@@ -16,7 +16,7 @@ Each strategy should be the best choice in some situations and a poor one in oth
 
 ## Rules
 
-- **No store-item synergies that force a purchase.** A strategy never requires spending all your money on one particular store item. That takes the fun out of shopping.
+- **No store-item synergies that force a purchase.** A strategy never requires spending all your money on one particular store item. That takes the fun out of shopping. Synergies tilt the game toward tags many items share, rather than needing a companion item (see `synergy.md`).
 - **Shopping never feels forced.** There is never only one thing the player needs.
 
 ## Tuning defaults
