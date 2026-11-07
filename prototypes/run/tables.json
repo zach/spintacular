@@ -24,7 +24,8 @@
       2,
       3,
       3
-    ]
+    ],
+    "wall_mult_per_point": 1
   },
   "targets": [
     30,

@@ -169,6 +169,12 @@ def score_sequence(run, seq, commit, trace=None):
         if trace is not None:
             trace.append(f"floor: -{penalty} points")
     for fam, size in pats:
+        if fam == "wall":
+            m = size * t["scoring"]["wall_mult_per_point"]
+            mult += m
+            if trace is not None:
+                trace.append(f"wall placement scores {size}: +{m} mult")
+            continue
         p, m = t["patterns"][fam][str(size)]
         points += p
         mult += m
@@ -366,6 +372,7 @@ class HoldersLayer:
 
     def patterns(self, seq, commit, trace):
         lines = copy.deepcopy(self.lines)
+        wall = set(getattr(self.run, "wall", set()))
         fam_pref = self.player.holder_family(self.run) if hasattr(self.player, "holder_family") else "color"
         pats, floor = [], 0
         for d in seq:
@@ -391,14 +398,59 @@ class HoldersLayer:
                 pats.append((line["fam"], self.caps[i]))
                 if trace is not None:
                     trace.append(f"{line['fam']} line of {self.caps[i]} filled")
+                self.completed(line, d, wall, pats, trace)
                 line.update(fam=None, key=None, n=0, last=None, dir=0)
         penalty = sum(self.floor[:floor]) + max(0, floor - len(self.floor)) * (self.floor[-1] if self.floor else 0)
         if commit:
             self.lines = lines
+            self.run.wall = wall
         return pats, penalty
 
+    def completed(self, line, d, wall, pats, trace):
+        pass
 
-LAYERS = {"adjacent": AdjacentLayer, "path": PathLayer, "holders": HoldersLayer}
+
+def wall_score(wall, cell):
+    """Azul scoring for a marker placed at cell (color, value) on a wall that already holds `wall`."""
+    c, v = cell
+    row = 1
+    x = v - 1
+    while (c, x) in wall:
+        row, x = row + 1, x - 1
+    x = v + 1
+    while (c, x) in wall:
+        row, x = row + 1, x + 1
+    col = 1
+    for step in (-1, 1):
+        y = c + step
+        while 0 <= y < 4 and (y, v) in wall:
+            col, y = col + 1, y + step
+    if row == 1 and col == 1:
+        return 1
+    return (row if row > 1 else 0) + (col if col > 1 else 0)
+
+
+class WallLayer(HoldersLayer):
+    """Holders plus an Azul-style wall that lasts the whole run. The wall is a 4 x 6 grid:
+    a row per color, a column per value. When a line fills, the die that filled it places a
+    marker on its (color, value) cell, if that cell is free. The marker scores like an Azul
+    tile: 1 alone, or the length of its row chain plus the length of its column chain.
+    Rows reward consecutive values in one color; columns reward one value in many colors."""
+
+    def completed(self, line, d, wall, pats, trace):
+        colors = [d.color] if d.color is not None else [0, 1, 2, 3]
+        free = [(c, d.value) for c in colors if (c, d.value) not in wall]
+        if not free:
+            return
+        cell = max(free, key=lambda cl: wall_score(wall, cl))
+        k = wall_score(wall, cell)
+        wall.add(cell)
+        pats.append(("wall", k))
+        if trace is not None:
+            trace.append(f"marker on wall {COLOR_NAMES[cell[0]]}{cell[1]}")
+
+
+LAYERS = {"adjacent": AdjacentLayer, "path": PathLayer, "holders": HoldersLayer, "wall": WallLayer}
 
 
 def make_layer(run, player):
