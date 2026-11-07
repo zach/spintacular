@@ -59,7 +59,7 @@ Each finding is marked **[Verified]** (survived 3-0) or **[Inference]** (what it
 **[Inference] For Spintacular:**
 - Give the player authorship. They chose the wedges and the wheel layout; the spin only picks among them. Offer agency after the spin as well, such as nudges, re-spins and choosing which wheel to cash in first.
 - Resolve compounding chains one step at a time, with each step's contribution visible, so a big payout reads as *your build working*, not as a jackpot from nowhere.
-- Spintacular has no rarity floor (`docs/design/economy.md` § Rarity). If one were used, it would belong in the shop (rare offers guaranteed every N rounds), not on spin outcomes, and decide whether it is visible. Hearthstone publishes its floor, and Sottosanti warns that hidden ones get noticed.
+- Spintacular has no rarity floor, because rare items are powerful rather than inherently good (`docs/design/economy.md` § Rarity).
 - Seed each run from one seed, with separate RNG streams for shop, spin and events. Then a run can be replayed and shared, and rerolling the shop does not change spin outcomes. This was not covered by a verified source.
 
 ## 5. Framing
