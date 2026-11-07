@@ -37,7 +37,7 @@ The design (`docs/design/`) leaves these open. The prototype picks a default for
 - **Straights** only go up: 3-4-5 counts, 5-4-3 doesn't.
 - **A run** has 12 rounds of 5 spins each.
 - **Start:** a bag of 24 wedges (each color with values 1–6), 4 plain wheels with room for 4 wedges each, and $4.
-- **Filling the wheels:** wedges are dealt round-robin, so a small bag still reaches every wheel. A wheel with no wedges adds nothing.
+- **Filling the wheels:** wedges are dealt round-robin. Slots the bag can't fill hold blank wedges, which add no die and break a run. Bots thin the bag only while it still fills every slot.
 - **Shop:** 4 offers. Rarity is gated by round: only commons until round 3, uncommons from round 3, rares from round 5, and more rares from round 8. Reroll costs $3, plus $1 more each time within a visit. Selling returns half the price. Limits: 5 items, 7 wheels, 2 consumables.
 - **Income:** $5 per round, $1 per unused spin, and Balatro-style interest of $1 per $5 held, up to $5.
 - **Tilt tools:**

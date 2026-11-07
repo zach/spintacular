@@ -8,37 +8,40 @@
 
 The holders layer has no adjacency "wall" yet, so items are its only compounding.
 
+Every wheel always holds its full number of wedges. Slots the bag can't fill hold blank wedges, which add no die and break a run (`docs/design/rounds.md`).
+
 Run: 2026-11-07, `python3 prototypes/run/spintacular.py compare 300`.
 
-**Method.** Each layer scores on a different scale, so comparing them on one target curve would be unfair. `compare` first scales each layer's target curve so that the best no-engine bot wins about 2% of runs. The scaling grows from nothing at round 1 to the full factor at round 12. It then runs the full rubric with 300 runs per bot. Bots place dice greedily (holders) or pick the highest-scoring path (path).
+**Method.** Each layer scores on a different scale, so comparing them on one target curve would be unfair. `compare` first scales each layer's target curve so that the best no-engine bot wins about 2% of runs. The scaling grows from nothing at round 1 to the full factor at round 12. It then runs the full rubric with 300 runs per bot. Bots place dice greedily (holders) or pick the highest-scoring path (path). They thin the bag only while it still fills every slot.
 
 ## Results [Verified by simulation]
 
 | Check | adjacent | path | holders |
 | --- | --- | --- | --- |
-| Target scale | 0.89 | 1.73 | 1.91 |
+| Target scale | 0.74 | 1.24 | 1.48 |
 | A1 round 1 safe | PASS (0%) | PASS (0%) | PASS (0%) |
 | A2 reckless loses round 1 | PASS (99.7%) | **FAIL (44%)** | **FAIL (46%)** |
-| B1 no-engine wins | PASS (3.0%) | PASS (2.3%) | PASS (2.0%) |
-| B2 best engine wins | PASS (45%) | PASS (55%) | PASS (46%) |
-| C1 straight factories win | 0% | 6% | 3% |
-| D1 no cliff | PASS (14%) | **FAIL (40% in round 12)** | PASS (32%) |
-| Checks passed | 10/10 | 8/10 | 9/10 |
+| B1 no-engine wins | PASS (0.7%) | PASS (2.3%) | PASS (2.0%) |
+| B2 best engine wins (bar 40%) | **FAIL (11%)** | **FAIL (30%)** | **FAIL (36%)** |
+| C1 kinds of factory | PASS | **FAIL** | PASS |
+| D1 no cliff | PASS (12%) | PASS (33%) | PASS (33%) |
+| Checks passed | 9/10 | 7/10 | 8/10 |
 
 Best win rate by focus:
 
 | Focus | adjacent | path | holders |
 | --- | --- | --- | --- |
-| color | 38% | 55% | 34% |
-| value | 40% | 51% | 46% |
-| straight | 0% | 6% | 3% |
-| adaptive | 45% | 45% | 36% |
-| bargain style (mean) | 13% | 26% | 16% |
+| color | 8% | 30% | 36% |
+| value | 6% | 14% | 30% |
+| straight | 0% | 5% | 4% |
+| adaptive | 11% | 22% | 33% |
+
+The earlier run, without blanks, let bots thin a wheel down to one wedge. Winning bots ended with a median of 1.2 to 1.7 wedges per wheel, and the best engine wins were 45% (adjacent), 55% (path) and 46% (holders).
 
 ## Findings [Inference]
 
-- **Path does the most for point factories and for the weaker strategies.** It has the highest engine win rates. It narrows the gap for the bargain style and roughly doubles color factories' wins. It lifts straights off zero, though not to a viable build.
-- **Neither variant makes straights a real build.** Choosing the reading order or placement helps a little, but straights still need consecutive values close together, and nothing in the bag tilts toward consecutive values. If straights are to be a build, they need their own tilt tool. Otherwise they should stay a bonus.
-- **Carrying results over between spins changes the risk in round 1.** In both path and holders, patterns build across spins, so even the reckless bot with one wheel survives round 1 more than half the time. The game gets more forgiving early, and losses pile up late. That's where path's D1 failure comes from: no bot loses before round 7. A different target curve, not just a scaled one, would be needed to spread losses out.
-- **The holders' floor costs straight builds the most.** Straight bots are the only engine bots that lose in rounds 2–4 under holders, because consecutive values rarely arrive in order and the rest go to the floor. This is Cavanagh's leftover problem showing up (`04-scoring-mechanisms.md`).
-- **Late spins become nearly deterministic in every layer.** Bots that win end with a median of 1.2 to 1.7 wedges per wheel, because the prototype lets the bag shrink to one wedge per wheel. A wheel with one wedge always lands the same die. That breaks "spins stay random" (`synergy.md`), so the comparison above flatters every layer equally.
+- **Once spins stay random, the player has to choose where results go.** Blanks cut the adjacent layer's best factory from 45% to 11% of wins. Most of its success came from wheels that always landed the same die. Path (30%) and holders (36%) hold up, because the player chooses where each die goes or how it's read, and so can work around a bad spin. That's the agency finding from `04-scoring-mechanisms.md`, now measured.
+- **Holders are the strongest layer under random spins.** They have the best factory win rates, three kinds of factory within half of the best, no cliff, and the bargain style no longer weak (18% mean, against 2% for adjacent). They still lack Azul's adjacency wall, the compounding source that research suggests, so items are their only multiplier.
+- **Straights are still not a build in any layer (0–5%).** Nothing in the bag tilts toward consecutive values. Straights need their own tilt tool, or should stay a bonus.
+- **Carrying results over between spins makes round 1 forgiving.** In path and holders, even the reckless bot with one wheel survives round 1 more than half the time. A1 is still met, but A2's idea, that an insane risk should be able to lose round 1, isn't.
+- **B2 fails in every layer at the same wall height.** The 40% bar was set before spins were kept random. Either factories need more compounding, such as the adjacency wall for holders, or the wall needs to come down.
