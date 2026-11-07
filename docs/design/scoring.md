@@ -8,7 +8,13 @@ Adjacency is what keeps patterns exciting. Patterns allowed anywhere become cert
 
 ## Wedges
 
-Each wedge starts as one fixed die: landing on it adds that die's color and value to the sequence. The player can see exactly what each spin might add. What a wedge produces can change during a run, and tilting the game (`synergy.md`) works by editing wedges.
+Each wedge starts as one fixed die: landing on it adds that die's color and value to the sequence. The player can see exactly what each spin might add. What a wedge produces can change during a run, and tilting the game (`synergy.md`) works by editing wedges. The first upgrades are:
+
+- **Second die:** the wedge adds two dice. This makes the sequence longer, so long runs come up more often.
+- **Wild color:** the wedge's die counts as any color, so it can join two runs into one.
+- **Value range:** the wedge's value is rolled within a range, such as 3–5, instead of being fixed.
+
+Each one improves the odds without guaranteeing anything, because the wheel still has to land on the wedge.
 
 ## Pattern families
 
