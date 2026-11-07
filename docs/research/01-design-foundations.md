@@ -32,7 +32,7 @@ Each finding is marked **[Verified]** (survived 3-0) or **[Inference]** (what it
 
 **[Verified]** Balatro's loop: score against a required total that rises every round (blind), with synergies that interlock and steer the build [1]. Joker effects resolve in a fixed order the player can rearrange [4]. Targets live in per-ante tables that differ by stake, and patches change single numbers in them [1][5].
 
-**[Inference] For Spintacular:**
+**[Inference] For Spintacular** (the resolution order is now decided, in `docs/design/scoring.md`):
 - Use a fixed resolution order: wedges in the order the pointer passes them, then wheels left to right, then always-on items. Additive bonuses should come before multipliers, so arranging the order is a skill.
 - Keep timing phases few and named, like Balatro's split between per-card triggers and global triggers. For example: *on land*, *on pass*, *after spin*, *end of round*.
 - Keep the target curve, prices, rarity weights and every effect's numbers in data tables. Balatro's patch history shows most tuning is changing a single number.
@@ -94,10 +94,9 @@ The Automap 0.1.0 public map has one library per slot. Only miniaudio and the EC
 
 ## Open questions
 
-1. What exact resolution model lets compounding stay readable at exponential scale: ordered slots plus a few named timing phases, or something else?
-2. Should a rarity floor or pity counter exist, and should it be visible?
-3. Text rendering and data serialization: which libraries, and add them through a private map or propose them for Automap's public map?
-4. ECS: use flecs as mapped, add EnTT privately, or use plain structs for a game state this small?
+1. Should a rarity floor or pity counter exist, and should it be visible?
+2. Text rendering and data serialization: which libraries, and add them through a private map or propose them for Automap's public map?
+3. ECS: use flecs as mapped, add EnTT privately, or use plain structs for a game state this small?
 
 ## Sources
 
