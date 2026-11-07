@@ -4,6 +4,7 @@ Throwaway code. Every balance number lives in tables.json.
 
     python3 prototypes/run/spintacular.py sim [runs]   # bots play; prints the rubric report
     python3 prototypes/run/spintacular.py play [seed]  # play a run yourself
+    python3 prototypes/run/spintacular.py compare [runs]  # compare scoring layers at the same wall
 
 Rules follow docs/design/. Details the design leaves open are listed in
 prototypes/run/README.md under "Prototype defaults".
@@ -141,13 +142,21 @@ def longest(pats, family):
 
 
 def score_sequence(run, seq, commit, trace=None):
-    """Scores one spin's sequence: dice, then patterns, then items in order."""
+    """Scores one spin's sequence: dice, then the scoring layer's patterns, then items in order."""
     t = run.t
     points = sum(d.value + d.points for d in seq)
     mult = 1.0
     if trace is not None:
         trace.append(f"dice {' '.join(d.label() for d in seq)}: {points} points")
-    pats = find_patterns(seq)
+    layer = getattr(run, "layer", None)
+    if layer is None:
+        pats, penalty = find_patterns(seq), 0
+    else:
+        pats, penalty = layer.patterns(seq, commit, trace)
+    if penalty:
+        points = max(0, points - penalty)
+        if trace is not None:
+            trace.append(f"floor: -{penalty} points")
     for fam, size in pats:
         p, m = t["patterns"][fam][str(size)]
         points += p
@@ -191,6 +200,214 @@ def score_sequence(run, seq, commit, trace=None):
     if trace is not None:
         trace.append(f"= {points:.0f} x {mult:.2f} = {total}")
     return total, pats
+
+
+# ---------------------------------------------------------------- scoring layers
+#
+# The dice layer is swappable (docs/design/scoring.md). tables.json "scoring.layer" picks one:
+#   adjacent: runs of adjacent dice in the order the wheels add them (the current design)
+#   path:     the player traces one run through a grid of recent spins (reading order)
+#   holders:  the player places each die into fixed-size lines (Azul-style)
+
+def path_families(dice):
+    """Families the whole path forms, read in path order (either direction), with sizes."""
+    out = []
+    cs = {0, 1, 2, 3}
+    for d in dice:
+        cs &= {0, 1, 2, 3} if d.color is None else {d.color}
+    if cs:
+        n = sum(d.weight for d in dice)
+        if n >= 3:
+            out.append(("color", min(n, 5)))
+    vals = [d.value for d in dice]
+    n = min(len(dice), 5)
+    if len(dice) >= 3:
+        if len(set(vals)) == 1:
+            out.append(("value", n))
+        steps = {b - a for a, b in zip(vals, vals[1:])}
+        if steps in ({1}, {-1}):
+            out.append(("straight", n))
+            if cs:
+                out.append(("color_straight", n))
+    return out
+
+
+def path_can_extend(dice):
+    """Whether a partial path can still become a run of some family."""
+    cs = {0, 1, 2, 3}
+    for d in dice:
+        cs &= {0, 1, 2, 3} if d.color is None else {d.color}
+    if cs:
+        return True
+    vals = [d.value for d in dice]
+    if len(set(vals)) == 1:
+        return True
+    steps = {b - a for a, b in zip(vals, vals[1:])}
+    return steps in ({1}, {-1})
+
+
+class AdjacentLayer:
+    def __init__(self, run, player):
+        pass
+
+    def patterns(self, seq, commit, trace):
+        return find_patterns(seq), 0
+
+
+class PathLayer:
+    """Results stay on a grid for a few spins: rows are spins, columns are the order dice were added.
+    Each spin the player traces one path of 3-5 orthogonally adjacent dice that touches the newest row
+    and forms a run; its dice are then used up."""
+
+    def __init__(self, run, player):
+        self.run = run
+        self.window = run.t["scoring"]["path_rows"]
+        self.rows = []
+
+    def patterns(self, seq, commit, trace):
+        grid = [r[:] for r in self.rows] + [list(seq)]
+        last = len(grid) - 1
+        cells = [(r, c) for r in range(len(grid)) for c in range(len(grid[r])) if grid[r][c] is not None]
+        best = (None, [], ())
+        seen = {}
+
+        def nbrs(r, c):
+            for dr, dc in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                rr, cc = r + dr, c + dc
+                if 0 <= rr < len(grid) and 0 <= cc < len(grid[rr]) and grid[rr][cc] is not None:
+                    yield rr, cc
+
+        def evaluate(path):
+            nonlocal best
+            pats = path_families([grid[r][c] for r, c in path])
+            if not pats:
+                return
+            key = tuple(sorted(pats))
+            if key not in seen:
+                seen[key] = score_items_only(self.run, seq, pats)
+            if best[0] is None or seen[key] > best[0]:
+                best = (seen[key], pats, tuple(path))
+
+        def dfs(path):
+            if len(path) >= 3 and any(r == last for r, _ in path):
+                evaluate(path)
+            if len(path) == 5:
+                return
+            r, c = path[-1]
+            for nb in nbrs(r, c):
+                if nb not in path:
+                    path.append(nb)
+                    if path_can_extend([grid[x][y] for x, y in path]):
+                        dfs(path)
+                    path.pop()
+
+        for cell in cells:
+            dfs([cell])
+        _, pats, path = best
+        if trace is not None and path:
+            trace.append("path " + "-".join(grid[r][c].label() for r, c in path))
+        if commit:
+            for r, c in path:
+                grid[r][c] = None
+            self.rows = grid[-(self.window - 1):] if self.window > 1 else []
+        return pats, 0
+
+
+class HoldersLayer:
+    """Azul-style lines of fixed size. Each die goes into a line that accepts it, or the floor.
+    A line becomes a color, value or straight line when started; a full line scores its pattern
+    and empties. Lines carry over between spins within a round."""
+
+    def __init__(self, run, player):
+        self.run, self.player = run, player
+        self.caps = run.t["scoring"]["holder_sizes"]
+        self.floor = run.t["scoring"]["floor_penalties"]
+        self.lines = [dict(fam=None, key=None, n=0, last=None, dir=0) for _ in self.caps]
+
+    @staticmethod
+    def accepts(line, d):
+        if line["fam"] is None:
+            return True
+        if line["fam"] == "color":
+            return d.color is None or line["key"] is None or d.color == line["key"]
+        if line["fam"] == "value":
+            return d.value == line["key"]
+        if line["dir"] == 0:
+            return abs(d.value - line["last"]) == 1
+        return d.value == line["last"] + line["dir"]
+
+    def place(self, lines, d, fam_pref):
+        """Greedy placement: finish lines first, then extend the fullest, then start the smallest."""
+        best, best_key = None, None
+        for i, line in enumerate(lines):
+            if line["fam"] is None or not self.accepts(line, d):
+                continue
+            w = d.weight if line["fam"] == "color" else 1
+            key = (line["n"] + w >= self.caps[i], line["n"] / self.caps[i])
+            if best_key is None or key > best_key:
+                best, best_key = i, key
+        if best is not None:
+            return best, None
+        empty = [i for i, l in enumerate(lines) if l["fam"] is None]
+        if empty:
+            return min(empty, key=lambda i: self.caps[i]), fam_pref or "color"
+        return None, None
+
+    def patterns(self, seq, commit, trace):
+        lines = copy.deepcopy(self.lines)
+        fam_pref = self.player.holder_family(self.run) if hasattr(self.player, "holder_family") else "color"
+        pats, floor = [], 0
+        for d in seq:
+            i, start = self.place(lines, d, fam_pref)
+            if i is None:
+                floor += 1
+                continue
+            line = lines[i]
+            if start:
+                line.update(fam=start, n=0, last=d.value, dir=0,
+                            key=d.color if start == "color" else d.value)
+            elif line["fam"] == "color" and line["key"] is None:
+                line["key"] = d.color
+            elif line["fam"] == "straight":
+                line["dir"] = line["dir"] or (d.value - line["last"])
+                line["last"] = d.value
+            w = d.weight if line["fam"] == "color" else 1
+            line["n"] += w
+            if line["n"] >= self.caps[i]:
+                floor += line["n"] - self.caps[i]
+                pats.append((line["fam"], self.caps[i]))
+                if trace is not None:
+                    trace.append(f"{line['fam']} line of {self.caps[i]} filled")
+                line.update(fam=None, key=None, n=0, last=None, dir=0)
+        penalty = sum(self.floor[:floor]) + max(0, floor - len(self.floor)) * (self.floor[-1] if self.floor else 0)
+        if commit:
+            self.lines = lines
+        return pats, penalty
+
+
+LAYERS = {"adjacent": AdjacentLayer, "path": PathLayer, "holders": HoldersLayer}
+
+
+def make_layer(run, player):
+    return LAYERS[run.t.get("scoring", {}).get("layer", "adjacent")](run, player)
+
+
+def score_items_only(run, seq, pats):
+    """Score with fixed patterns and no state changes (for choosing among options)."""
+    saved = run.layer
+    run.layer = _Fixed(pats)
+    try:
+        return score_sequence(run, seq, commit=False)[0]
+    finally:
+        run.layer = saved
+
+
+class _Fixed:
+    def __init__(self, pats):
+        self.pats = pats
+
+    def patterns(self, seq, commit, trace):
+        return self.pats, 0
 
 
 # ---------------------------------------------------------------- spinning
@@ -256,6 +473,7 @@ def play_round(run, player, log=None, target=None):
     target = t["targets"][run.round] if target is None else target
     spins = t["run"]["spins_per_round"]
     loads = fill_wheels(run)
+    run.layer = make_layer(run, player)
     rods = sum(i["amount"] for i in run.has("rod"))
     total, used = 0, 0
     best_spin = 0
@@ -553,6 +771,10 @@ class Builder(Player):
         else:
             pool = [w for w in run.bag if not w.ranged]
         return self.rng.choice(pool) if pool else None
+
+    def holder_family(self, run):
+        kind = self.current_focus(run)[0]
+        return kind if kind in ("color", "value", "straight") else "color"
 
     def choice_for(self, o, focus):
         kind, x = focus
@@ -947,6 +1169,56 @@ def play(seed):
             run.money = 0
 
 
+def scaled_targets(t, scale):
+    """Scale the target curve, fully at the last round and not at all at round 1."""
+    n = len(t["targets"])
+    return [int(v * scale ** (r / (n - 1))) for r, v in enumerate(t["targets"])]
+
+
+def calibrate(t, runs, wall=0.02):
+    """Find the target scale at which the best no-engine bot wins about `wall` of runs."""
+    roster = bot_roster()
+    lo, hi = 0.02, 50.0
+    for _ in range(10):
+        mid = (lo * hi) ** 0.5
+        tt = copy.deepcopy(t)
+        tt["targets"] = scaled_targets(t, mid)
+        best = 0
+        for name in ("flat/spender", "random"):
+            wins = sum(play_run(tt, 50_000 + i, roster[name], Stats())["won"] for i in range(runs))
+            best = max(best, wins / runs)
+        if best > wall:
+            lo = mid
+        else:
+            hi = mid
+    return hi
+
+
+def compare(t, runs):
+    """Calibrate each scoring layer's wall to the same height, then run the rubric on each."""
+    out = [f"Each layer's targets are scaled so the best no-engine bot wins about 2%, then {runs} runs per bot.", ""]
+    rows = []
+    for layer in LAYERS:
+        tt = copy.deepcopy(t)
+        tt["scoring"]["layer"] = layer
+        scale = calibrate(tt, max(100, runs // 2))
+        tt["targets"] = scaled_targets(tt, scale)
+        text, checks = report(tt, runs)
+        results = {c: (ok, det) for c, _, ok, det in checks}
+        rows.append((layer, scale, tt["targets"], results, text))
+    out.append(f"{'check':<6}" + "".join(f"{l:>34}" for l, *_ in rows))
+    for cid in rows[0][3]:
+        out.append(f"{cid:<6}" + "".join(
+            f"{('PASS ' if r[3][cid][0] else 'FAIL ') + r[3][cid][1][-28:]:>34}" for r in rows))
+    out.append(f"{'pass':<6}" + "".join(f"{sum(ok for ok, _ in r[3].values()):>34}" for r in rows))
+    out.append("")
+    for layer, scale, targets, _, text in rows:
+        out.append(f"== {layer}: target scale {scale:.2f}, targets {targets}")
+        out.extend(l for l in text.splitlines()[2:24])
+        out.append("")
+    return "\n".join(out)
+
+
 def capacity(t, runs):
     """Median round total per round when no one can lose: how fast each bot's score grows."""
     out = ["Median round total (all spins played, no losing), by round"]
@@ -965,7 +1237,9 @@ def capacity(t, runs):
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "sim"
-    if mode == "capacity":
+    if mode == "compare":
+        print(compare(load_tables(), int(sys.argv[2]) if len(sys.argv) > 2 else 300))
+    elif mode == "capacity":
         print(capacity(load_tables(), int(sys.argv[2]) if len(sys.argv) > 2 else 100))
     elif mode == "play":
         play(int(sys.argv[2]) if len(sys.argv) > 2 else random.randrange(10**6))
