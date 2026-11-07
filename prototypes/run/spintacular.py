@@ -101,7 +101,16 @@ def runs_of(seq, ok_pair_start, extend):
 
 
 def find_patterns(seq):
-    """Returns [(family, size)] for every maximal run of 3+ adjacent dice."""
+    """Returns [(family, size)] for every maximal run of 3+ adjacent dice. A blank (None) breaks runs."""
+    if any(d is None for d in seq):
+        pats, part = [], []
+        for d in seq + [None]:
+            if d is None:
+                pats += find_patterns(part) if part else []
+                part = []
+            else:
+                part.append(d)
+        return pats
     pats = []
 
     def colors(d):
@@ -144,15 +153,17 @@ def longest(pats, family):
 def score_sequence(run, seq, commit, trace=None):
     """Scores one spin's sequence: dice, then the scoring layer's patterns, then items in order."""
     t = run.t
+    full = seq
+    seq = [d for d in full if d is not None]
     points = sum(d.value + d.points for d in seq)
     mult = 1.0
     if trace is not None:
-        trace.append(f"dice {' '.join(d.label() for d in seq)}: {points} points")
+        trace.append(f"dice {' '.join(d.label() if d else '__' for d in full)}: {points} points")
     layer = getattr(run, "layer", None)
     if layer is None:
-        pats, penalty = find_patterns(seq), 0
+        pats, penalty = find_patterns(full), 0
     else:
-        pats, penalty = layer.patterns(seq, commit, trace)
+        pats, penalty = layer.patterns(full, commit, trace)
     if penalty:
         points = max(0, points - penalty)
         if trace is not None:
@@ -358,6 +369,8 @@ class HoldersLayer:
         fam_pref = self.player.holder_family(self.run) if hasattr(self.player, "holder_family") else "color"
         pats, floor = [], 0
         for d in seq:
+            if d is None:
+                continue
             i, start = self.place(lines, d, fam_pref)
             if i is None:
                 floor += 1
@@ -415,7 +428,8 @@ class _Fixed:
 def fill_wheels(run):
     bag = run.bag[:]
     run.rng.shuffle(bag)
-    # Deal round-robin, so a small bag still puts wedges on every wheel.
+    # Deal round-robin. Slots the bag can't fill hold blank wedges (None), which add no die
+    # and break a run, so every wheel always holds its full number of wedges.
     loads = [[] for _ in run.wheels]
     k = 0
     for _ in range(max((w["size"] for w in run.wheels), default=0)):
@@ -423,11 +437,15 @@ def fill_wheels(run):
             if len(loads[wi]) < w["size"] and k < len(bag):
                 loads[wi].append(bag[k])
                 k += 1
+    if run.t["run"].get("blank_wedges", True):
+        for wi, w in enumerate(run.wheels):
+            loads[wi] += [None] * (w["size"] - len(loads[wi]))
     return loads
 
 
 def land(run, wedges, band_color):
-    weights = [3 if band_color is not None and w.color in (None, band_color) else 1 for w in wedges]
+    weights = [3 if band_color is not None and w is not None and w.color in (None, band_color) else 1
+               for w in wedges]
     return run.rng.choices(range(len(wedges)), weights)[0]
 
 
@@ -449,6 +467,9 @@ def build_sequence(run, loads, landings, values=None):
     for wi, (w, wedges, lands) in enumerate(zip(run.wheels, loads, landings)):
         for li, idx in enumerate(lands):
             wedge = wedges[idx]
+            if wedge is None:
+                seq.append(None)
+                continue
             for di in range(wedge.dice):
                 key = (wi, li, di, wedge.uid)
                 v = values.get(key) if values else None
@@ -513,15 +534,15 @@ def play_round(run, player, log=None, target=None):
             log(f"  spin {used}: " + " | ".join(trace) + f"   (round {total}/{target})")
         # The Rod: take a landed wedge out of the bag for good.
         if rods > 0:
-            landed = [loads[wi][i] for wi, lands in enumerate(landings) for i in lands]
+            landed = [loads[wi][i] for wi, lands in enumerate(landings) for i in lands if loads[wi][i] is not None]
             landed = list({w.uid: w for w in landed if w in run.bag}.values())
             victim = player.zap_choice(run, landed)
             if victim is not None:
                 rods -= 1
                 run.bag.remove(victim)
                 for wedges in loads:
-                    if victim in wedges and len(wedges) > 1:
-                        wedges.remove(victim)
+                    if victim in wedges:
+                        wedges[wedges.index(victim)] = None
                 if log:
                     log(f"  The Rod removes {victim.label()} from the bag")
     return total >= target, spins - used, best_spin, total
@@ -656,7 +677,7 @@ class RandomPlayer(Player):
         self.rng.shuffle(run.items)
 
     def zap_choice(self, run, landed):
-        return self.rng.choice(landed) if landed and len(run.bag) > 2 * len(run.wheels) else None
+        return self.rng.choice(landed) if landed and len(run.bag) > run.slots() else None
 
 
 class Builder(Player):
@@ -785,7 +806,8 @@ class Builder(Player):
         return None
 
     def min_bag(self, run):
-        return len(run.wheels)
+        # With blank wedges, thinning below the wheels' slots trades dice for blanks.
+        return run.slots() if run.t["run"].get("blank_wedges", True) else len(run.wheels)
 
     # --- spending
     def shop(self, run, offers, stats):

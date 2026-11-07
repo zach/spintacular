@@ -5,7 +5,8 @@
     "start_money": 4,
     "max_items": 5,
     "max_wheels": 7,
-    "max_consumables": 2
+    "max_consumables": 2,
+    "blank_wedges": true
   },
   "scoring": {
     "layer": "adjacent",
