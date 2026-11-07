@@ -9,7 +9,7 @@
     "blank_wedges": true
   },
   "scoring": {
-    "layer": "adjacent",
+    "layer": "wall",
     "path_rows": 3,
     "holder_sizes": [
       3,
@@ -26,21 +26,22 @@
       3
     ],
     "wall_mult_per_point": 1,
-    "wall_passive_mult_per_marker": 0
+    "wall_passive_mult_per_marker": 0,
+    "wall_aware_bots": true
   },
   "targets": [
     30,
-    50,
-    80,
-    120,
-    180,
-    280,
-    460,
-    800,
-    1500,
-    2600,
-    6000,
-    18000
+    52,
+    86,
+    135,
+    211,
+    342,
+    586,
+    1061,
+    2072,
+    3740,
+    8989,
+    28080
   ],
   "income": {
     "per_round": 5,
@@ -227,7 +228,7 @@
       "rarity": "uncommon",
       "size": 4,
       "effect": "heavy",
-      "text": "its dice count double in color runs"
+      "text": "its dice count double in color lines and runs"
     },
     "twin": {
       "name": "Twin Wheel",

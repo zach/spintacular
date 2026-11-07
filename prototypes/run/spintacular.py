@@ -377,9 +377,13 @@ class HoldersLayer:
             key = (completes, line["n"] / self.caps[i])
             if best_key is None or key > best_key:
                 best, best_key = i, key
+        empty = [i for i, l in enumerate(lines) if l["fam"] is None]
+        if best is not None and aim and not best_key[0] and empty \
+                and lines[best]["n"] + (d.weight if lines[best]["fam"] == "color" else 1) >= self.caps[best]:
+            # Hold the line: this die would place an isolated marker, so start another line with it.
+            return min(empty, key=lambda i: self.caps[i]), fam_pref or "color"
         if best is not None:
             return best, None
-        empty = [i for i, l in enumerate(lines) if l["fam"] is None]
         if empty:
             return min(empty, key=lambda i: self.caps[i]), fam_pref or "color"
         return None, None
