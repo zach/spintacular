@@ -360,14 +360,21 @@ class HoldersLayer:
             return abs(d.value - line["last"]) == 1
         return d.value == line["last"] + line["dir"]
 
-    def place(self, lines, d, fam_pref):
-        """Greedy placement: finish lines first, then extend the fullest, then start the smallest."""
+    def place(self, lines, d, fam_pref, wall=None):
+        """Greedy placement: finish lines first, then extend the fullest, then start the smallest.
+        With a wall, a line is held one short when the die would place an isolated marker."""
         best, best_key = None, None
+        aim = wall is not None and len(wall) >= 2 and self.run.t["scoring"].get("wall_aware_bots", True)
         for i, line in enumerate(lines):
             if line["fam"] is None or not self.accepts(line, d):
                 continue
             w = d.weight if line["fam"] == "color" else 1
-            key = (line["n"] + w >= self.caps[i], line["n"] / self.caps[i])
+            completes = line["n"] + w >= self.caps[i]
+            if completes and aim:
+                colors = [d.color] if d.color is not None else [0, 1, 2, 3]
+                gain = max((wall_score(wall, (c, d.value)) for c in colors if (c, d.value) not in wall), default=0)
+                completes = gain > 1
+            key = (completes, line["n"] / self.caps[i])
             if best_key is None or key > best_key:
                 best, best_key = i, key
         if best is not None:
@@ -385,7 +392,7 @@ class HoldersLayer:
         for d in seq:
             if d is None:
                 continue
-            i, start = self.place(lines, d, fam_pref)
+            i, start = self.place(lines, d, fam_pref, wall if isinstance(self, WallLayer) else None)
             if i is None:
                 floor += 1
                 continue
