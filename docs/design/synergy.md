@@ -16,7 +16,7 @@ Say a fishing game gives a bonus on blue fish.
 
 ## In Spintacular
 
-The wheels are the pond and the wedges are the fish. Items tilt a wheel toward the player's tags by changing what is on it:
+The bag of wedges is the pond, and the wedges drawn from it onto the wheels are the fish (`rounds.md`). Items tilt the bag toward the player's tags by changing what is in it:
 
 - removing or destroying wedges the player doesn't want;
 - turning a wedge into another color, tag or value;
