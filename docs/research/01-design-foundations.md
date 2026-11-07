@@ -40,7 +40,7 @@ Each finding is marked **[Verified]** (survived 3-0) or **[Inference]** (what it
 
 ## 2. Economy
 
-**Not established by this research.** Balatro's interest, shop prices, reroll costs and selling were not verified: the one patch-economy claim was refuted, and the economy sources fetched were blogs or unreliable. This is the largest gap (see Open questions).
+**Not established by this research.** Balatro's interest, shop prices, reroll costs and selling were not verified: the one patch-economy claim was refuted, and the economy sources fetched were blogs or unreliable. Spintacular's economy is a design decision, in `docs/design/economy.md`.
 
 ## 3. Synergy, rarity and replayability
 
@@ -94,11 +94,10 @@ The Automap 0.1.0 public map has one library per slot. Only miniaudio and the EC
 
 ## Open questions
 
-1. How should Spintacular's economy work (interest, shop prices, reroll costs, selling)? Balatro's economy was not verified here.
-2. What exact resolution model lets compounding stay readable at exponential scale: ordered slots plus a few named timing phases, or something else?
-3. Should a rarity floor or pity counter exist, and should it be visible?
-4. Text rendering and data serialization: which libraries, and add them through a private map or propose them for Automap's public map?
-5. ECS: use flecs as mapped, add EnTT privately, or use plain structs for a game state this small?
+1. What exact resolution model lets compounding stay readable at exponential scale: ordered slots plus a few named timing phases, or something else?
+2. Should a rarity floor or pity counter exist, and should it be visible?
+3. Text rendering and data serialization: which libraries, and add them through a private map or propose them for Automap's public map?
+4. ECS: use flecs as mapped, add EnTT privately, or use plain structs for a game state this small?
 
 ## Sources
 
