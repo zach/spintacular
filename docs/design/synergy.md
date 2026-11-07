@@ -5,7 +5,7 @@ A synergy pays off on something that already exists in the game. The player's jo
 ## The rule
 
 - **Synergies key off broad tags that many items share,** such as "any red wedge" or "any wedge with a multiplier". They never name a specific item. Any build then has several fitting items in a typical shop, so shopping stays a choice (see `economy.md`).
-- **Items shift the odds; they don't guarantee outcomes.** No cheap item that is always in the shop makes the result you want certain. Items reshape the wheel instead, so what you want comes up more often.
+- **Items shift the odds; they never guarantee outcomes.** No item picks a spin's result, not even a rare one: there's no ace in the hole. Items reshape the wheel instead, so what you want comes up more often.
 
 ## Example: the fishing pond
 
@@ -22,5 +22,17 @@ The wheels are the pond and the wedges are the fish. Items tilt a wheel toward t
 - turning a wedge into another color, tag or value;
 - making wedges wider or narrower;
 - adding wedges from the shop, which offers whatever it rolled.
+
+## Consumables
+
+Consumables are one-use effects the player saves and deploys at the right moment. Like other items, they improve the odds without fixing the result:
+
+- **Respins:** spin again.
+- **Nudges:** move the pointer a short way after it stops.
+- **Outer wheel bands:** a temporary band around the outside of the wheel that favors part of it without guaranteeing a hit.
+
+Their skill is in the timing, not in what they guarantee.
+
+## Spins stay random
 
 A spin still picks among what is on the wheel. Compounding comes from building a wheel where more of the wedges pay off together, not from forcing one particular wedge to come up.
