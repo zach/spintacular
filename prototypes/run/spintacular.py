@@ -169,6 +169,13 @@ def score_sequence(run, seq, commit, trace=None):
         if trace is not None:
             trace.append(f"floor: -{penalty} points")
     for fam, size in pats:
+        if fam == "wall_passive":
+            m = size * t["scoring"].get("wall_passive_mult_per_marker", 0)
+            if m:
+                mult += m
+                if trace is not None:
+                    trace.append(f"wall holds {size} markers: +{m} mult")
+            continue
         if fam == "wall":
             m = size * t["scoring"]["wall_mult_per_point"]
             mult += m
@@ -401,6 +408,8 @@ class HoldersLayer:
                 self.completed(line, d, wall, pats, trace)
                 line.update(fam=None, key=None, n=0, last=None, dir=0)
         penalty = sum(self.floor[:floor]) + max(0, floor - len(self.floor)) * (self.floor[-1] if self.floor else 0)
+        if self.run.t["scoring"]["layer"] == "wall" and wall:
+            pats.append(("wall_passive", len(wall)))
         if commit:
             self.lines = lines
             self.run.wall = wall

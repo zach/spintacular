@@ -25,7 +25,8 @@
       3,
       3
     ],
-    "wall_mult_per_point": 1
+    "wall_mult_per_point": 1,
+    "wall_passive_mult_per_marker": 0
   },
   "targets": [
     30,
