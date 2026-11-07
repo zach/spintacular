@@ -20,7 +20,13 @@ python3 prototypes/run/spintacular.py capacity 100
 
 Shows each bot's median round score when no one can lose. Use it to set score targets.
 
-Every balance number and every piece of content is in `tables.json`.
+```bash
+python3 prototypes/run/spintacular.py compare 300
+```
+
+Compares the scoring layers. It scales each layer's target curve so that bots without a point factory win about 2% of runs, then runs the rubric on each (`docs/research/05-scoring-layer-comparison.md`).
+
+Every balance number and every piece of content is in `tables.json`. `scoring.layer` picks the scoring layer: `adjacent` (the current design), `path` (the player traces a run through a grid of recent spins) or `holders` (Azul-style lines with a floor). `play` uses the bots' choices for path and holders, so to play them by hand, set the layer and expect the path or placement to be chosen for you.
 
 ## Prototype defaults
 
