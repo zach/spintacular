@@ -19,6 +19,10 @@ Each strategy should be the best choice in some situations and a poor one in oth
 - **No store-item synergies that force a purchase.** A strategy never requires spending all your money on one particular store item. That takes the fun out of shopping. Synergies tilt the game toward tags many items share, rather than needing a companion item (see `synergy.md`).
 - **Shopping never feels forced.** There is never only one thing the player needs.
 
+## Rarity
+
+Rare items aren't inherently good. They have a more powerful effect on scoring, which helps some builds and does nothing for others. So the shop has no rarity floor and no pity timer: a run without rare offers isn't a run of bad luck.
+
 ## Tuning defaults
 
 These are numbers to tune, not decisions. They live in data tables with the rest of the balance numbers (see `docs/research/01-design-foundations.md` §1).

@@ -59,7 +59,7 @@ Each finding is marked **[Verified]** (survived 3-0) or **[Inference]** (what it
 **[Inference] For Spintacular:**
 - Give the player authorship. They chose the wedges and the wheel layout; the spin only picks among them. Offer agency after the spin as well, such as nudges, re-spins and choosing which wheel to cash in first.
 - Resolve compounding chains one step at a time, with each step's contribution visible, so a big payout reads as *your build working*, not as a jackpot from nowhere.
-- If a rarity floor is used, use it in the shop (rare offers guaranteed every N rounds), not on spin outcomes, and decide whether it is visible. Hearthstone publishes its floor, and Sottosanti warns that hidden ones get noticed.
+- Spintacular has no rarity floor (`docs/design/economy.md` § Rarity). If one were used, it would belong in the shop (rare offers guaranteed every N rounds), not on spin outcomes, and decide whether it is visible. Hearthstone publishes its floor, and Sottosanti warns that hidden ones get noticed.
 - Seed each run from one seed, with separate RNG streams for shop, spin and events. Then a run can be replayed and shared, and rerolling the shop does not change spin outcomes. This was not covered by a verified source.
 
 ## 5. Framing
@@ -94,9 +94,8 @@ The Automap 0.1.0 public map has one library per slot. Only miniaudio and the EC
 
 ## Open questions
 
-1. Should a rarity floor or pity counter exist, and should it be visible?
-2. Text rendering and data serialization: which libraries, and add them through a private map or propose them for Automap's public map?
-3. ECS: use flecs as mapped, add EnTT privately, or use plain structs for a game state this small?
+1. Text rendering and data serialization: which libraries, and add them through a private map or propose them for Automap's public map?
+2. ECS: use flecs as mapped, add EnTT privately, or use plain structs for a game state this small?
 
 ## Sources
 
