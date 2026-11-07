@@ -6,6 +6,10 @@ The dice layer is where scoring variations get tried. The wheels and the shop si
 
 Adjacency is what keeps patterns exciting. Patterns allowed anywhere become certain once there are enough dice: with four colors, any 9 dice hold 3 of one color. Adjacent runs stay graded, with 3 common, 4 uncommon and 5 rare (`docs/research/02-dice-pattern-odds.md`). Adjacency also makes the order of the wheels matter.
 
+## Wedges
+
+Each wedge starts as one fixed die: landing on it adds that die's color and value to the sequence. The player can see exactly what each spin might add. What a wedge produces can change during a run, and tilting the game (`synergy.md`) works by editing wedges.
+
 ## Pattern families
 
 These are the families to try first. Their odds are in `docs/research/02-dice-pattern-odds.md`.
