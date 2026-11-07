@@ -20,5 +20,6 @@ Each layer is its own way to build.
 - `scoring.md`: the dice layer, wedges and their upgrades, pattern families, and resolution order.
 - `synergy.md`: tilt the game, don't complete a set; consumables.
 - `economy.md`: the shop's spending strategies, rarity, and tuning defaults.
+- `session-rubric.md`: how to judge a run: a safe first round, and a wall at the end that only a point factory gets over.
 
-Research is in `../research/`, and the pattern-odds prototype is in `../../prototypes/`.
+Research is in `../research/`. The prototypes are in `../../prototypes/`: `dice_patterns.py` measures pattern odds, and `run/` plays whole runs and checks the rubric.
