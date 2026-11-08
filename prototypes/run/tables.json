@@ -421,6 +421,24 @@
         2
       ],
       "amount": 2
+    },
+    "spare_tarp": {
+      "name": "Spare Tarp",
+      "rarity": "uncommon",
+      "effect": "spare_tarp",
+      "amount": 1,
+      "layers": [
+        "haul"
+      ]
+    },
+    "overtime": {
+      "name": "Overtime",
+      "rarity": "rare",
+      "effect": "overtime",
+      "amount": 0.5,
+      "layers": [
+        "haul"
+      ]
     }
   },
   "upgrades": {
@@ -465,6 +483,91 @@
       "name": "Outer Band",
       "rarity": "uncommon",
       "text": "next spin, wedges of one color are three times as wide"
+    }
+  },
+  "haul": {
+    "trips_per_round": 4,
+    "truck_size": 6,
+    "mult_per_cargo": 0.5,
+    "quota_bonus": 2,
+    "full_bonus": 1.5,
+    "quotas": [
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      25,
+      28,
+      32,
+      36
+    ],
+    "special_wedge_share": 0.35,
+    "prices": {
+      "tarp": 3,
+      "crate": 4
+    },
+    "max_value": 9,
+    "patterns": {
+      "color": {
+        "3": [
+          10,
+          2
+        ],
+        "4": [
+          25,
+          4
+        ],
+        "5": [
+          60,
+          8
+        ]
+      },
+      "value": {
+        "3": [
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0
+        ]
+      },
+      "straight": {
+        "3": [
+          5,
+          1
+        ],
+        "4": [
+          15,
+          2
+        ],
+        "5": [
+          30,
+          4
+        ]
+      },
+      "color_straight": {
+        "3": [
+          40,
+          4
+        ],
+        "4": [
+          100,
+          10
+        ],
+        "5": [
+          250,
+          20
+        ]
+      }
     }
   }
 }

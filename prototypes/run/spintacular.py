@@ -19,6 +19,7 @@ from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COLOR_NAMES = ["R", "G", "B", "Y"]
+MAX_VALUE = [6]   # set from tables.json "run.max_value" when a run starts
 FAMILIES = ["color", "value", "straight", "color_straight"]
 ADDITIVE = {"flat_points", "flat_mult", "mult_per_color", "mult_per_value", "points_per_high",
             "mult_per_parity", "mult_per_pattern", "scaling_mult"}
@@ -41,8 +42,11 @@ class Wedge:
         self.value = value
         self.ranged = False         # value rolls value-1..value+1
         self.dice = 1
+        self.kind = "cargo"         # cargo | tarp | crate (tarps and crates are haul-only)
 
     def label(self):
+        if self.kind != "cargo":
+            return self.kind.upper()
         c = "*" if self.color is None else COLOR_NAMES[self.color]
         v = f"{self.value}~" if self.ranged else str(self.value)
         return f"{c}{v}" + ("x2" if self.dice == 2 else "")
@@ -50,7 +54,7 @@ class Wedge:
     def roll_value(self, rng):
         if not self.ranged:
             return self.value
-        return min(6, max(1, self.value + rng.choice((-1, 0, 1))))
+        return min(MAX_VALUE[0], max(1, self.value + rng.choice((-1, 0, 1))))
 
 
 class Die:
@@ -67,6 +71,7 @@ class Die:
 class Run:
     def __init__(self, t, rng):
         self.t, self.rng = t, rng
+        MAX_VALUE[0] = t["run"].get("max_value", 6)
         self.money = t["run"]["start_money"]
         self.bag = [Wedge(c, v) for c in range(4) for v in t["start"]["bag_values"]]
         self.wheels = [dict(id=w, **t["wheels"][w]) for w in t["start"]["wheels"]]
@@ -168,7 +173,24 @@ def score_sequence(run, seq, commit, trace=None):
         points = max(0, points - penalty)
         if trace is not None:
             trace.append(f"floor: -{penalty} points")
+    quota_factor = 1
     for fam, size in pats:
+        if fam == "load":
+            m = size * t["haul"]["mult_per_cargo"]
+            mult += m
+            if trace is not None:
+                trace.append(f"load of {size}: +{m:g} mult")
+            continue
+        if fam == "crate":
+            mult *= 2 ** size
+            if trace is not None:
+                trace.append(f"{size} crate(s): x{2 ** size} mult")
+            continue
+        if fam in ("quota", "full"):
+            quota_factor *= size
+            if trace is not None:
+                trace.append(f"{'quota reached' if fam == 'quota' else 'full truck'}: x{size:g}")
+            continue
         if fam == "wall_passive":
             m = size * t["scoring"].get("wall_passive_mult_per_marker", 0)
             if m:
@@ -182,7 +204,8 @@ def score_sequence(run, seq, commit, trace=None):
             if trace is not None:
                 trace.append(f"wall placement scores {size}: +{m} mult")
             continue
-        p, m = t["patterns"][fam][str(size)]
+        table = t["haul"]["patterns"] if t["scoring"]["layer"] == "haul" else t["patterns"]
+        p, m = table[fam][str(size)]
         points += p
         mult += m
         if trace is not None:
@@ -220,9 +243,9 @@ def score_sequence(run, seq, commit, trace=None):
             mult += it.get("state", 0)
         if trace is not None and (points, mult) != before:
             trace.append(f"{it['name']}: {before[0]:.0f}x{before[1]:.2f} -> {points:.0f}x{mult:.2f}")
-    total = int(points * mult)
+    total = int(points * mult * quota_factor)
     if trace is not None:
-        trace.append(f"= {points:.0f} x {mult:.2f} = {total}")
+        trace.append(f"= {points:.0f} x {mult:.2f}" + (f" x {quota_factor:g}" if quota_factor != 1 else "") + f" = {total}")
     return total, pats
 
 
@@ -495,6 +518,203 @@ class _Fixed:
         return self.pats, 0
 
 
+# ---------------------------------------------------------------- the haul (press your luck)
+#
+# docs/design/haul-proposal.md. A round is a few trips. On a trip the player spins one wheel
+# at a time; the landed wedge goes into the truck and leaves its wheel until the trip ends.
+# Landing a value already in the truck spoils the load (a tarp cancels one), unless a nudge or
+# respin fixes it. The player delivers whenever they like. A delivered load scores:
+#   points = cargo values; mult = 1 + per-cargo mult + set patterns in the load; items;
+#   x2 per crate; x quota bonus if the values reach the round's quota; x full-truck bonus.
+
+def load_patterns(dice):
+    """Set patterns in a delivered load: biggest one-color group, longest run of consecutive values."""
+    pats = []
+    by_color = [0, 0, 0, 0]
+    wild = 0
+    for d in dice:
+        if d.color is None:
+            wild += d.weight
+        else:
+            by_color[d.color] += d.weight
+    group = max(by_color) + wild
+    if group >= 3:
+        pats.append(("color", min(group, 5)))
+    vals = sorted({d.value for d in dice})
+    best = run_len = 1 if vals else 0
+    best_vals = vals[:1]
+    cur = vals[:1]
+    for a, b in zip(vals, vals[1:]):
+        if b == a + 1:
+            run_len += 1
+            cur.append(b)
+        else:
+            run_len, cur = 1, [b]
+        if run_len > best:
+            best, best_vals = run_len, cur[:]
+    if best >= 3:
+        pats.append(("straight", min(best, 5)))
+        colors = {0, 1, 2, 3}
+        for d in dice:
+            if d.value in best_vals and d.color is not None:
+                colors &= {d.color}
+        if colors:
+            pats.append(("color_straight", min(best, 5)))
+    return pats
+
+
+class HaulLayer:
+    def __init__(self, run, player):
+        self.run = run
+        self.crates = 0
+        self.spare_tarps = sum(it["amount"] for it in run.has("spare_tarp"))   # per round
+
+    def patterns(self, seq, commit, trace):
+        t = self.run.t["haul"]
+        dice = [d for d in seq if d is not None]
+        pats = load_patterns(dice) + [("load", len(dice))]
+        if self.crates:
+            pats.append(("crate", self.crates))
+        quota = t["quotas"][min(self.run.round, len(t["quotas"]) - 1)]
+        bonus = t["quota_bonus"] * (1 + sum(it["amount"] for it in self.run.has("overtime")))
+        if sum(d.value for d in dice) >= quota:
+            pats.append(("quota", bonus))
+        if len({d.value for d in dice}) >= t["truck_size"]:
+            pats.append(("full", t["full_bonus"]))
+        return pats, 0
+
+
+def haul_dice(run, wheel, wedge):
+    """The dice a cargo wedge adds when landed on this wheel."""
+    out = []
+    for _ in range(wedge.dice):
+        d = Die(wedge.color, wedge.roll_value(run.rng), wedge)
+        if wheel["effect"] == "bump":
+            d.value = min(MAX_VALUE[0], d.value + 1)
+        elif wheel["effect"] == "heavy":
+            d.weight = 2
+        elif wheel["effect"] == "gilded":
+            d.points = wheel["amount"]
+        out.append(d)
+    return out
+
+
+def bust_chance(held_values, wedges, tarps):
+    """Share of a wheel's remaining wedges that would spoil the load (fixed values only)."""
+    if not wedges:
+        return 1.0
+    if tarps:
+        return 0.0
+    bad = sum(1 for w in wedges if w is not None and w.kind == "cargo"
+              and (w.value in held_values or w.ranged))
+    return bad / len(wedges)
+
+
+def load_value(run, dice, crates, commit=False, trace=None):
+    run.layer.crates = crates
+    return score_sequence(run, dice, commit=commit, trace=trace)[0]
+
+
+def haul_trip(run, player, loads, log=None):
+    """One trip. Returns the delivered score (0 if the load spoiled)."""
+    t = run.t["haul"]
+    left = [list(w) for w in loads]          # wedges still on each wheel this trip
+    dice, crates = [], 0
+    tarps = 0
+    if run.layer.spare_tarps > 0:
+        run.layer.spare_tarps -= 1
+        tarps = 1
+    spins = 0
+    while True:
+        wi = player.haul_choose(run, left, dice, crates, tarps)
+        if wi is None:
+            break
+        wheel = run.wheels[wi]
+        landings = 2 if wheel["effect"] == "twin" else 1
+        spoiled = False
+        for _ in range(landings):
+            if not left[wi]:
+                break
+            idx = run.rng.randrange(len(left[wi]))
+            wedge = left[wi][idx]
+            spins += 1
+            new = haul_dice(run, wheel, wedge) if wedge is not None and wedge.kind == "cargo" else []
+            held = {d.value for d in dice}
+            clash = [d for d in new if d.value in held] or (len({d.value for d in new}) < len(new))
+            if clash and not tarps:
+                # Fixes: nudge to a neighbouring wedge, or respin, if that avoids spoiling.
+                for fix in ("nudge", "respin"):
+                    if fix not in run.consumables:
+                        continue
+                    options = [(idx + s) % len(left[wi]) for s in (-1, 1)] if fix == "nudge" \
+                        else [run.rng.randrange(len(left[wi]))]
+                    for j in options:
+                        w2 = left[wi][j]
+                        n2 = haul_dice(run, wheel, w2) if w2 is not None and w2.kind == "cargo" else []
+                        if not ([d for d in n2 if d.value in held] or len({d.value for d in n2}) < len(n2)):
+                            run.consumables.remove(fix)
+                            idx, wedge, new, clash = j, w2, n2, False
+                            if log:
+                                log(f"    {fix} saves the load")
+                            break
+                    if not clash:
+                        break
+            left[wi].pop(idx)
+            if wedge is not None and wedge.kind == "tarp":
+                tarps += 1
+            elif wedge is not None and wedge.kind == "crate":
+                crates += 1
+            if clash:
+                if tarps:
+                    tarps -= 1
+                    new = [d for d in new if d.value not in held]
+                    if log:
+                        log("    a tarp covers a duplicate")
+                else:
+                    spoiled = True
+            if log:
+                lab = "blank" if wedge is None else wedge.label()
+                log(f"    wheel {wi}: {lab}" + (" -> SPOILED" if spoiled else ""))
+            if spoiled:
+                break
+            dice += new
+            if len({d.value for d in dice}) >= t["truck_size"]:
+                break
+        if spoiled:
+            if log:
+                log(f"  trip spoiled after {spins} spins")
+            return 0, spins
+        if len({d.value for d in dice}) >= t["truck_size"]:
+            break
+    if not dice:
+        return 0, spins
+    trace = [] if log else None
+    value = load_value(run, dice, crates, commit=True, trace=trace)
+    if log:
+        log(f"  deliver after {spins} spins: " + " | ".join(trace))
+    return value, spins
+
+
+def play_round_haul(run, player, log=None, target=None):
+    t = run.t
+    target = t["targets"][run.round] if target is None else target
+    trips = t["haul"]["trips_per_round"]
+    loads = fill_wheels(run)
+    run.layer = HaulLayer(run, player)
+    total, used, best = 0, 0, 0
+    while used < trips and total < target:
+        used += 1
+        value, _ = haul_trip(run, player, loads, log)
+        total += value
+        best = max(best, value)
+        if log:
+            log(f"  trip {used}: {value}   (round {total}/{target})")
+    return total >= target, trips - used, best, total
+
+
+LAYERS["haul"] = HaulLayer
+
+
 # ---------------------------------------------------------------- spinning
 
 def fill_wheels(run):
@@ -550,7 +770,7 @@ def build_sequence(run, loads, landings, values=None):
                 rolled[key] = v
                 d = Die(wedge.color, v, wedge)
                 if w["effect"] == "bump":
-                    d.value = min(6, d.value + 1)
+                    d.value = min(MAX_VALUE[0], d.value + 1)
                 elif w["effect"] == "heavy":
                     d.weight = 2
                 elif w["effect"] == "gilded":
@@ -562,6 +782,8 @@ def build_sequence(run, loads, landings, values=None):
 # ---------------------------------------------------------------- round
 
 def play_round(run, player, log=None, target=None):
+    if run.t["scoring"]["layer"] == "haul":
+        return play_round_haul(run, player, log, target)
     t = run.t
     target = t["targets"][run.round] if target is None else target
     spins = t["run"]["spins_per_round"]
@@ -654,11 +876,17 @@ def roll_offer(run):
     kw = t["shop"]["kind_weights"]
     kind = rng.choices(list(kw), list(kw.values()))[0]
     prices = t["shop"]["prices"]
+    layer = t["scoring"]["layer"]
     if kind in ("item", "wheel", "upgrade", "consumable"):
         pool = t[{"item": "items", "wheel": "wheels", "upgrade": "upgrades", "consumable": "consumables"}[kind]]
+        pool = {k: v for k, v in pool.items() if layer in v.get("layers", [layer])}
         rar = pick_rarity(t, rng, run.round, pool)
         cid = rng.choice([k for k, v in pool.items() if v["rarity"] == rar])
         return dict(kind=kind, id=cid, name=pool[cid]["name"], price=prices[kind][rar], rarity=rar)
+    if kind == "wedge" and layer == "haul" and rng.random() < t["haul"]["special_wedge_share"]:
+        special = rng.choice(["tarp", "tarp", "crate"])
+        return dict(kind="wedge", id=special + "_wedge", name=f"{special.title()} wedge", special=special,
+                    price=t["haul"]["prices"][special], rarity="common" if special == "tarp" else "uncommon")
     if kind == "wedge":
         c, v = rng.randrange(4), rng.randint(1, 6)
         return dict(kind="wedge", id="wedge", name=f"Wedge {COLOR_NAMES[c]}{v}", price=prices["wedge"],
@@ -689,6 +917,10 @@ def apply_offer(run, offer, target_wedge=None, choice=None):
         run.wheels.append(dict(id=offer["id"], price=offer["price"], **run.t["wheels"][offer["id"]]))
     elif k == "consumable":
         run.consumables.append(offer["id"])
+    elif k == "wedge" and offer.get("special"):
+        w = Wedge(None, 0)
+        w.kind = offer["special"]
+        run.bag.append(w)
     elif k == "wedge":
         run.bag.append(Wedge(offer["color"], offer["value"]))
     elif k == "zap":
@@ -736,9 +968,54 @@ class Player:
     def zap_choice(self, run, landed):
         return None
 
+    # --- the haul: which wheel to spin next, or None to deliver
+    caution = 1.0   # keep going while expected value after one more spin > caution x value now
+
+    def haul_choose(self, run, left, dice, crates, tarps):
+        t = run.t["haul"]
+        quota = t["quotas"][min(run.round, len(t["quotas"]) - 1)]
+        per = t["mult_per_cargo"]
+
+        def proxy(vals, n, cr):
+            v = sum(vals)
+            return v * (1 + per * n) * (2 ** cr) * (t["quota_bonus"] if v >= quota else 1)
+
+        held = [d.value for d in dice]
+        now = proxy(held, len(held), crates) if dice else 0
+        best, best_ev = None, -1.0
+        for wi, wedges in enumerate(left):
+            if not wedges:
+                continue
+            bump = 1 if run.wheels[wi]["effect"] == "bump" else 0
+            ev = 0.0
+            for w in wedges:
+                if w is None:
+                    ev += now
+                elif w.kind == "tarp":
+                    ev += now * 1.05
+                elif w.kind == "crate":
+                    ev += now * 2
+                else:
+                    vals = [min(MAX_VALUE[0], w.value + bump)] * w.dice
+                    clash = any(v in held for v in vals) or len(set(vals)) < len(vals)
+                    if clash and not tarps:
+                        ev += 0
+                    else:
+                        nv = held + [v for v in vals if v not in held][: (1 if clash else len(vals))]
+                        ev += proxy(nv, len(nv), crates)
+            ev /= len(wedges)
+            if ev > best_ev:
+                best, best_ev = wi, ev
+        if best is None:
+            return None
+        if not dice or best_ev > self.caution * now or self.caution == 0:
+            return best
+        return None
+
 
 class RandomPlayer(Player):
     name = "random"
+
 
     def shop(self, run, offers, stats):
         for o in offers:
@@ -782,6 +1059,8 @@ class Builder(Player):
         return [("color", c) for c in range(4)] + [("value", 5), ("value", 6), ("straight", None)]
 
     def wedge_fits(self, w, focus):
+        if w.kind != "cargo":
+            return True
         kind, x = focus
         if kind == "color":
             return w.color in (None, x)
@@ -798,6 +1077,8 @@ class Builder(Player):
             return 1.5 if kind == "flat" else 1.0
         if e == "rod":
             return 0 if kind == "flat" else 3.5
+        if e in ("spare_tarp", "overtime"):
+            return 0.5 if kind == "flat" else 4.0
         if e == "piggy":
             return 2.5 if self.style in ("saver", "bargain") else 0.5
         if e == "spendthrift":
@@ -842,6 +1123,8 @@ class Builder(Player):
             if o["id"] == "recut":
                 return 3.0 if kind == "value" else (1.5 if kind == "straight" else 0.3)
             return 2.0 if kind in ("straight", "value") else 0.5
+        if k == "wedge" and o.get("special"):
+            return 3.5 if o["special"] == "tarp" else 3.0
         if k == "wedge":
             fake = Wedge(o["color"], o["value"])
             return 2.5 if self.wedge_fits(fake, focus) and kind != "adaptive" else 0.2
@@ -971,6 +1254,7 @@ class RecklessPlayer(Builder):
     def __init__(self, rng):
         super().__init__(rng, ("color", 0), "spender")
         self.name = "reckless"
+        self.caution = 0.0   # in the haul: never delivers by choice
 
     def pre_run(self, run):
         for _ in range(3):
@@ -1288,13 +1572,15 @@ def calibrate(t, runs, wall=0.02):
     return hi
 
 
-def compare(t, runs):
+def compare(t, runs, layers=None):
     """Calibrate each scoring layer's wall to the same height, then run the rubric on each."""
     out = [f"Each layer's targets are scaled so the best no-engine bot wins about 2%, then {runs} runs per bot.", ""]
     rows = []
-    for layer in LAYERS:
+    for layer in layers or list(LAYERS):
         tt = copy.deepcopy(t)
         tt["scoring"]["layer"] = layer
+        if layer == "haul":
+            tt["run"]["max_value"] = tt["haul"]["max_value"]
         scale = calibrate(tt, max(100, runs // 2))
         tt["targets"] = scaled_targets(tt, scale)
         text, checks = report(tt, runs)
@@ -1332,7 +1618,8 @@ def capacity(t, runs):
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "sim"
     if mode == "compare":
-        print(compare(load_tables(), int(sys.argv[2]) if len(sys.argv) > 2 else 300))
+        print(compare(load_tables(), int(sys.argv[2]) if len(sys.argv) > 2 else 300,
+                      sys.argv[3].split(",") if len(sys.argv) > 3 else None))
     elif mode == "capacity":
         print(capacity(load_tables(), int(sys.argv[2]) if len(sys.argv) > 2 else 100))
     elif mode == "play":
