@@ -1,4 +1,4 @@
-# 06 — First pass of the haul in the run prototype
+# 06 — The haul in the run prototype
 
 **Scope.** This note compares the haul (`docs/design/haul-proposal.md`) with holders and the wall, on the same rubric, bots and calibration. Details the proposal leaves open use these prototype defaults:
 
@@ -39,3 +39,34 @@ Best win rate by focus in the haul: straight 11%, color 8%, adaptive 5%, value 0
 - **Straights become a build at last** (best focus, 11%). Under the duplicate rule every value in the truck is different, so runs of consecutive values come naturally.
 - **Point factories are too weak.** The best engine wins 11%, against 43% under the wall. The bots' shopping rules were written for the earlier layers, and some now work against them. Value-focused bots recut wedges to the same value, which makes duplicates, and so spoiled loads, more likely.
 - **The rules have a hole: a bag with one wedge per value can never spoil.** Landed wedges leave the wheel for the rest of the trip, so a bag thinned to one wedge of each value (with blanks filling the slots) makes every trip risk-free. Bots don't find this yet, but players would. It ends the press-your-luck decision for exactly the builds the game should reward.
+
+## Second pass: wedges stay on the wheel [Verified by simulation]
+
+With the hole closed, a landed wedge stays on its wheel and can come up again. Bots also got shopping rules for the haul:
+
+- thin out duplicated values;
+- recut wedges toward rare values;
+- value tarps and crates highly;
+- avoid Second Die.
+
+Run: 2026-11-08, `python3 prototypes/run/spintacular.py compare 300 haul`.
+
+| Check | haul, wedges stay |
+| --- | --- |
+| Target scale | 0.18 (targets 30 → 4,994) |
+| A1 round 1 safe | **FAIL (2.0%)** |
+| A2 reckless loses round 1 | PASS (100%) |
+| B1 no-engine wins | FAIL (3.3%) |
+| B2 best engine wins | **FAIL (6.7%)** |
+| D1 no cliff | PASS (15%) |
+| Checks passed | 7/10 |
+
+## Findings, second pass [Inference]
+
+- **There is no point factory in the haul yet.** Engine bots win 1–7%, barely more than bots with no engine (up to 3.3%). Calibration then pulled the targets down to a fifth of the wall's. Two things cap a load:
+  - Bust risk caps it at about three cargo, whatever the build.
+  - The multipliers on offer (ribbons, flat mult, crates) help every build about equally.
+- **Nothing in the content rewards carrying a bigger load safely.** The haul needs engine content of its own. Two kinds are missing:
+  - **Ways to make big loads safer.** For example, controlling which values sit on which wheel, so the player can spin each wheel in turn without repeating a value.
+  - **Payouts that grow with load size or with risk taken.** Examples: "+mult per cargo past 3", "×2 for 5+ cargo".
+- **Round 1 is slightly too risky** for bots that weigh one spin ahead (2% lose). A lower round-1 target or a fifth trip would fix it.
