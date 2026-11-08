@@ -1,6 +1,6 @@
 """PROTOTYPE: push-your-luck odds for a "haul" round (docs/design/haul-proposal.md).
 
-One trip: land wedges one at a time (each landed wedge leaves the wheel for the rest of the trip),
+One trip: land wedges one at a time (landed wedges stay, so the same wedge can come up again),
 then deliver or keep going. Compares two bust rules on the starting bag:
 
   duplicate: like Flip 7, landing a value already in the truck spoils the load
@@ -26,8 +26,8 @@ def bag_spoilage(hazards):
 
 
 def trip(bag, rule, stop_at, rng, tolerance=4, full_bonus=2.0):
-    pool = bag[:]
-    rng.shuffle(pool)
+    # Wedges stay on the wheel: every spin draws from the whole bag again.
+    pool = (rng.choice(bag) for _ in range(60))
     held, values, spoil, tarps = [], set(), 0, 0
     for kind, v in pool:
         if kind == "tarp":

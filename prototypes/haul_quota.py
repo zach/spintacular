@@ -17,8 +17,8 @@ def make_bag(copies=4, values=range(1, 7), tarps=0, bump=0):
 
 
 def trip(bag, rng, stop_at=None, quota=None, bonus=2.0):
-    pool = bag[:]
-    rng.shuffle(pool)
+    # Wedges stay on the wheel: every spin draws from the whole bag again.
+    pool = (rng.choice(bag) for _ in range(60))
     held, seen, tarps = [], set(), 0
     for kind, v in pool:
         if kind == "tarp":
