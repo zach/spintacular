@@ -626,7 +626,7 @@ def haul_trip(run, player, loads, log=None):
         tarps = 1
     spins = 0
     while True:
-        wi = player.haul_choose(run, left, dice, crates, tarps)
+        wi = player.haul_choose(run, left, dice, crates, tarps) if spins < t["max_spins_per_trip"] else None
         if wi is None:
             break
         wheel = run.wheels[wi]
@@ -659,7 +659,8 @@ def haul_trip(run, player, loads, log=None):
                             break
                     if not clash:
                         break
-            left[wi].pop(idx)
+            if not run.t["haul"].get("wedges_stay", True):
+                left[wi].pop(idx)
             if wedge is not None and wedge.kind == "tarp":
                 tarps += 1
             elif wedge is not None and wedge.kind == "crate":
@@ -1038,12 +1039,17 @@ class Builder(Player):
 
     def __init__(self, rng, focus, style):
         super().__init__(rng)
+        self.haul, self.bag_ref = False, []
         self.focus, self.style = focus, style
         self.engine = focus[0] != "flat"
         self.name = f"{focus[0]}/{style}"
         self.adaptive = focus[0] == "adaptive"
 
     # --- what the build wants
+    def prepare(self, run):
+        self.haul = run.t["scoring"]["layer"] == "haul"
+        self.bag_ref = run.bag
+
     def current_focus(self, run):
         if not self.adaptive:
             return self.focus
@@ -1062,6 +1068,11 @@ class Builder(Player):
         if w.kind != "cargo":
             return True
         kind, x = focus
+        if self.haul:
+            # In the haul, variety keeps loads safe: a wedge fits if its value is rare in the bag.
+            copies = sum(1 for o in self.bag_ref if o.kind == "cargo" and o.value == w.value)
+            ok = copies <= 2
+            return ok and (kind != "color" or w.color in (None, x))
         if kind == "color":
             return w.color in (None, x)
         if kind == "value":
@@ -1113,6 +1124,9 @@ class Builder(Player):
             base = {"none": 2.5, "bump": 2.0 if kind in ("straight", "value") else 1.5,
                     "gilded": 2.0, "heavy": 4.0 if kind == "color" else 1.5, "twin": 4.0}[eff]
             return base
+        if k == "upgrade" and getattr(self, "haul", False):
+            return {"second_die": 1.0, "wild": 2.0 if kind == "color" else 0.5, "paint": 2.5 if kind == "color" else 0.3,
+                    "recut": 3.0, "range": 0.3}.get(o["id"], 0.5)
         if k == "upgrade":
             if o["id"] == "second_die":
                 return 3.5
@@ -1139,6 +1153,9 @@ class Builder(Player):
         fits = [w for w in run.bag if self.wedge_fits(w, focus)]
         off = [w for w in run.bag if not self.wedge_fits(w, focus)]
         if o["kind"] == "zap":
+            if self.haul and off:
+                counts = Counter(w.value for w in run.bag if w.kind == "cargo")
+                return max(off, key=lambda w: counts[w.value])
             return self.rng.choice(off) if off else None
         if o["id"] in ("wild", "paint", "recut"):
             pool = [w for w in off if w.color is not None] or [w for w in run.bag if w.color is not None]
@@ -1154,6 +1171,9 @@ class Builder(Player):
 
     def choice_for(self, o, focus):
         kind, x = focus
+        if self.haul and o["id"] == "recut":
+            counts = Counter(w.value for w in self.bag_ref if w.kind == "cargo")
+            return min(range(1, 7), key=lambda v: (counts[v], -v))
         if o["id"] == "paint":
             return x if kind == "color" else self.rng.randrange(4)
         if o["id"] == "recut":
@@ -1161,11 +1181,14 @@ class Builder(Player):
         return None
 
     def min_bag(self, run):
+        if getattr(self, "haul", False):
+            return len(run.wheels)
         # With blank wedges, thinning below the wheels' slots trades dice for blanks.
         return run.slots() if run.t["run"].get("blank_wedges", True) else len(run.wheels)
 
     # --- spending
     def shop(self, run, offers, stats):
+        self.prepare(run)
         focus = self.current_focus(run)
         reroll_cost = run.t["shop"]["reroll_base"]
         rerolls = 0
@@ -1241,6 +1264,7 @@ class Builder(Player):
         return None
 
     def zap_choice(self, run, landed):
+        self.prepare(run)
         focus = self.current_focus(run)
         if len(run.bag) <= self.min_bag(run) or focus[0] in ("flat", "adaptive"):
             return None

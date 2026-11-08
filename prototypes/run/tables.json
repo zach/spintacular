@@ -568,6 +568,8 @@
           20
         ]
       }
-    }
+    },
+    "wedges_stay": true,
+    "max_spins_per_trip": 12
   }
 }
