@@ -20,6 +20,7 @@ Each layer is its own way to build.
 - `scoring.md`: holders, the wall, wedges and their upgrades, and resolution order.
 - `synergy.md`: tilt the game, don't complete a set; consumables.
 - `economy.md`: the shop's spending strategies, rarity, and tuning defaults.
+- `haul-proposal.md`: a proposal, not decided: a press-your-luck middle layer where you load a truck spin by spin and can spoil the load.
 - `session-rubric.md`: how to judge a run: a safe first round, and a wall at the end that only a point factory gets over.
 
 Research is in `../research/`. The prototypes are in `../../prototypes/`: `dice_patterns.py` measures pattern odds, and `run/` plays whole runs and checks the rubric.
