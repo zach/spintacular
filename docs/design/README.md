@@ -44,7 +44,7 @@ Each layer is its own way to build.
 | `content.md` | Every wedge, upgrade, wheel, item and consumable; the kinds of point factory |
 | `progression.md` | Routes, rigs, stakes, unlocks, seeds |
 | `presentation.md` | What the player sees and hears |
-| `art-and-audio.md` | The look and sound: road signs and loading docks |
+| `art-and-audio.md` | The look and sound: a carnival midway |
 | `tech.md` | How the game is built: C++ with Automap |
 | `session-rubric.md` | How to judge a run, by simulation and by playtest |
 
@@ -54,5 +54,6 @@ Research is in `../research/`. The prototypes are in `../../prototypes/`: `haul/
 
 - **Tested by simulation:** the haul's rules, the round structure, the economy's numbers and the starter content. Together they pass all ten checks of the session rubric. The six rigs and the eight stakes are tested too (`../research/07-haul-design-experiments.md`).
 - **Checked by simulation as well:** seeds (the same seed replays the same run, and rerolling the shop changes neither the deal nor the spins) and the starter content set (`progression.md`).
-- **Played by its author, not yet by anyone else:** the opening of a run was played by hand, which found one gap and led to the freight bonus (`../research/07-haul-design-experiments.md`). The browser prototype (`../../prototypes/web/`) puts the presentation rules on screen: every wedge face up, each wheel's chance to spoil, the quota line, and step-by-step payouts. It also has the start screen, rigs, stakes, the daily haul, unlocks and the collection. Its sounds are simple tones, and it has no art beyond shapes and color.
-- **Not testable by simulation:** whether it's fun. The rubric's playtest scorecard is for that, and the browser prototype is the thing to put in front of a person.
+- **Played and approved by the product owner:** the browser prototype, which they found fun. They also accepted the four rule decisions made by experiment (no repeats, the freight bonus, the quota level and the random deal) and chose the carnival midway look (`art-and-audio.md`).
+- **Played by its author first:** the opening of a run was played by hand, which found one gap and led to the freight bonus (`../research/07-haul-design-experiments.md`). The browser prototype (`../../prototypes/web/`) puts the presentation rules on screen: every wedge face up, each wheel's chance to spoil, the quota line, and step-by-step payouts. It also has the start screen, rigs, stakes, the daily haul, unlocks and the collection. Its sounds are simple tones, and it has no art beyond shapes and color.
+- **Still to do:** playtests with new players, scored on the rubric's playtest scorecard. One approving player is a start, not a sample.

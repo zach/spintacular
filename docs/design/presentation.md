@@ -1,6 +1,6 @@
 # Presentation: what the player sees and hears
 
-The game is about one decision, taken again and again: one more spin, or deliver? The screen's job is to make that decision readable at a glance and make the result feel big. Art style is open; this document sets what must be shown, not how it's drawn.
+The game is about one decision, taken again and again: one more spin, or deliver? The screen's job is to make that decision readable at a glance and make the result feel big. This document sets what must be shown; `art-and-audio.md` sets how it looks and sounds.
 
 ## The screen during a round
 

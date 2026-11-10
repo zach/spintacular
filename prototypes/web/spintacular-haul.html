@@ -1,31 +1,31 @@
 <title>Spintacular Haul</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
-/* Layout: one column like a loading dock. A highway-sign header, the wheels in a row, the truck bed under them. */
+/* Layout: one column like a midway stall. A striped marquee with bulbs, the prize wheels in a row, the wagon under them. */
 :root {
-  --ground: #e9ecea; --panel: #f7f8f6; --ink: #1c2622; --muted: #5c6a64; --line: #c3cbc6;
-  --sign: #0c6a4d; --sign-ink: #f2f7f3; --warn: #f2b705; --warn-ink: #2a2100; --bad: #b3261e; --ok: #1f7a4c;
+  --ground: #f3e9d6; --panel: #fbf5e8; --ink: #2a1a1f; --muted: #6f5a5c; --line: #d9c6a8;
+  --sign: #b3202a; --sign-ink: #fff4dc; --warn: #f2b705; --warn-ink: #2a2100; --bad: #9c1d6a; --ok: #1f7a4c;
   --c0: #c8382f; --c1: #2f8f4e; --c2: #2f6fc0; --c3: #c79a0a; --wild: #7a5bb5; --blank: #aab3ae;
   --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: "Barlow", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --ground: #151b19; --panel: #1f2724; --ink: #e8eeea; --muted: #9aa8a1; --line: #3a4640;
-  --sign: #0f7d5b; --sign-ink: #f2f7f3; --warn: #f2b705; --warn-ink: #2a2100; --bad: #ef6b62; --ok: #58c48a;
+  --ground: #141a33; --panel: #1e2545; --ink: #f6ecd8; --muted: #b3a9a0; --line: #3c456e;
+  --sign: #c22a35; --sign-ink: #fff4dc; --warn: #f7c531; --warn-ink: #2a2100; --bad: #f08ad0; --ok: #6fd39a;
   --c0: #e0584f; --c1: #4fb673; --c2: #5b96e3; --c3: #e0b52a; --wild: #a48be0; --blank: #5d6a64; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --ground: #151b19; --panel: #1f2724; --ink: #e8eeea; --muted: #9aa8a1; --line: #3a4640;
-  --sign: #0f7d5b; --sign-ink: #f2f7f3; --warn: #f2b705; --warn-ink: #2a2100; --bad: #ef6b62; --ok: #58c48a;
+  --ground: #141a33; --panel: #1e2545; --ink: #f6ecd8; --muted: #b3a9a0; --line: #3c456e;
+  --sign: #c22a35; --sign-ink: #fff4dc; --warn: #f7c531; --warn-ink: #2a2100; --bad: #f08ad0; --ok: #6fd39a;
   --c0: #e0584f; --c1: #4fb673; --c2: #5b96e3; --c3: #e0b52a; --wild: #a48be0; --blank: #5d6a64; color-scheme: dark }
 body { background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.4;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 28px; }
 #app { max-width: 980px; margin: 0 auto; display: grid; gap: 12px; }
 h1, h2, .num, button { font-family: var(--display); }
-h1 { font-size: 30px; margin: 0; letter-spacing: .02em; text-transform: uppercase; }
+h1 { font-family: "Alfa Slab One", "Rockwell", serif; font-weight: 400; font-size: 30px; margin: 0; letter-spacing: .02em; }
 h2 { font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: .04em; }
 .num { font-variant-numeric: tabular-nums; font-weight: 700; }
-.sign { background: var(--sign); color: var(--sign-ink); border-radius: 10px; padding: 12px 16px; display: grid; gap: 8px;
-  border: 3px solid var(--sign-ink); outline: 3px solid var(--sign); }
+.sign { background: repeating-linear-gradient(90deg, var(--sign) 0 34px, color-mix(in srgb, var(--sign) 82%, #000) 34px 68px); color: var(--sign-ink); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px;
+  border: 6px dotted var(--warn); outline: 3px solid var(--sign); }
 .sign .row { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; }
 .sign .k { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; opacity: .85; }
 .sign .v { font-family: var(--display); font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
