@@ -1,0 +1,10 @@
+--- a/stb_truetype_allocation.cpp
++++ b/stb_truetype_allocation.cpp
+@@ -4,7 +4,5 @@
+ // included.
+ #include "automap/alloc.h"
+ 
+-#define STBTT_malloc(size, userdata) ((void)(userdata), am::alloc::allocate("stb-truetype", size))
+-#define STBTT_free(block, userdata) ((void)(userdata), am::alloc::release("stb-truetype", block))
+ #define STB_TRUETYPE_IMPLEMENTATION
+ #include <stb_truetype.h>
