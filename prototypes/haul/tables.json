@@ -486,11 +486,7 @@
     },
     "flatbed": {
       "truck_size": 7,
-      "wheels": [
-        "plain",
-        "plain",
-        "plain"
-      ]
+      "tank": -2
     },
     "hotshot": {
       "add_wedges": [

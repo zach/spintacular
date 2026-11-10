@@ -19,14 +19,14 @@ Every rig was simulated on stake 1 (`../research/07-haul-design-experiments.md`)
 
 | Rig | Starts with | Pushes toward | Factory | No factory |
 | --- | --- | --- | --- | --- |
-| **Standard** | 12 cargo wedges (values 1–6, twice), 4 plain wheels | Anything | 43% | 2.2% |
-| **Tanker** | +2 to the tank, but one fewer item slot | Longer trips | 40% | 1.2% |
-| **Reefer** | 2 tarp wedges, but quotas are 20% higher | Long, protected loads | 36% | 2.0% |
-| **Flatbed** | A truck that holds 7 values, but only 3 wheels | Full-truck bonuses | 37% | 1.8% |
-| **Hotshot** | 2 crate wedges and $10, but 3 less in the tank | High-risk, high-multiplier loads | 35% | 3.5% |
-| **Monochrome** | Every wedge red, but targets are 30% higher | Color sets | 48% | 3.8% |
+| **Standard** | 12 cargo wedges (values 1–6, twice), 4 plain wheels | Anything | 43% | 1.8% |
+| **Tanker** | +2 to the tank, but one fewer item slot | Longer trips | 38% | 1.0% |
+| **Reefer** | 2 tarp wedges, but quotas are 20% higher | Long, protected loads | 35% | 0.8% |
+| **Flatbed** | A truck that holds 7 values, but 2 less in the tank | Big loads from few spins | 30% | 0.8% |
+| **Hotshot** | 2 crate wedges and $10, but 3 less in the tank | High-risk, high-multiplier loads | 28% | 1.2% |
+| **Monochrome** | Every wedge red, but targets are 30% higher | Color sets | 46% | 1.8% |
 
-On every rig, sensible bots lose round 1 at most 1% of the time.
+On every rig, sensible bots lose round 1 less than 1% of the time. Hotshot and Flatbed are the hard rigs.
 
 **A rule for future rigs: don't add values to the starting bag.** How many different values the bag holds is the game's strongest difficulty dial. Two rigs that started with more values were tried and dropped. With nine unique values, bots with no point factory won 24% of runs. With values 1–8 twice, they won 37%.
 
@@ -38,14 +38,14 @@ A stake is a difficulty level. Winning on one stake unlocks the next for that ri
 | --- | --- | --- |
 | 1 | The base game | 43% |
 | 2 | Targets are 15% higher | 37% |
-| 3 | Shop prices are $1 higher | 24% |
-| 4 | Inspections happen every second round | 22% |
-| 5 | The tank holds 1 fewer spin | 19% |
-| 6 | A spoiled load costs $2 | 18% |
-| 7 | Quotas are 20% higher | 10% |
+| 3 | Shop prices are $1 higher | 28% |
+| 4 | Inspections happen every second round | 26% |
+| 5 | The tank holds 1 fewer spin | 24% |
+| 6 | A spoiled load costs $2 | 20% |
+| 7 | Quotas are 20% higher | 12% |
 | 8 | One fewer item slot | 9% |
 
-The ladder falls at every step and never reaches zero. Round 1 stays safe on every stake (0.8% at worst). The bots are weaker than a practiced player, so read these as floors.
+The ladder falls at every step and never reaches zero. Round 1 stays safe on every stake (1.0% at worst). The bots are weaker than a practiced player, so read these as floors.
 
 ## Unlocks and the collection
 

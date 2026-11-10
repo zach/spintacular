@@ -213,3 +213,29 @@ The bonus also lifts the color build, the weakest focus, to the level of the oth
 ## The quota level: a decision
 
 The quota list stays at 10, 12, 13, 15, 17, 19, 21, 23, 26, 29, 32, 36. Bots reach it on about 78% of deliveries. Raising it 25% makes it a harder stretch (45%) but costs point factories about 7 points of win rate, and the freight bonus now supplies the reason to go one further in every trip. The quota's job is to reward better loads, which it does at this level. It remains the first dial to turn if playtests find the quota too easy to matter.
+
+## Rigs and stakes on the final tables [Verified by simulation]
+
+`python3 prototypes/haul/haul.py ladder 500`, with the freight bonus and the final targets. These replace the earlier rig and stake figures above.
+
+| Rig, stake 1 | Engine | No engine | Worst round-1 loss | Reckless loses round 1 |
+| --- | --- | --- | --- | --- |
+| Standard | 43% | 1.8% | 0.4% | 65% |
+| Tanker | 38% | 1.0% | 0.4% | 65% |
+| Reefer | 35% | 0.8% | 0.8% | 57% |
+| Flatbed (truck of 7, tank −2) | 30% | 0.8% | 0.3% | 100% |
+| Hotshot | 28% | 1.2% | 0.6% | 69% |
+| Monochrome | 46% | 1.8% | 0.4% | 64% |
+
+Flatbed's drawback changed. With three starting wheels, its worst round-1 loss was 1.6%, over the 1% limit. A smaller tank keeps round 1 safe.
+
+| Standard rig | Engine | No engine | Worst round-1 loss |
+| --- | --- | --- | --- |
+| Stake 1 | 43% | 1.8% | 0.4% |
+| Stake 2 | 37% | 0.6% | 0.4% |
+| Stake 3 | 28% | 0.6% | 0.4% |
+| Stake 4 | 26% | 0.8% | 0.4% |
+| Stake 5 | 24% | 0.8% | 0.4% |
+| Stake 6 | 20% | 0.6% | 0.4% |
+| Stake 7 | 12% | 0.2% | 1.0% |
+| Stake 8 | 9% | 0.2% | 1.0% |

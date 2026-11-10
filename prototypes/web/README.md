@@ -11,4 +11,4 @@ Builds `spintacular-haul.html` from `template.html` and the numbers in `prototyp
 - **Mouse:** click a wheel to spin it; click Deliver.
 - **Keyboard:** number keys spin wheels; Space delivers.
 
-It leaves out rigs, stakes, unlocks, sound, and seeing the next inspection's rule ahead of time.
+It has the start screen (rig, stake, seed, daily haul), unlocks with a simplified rule, a collection saved in the browser, and simple sounds. It leaves out art, music, and seeing the next inspection's rule ahead of time.
