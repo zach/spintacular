@@ -47,6 +47,7 @@ Each layer is its own way to build.
 | `art-and-audio.md` | The look and sound: a carnival midway |
 | `tech.md` | How the game is built: C++ with Automap |
 | `session-rubric.md` | How to judge a run, by simulation and by playtest |
+| `playtest-kit.md` | How to run a playtest with a new player, and what to record |
 
 Research is in `../research/`. The prototypes are in `../../prototypes/`: `haul/` simulates the current design and checks the rubric, and `web/` is a playable browser version of it.
 
