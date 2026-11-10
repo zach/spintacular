@@ -13,7 +13,7 @@
     "level": "none",
     "map_release": "map-2026.11.07",
     "platform": "linux-x64-clang",
-    "produced_at": "2026-11-10T07:33:04Z",
+    "produced_at": "2026-11-10T07:40:38Z",
     "results": [
       {
         "rule": "allocation.hooks-before-first-allocation",
@@ -40,6 +40,12 @@
         "reason": "stb_image's hooks are compile-time macros in its implementation: no stb_image code runs without them."
       },
       {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "stb-truetype",
+        "status": "not-applicable",
+        "reason": "stb_truetype's hooks are compile-time macros in its implementation: no stb_truetype code runs without them."
+      },
+      {
         "rule": "allocation.routed-through-facade",
         "library": "dear-imgui",
         "status": "unverifiable",
@@ -60,6 +66,12 @@
       {
         "rule": "allocation.routed-through-facade",
         "library": "stb-image",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "stb-truetype",
         "status": "unverifiable",
         "reason": "No probe ran: the composition reached none."
       },
@@ -176,7 +188,7 @@
       }
     ],
     "subject_detail": {
-      "lock_hash": "sha256:ab9533ad3102f91796a51ea4c28caee66c8c515ac7a19d3824e900ea333aedd3"
+      "lock_hash": "sha256:2bda5defae1a67c60118f3f0e3a25c3bb3b37ae9c8d959f6f8ebc20a3c52aa1b"
     },
     "subject_kind": "composition",
     "verifier": {
@@ -189,7 +201,7 @@
   "subject": [
     {
       "digest": {
-        "sha256": "59500480c2d2183de7ecdf7f48f7cf19aaf5fb621ce7d4b255d99e40efadeff0"
+        "sha256": "e387551096437ce03107e07825adb59af456612eb5bd7ba56f2202ec368ca6a8"
       },
       "name": "automap.lock.json"
     }

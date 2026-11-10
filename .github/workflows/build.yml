@@ -101,3 +101,47 @@ jobs:
         with:
           name: automap-${{ matrix.platform }}
           path: ${{ runner.temp }}/out
+      - name: Release build
+        run: |
+          compilers=
+          [ "$RUNNER_OS" = Linux ] && compilers="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
+          [ "$RUNNER_OS" = Windows ] && compilers="-DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl"
+          cmake -S . -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" $compilers
+          cmake --build build/release
+      - name: Rules tests
+        run: ctest --test-dir build/release --output-on-failure
+      - name: Balance rubric
+        run: build/release/spintacular-sim sim 400 --tables assets/data/tables.json
+      - name: Play the game unattended
+        env:
+          AUTOMAP_MINIAUDIO_BACKEND: "null"
+        run: |
+          [ "$RUNNER_OS" = Linux ] && export SDL_VIDEO_DRIVER=offscreen
+          mkdir -p "$RUNNER_TEMP/shots"
+          cd build/release
+          # Six whole runs at instant speed, then one slower run that saves a picture of every screen.
+          ./spintacular --script soak --size 640x360 --frames 400000
+          ./spintacular --script tour --shots "$RUNNER_TEMP/shots" --size 1280x720 --frames 400000
+          ls "$RUNNER_TEMP/shots"
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ matrix.platform }}
+          path: ${{ runner.temp }}/shots
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          dist="$RUNNER_TEMP/dist/Spintacular"
+          mkdir -p "$dist"
+          cp build/release/spintacular.exe build/release/*.dll "$dist/"
+          cp -r assets "$dist/assets"
+          cp LICENSE "$dist/LICENSE.txt"
+          cp docs/README-windows.txt "$dist/README.txt"
+      - name: Keep the Windows build
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Spintacular-windows-x64
+          path: ${{ runner.temp }}/dist

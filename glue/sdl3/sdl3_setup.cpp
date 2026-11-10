@@ -12,7 +12,7 @@ bool am_sdl3_setup_init(am::Context& ctx) {
         return false;
     }
     am::lifecycle::init_step("sdl3:SDL_Init");
-    ctx.sdl3.window = SDL_CreateWindow("Automap testbed", 1280, 720, SDL_WINDOW_RESIZABLE);
+    ctx.sdl3.window = SDL_CreateWindow("Spintacular", 1600, 900, SDL_WINDOW_RESIZABLE);
     if (ctx.sdl3.window == nullptr) {
         SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
         return false;

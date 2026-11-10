@@ -8,13 +8,20 @@
     "linux-x64-clang"
   ],
   "executable": {
-    "target": "testbed",
+    "target": "spintacular",
     "sources": [
-      "main.cpp"
+      "game/app/main.cpp"
     ]
   },
+  "private_maps": [
+    {
+      "id": "spintacular",
+      "location": "automap-private"
+    }
+  ],
   "slots": {
     "audio": "miniaudio",
+    "data-files": "nlohmann-json",
     "gpu": "sdl3",
     "image-decode": "stb-image",
     "input": "sdl3",
@@ -22,6 +29,7 @@
     "math": "glm",
     "profiling": "tracy",
     "shader-compiler": "sdl-shadercross",
+    "text": "stb-truetype",
     "tools-ui": "dear-imgui",
     "windowing": "sdl3"
   },
@@ -29,10 +37,12 @@
     "dear-imgui": "docking",
     "glm": "default",
     "miniaudio": "default",
+    "nlohmann-json": "default",
     "sdl-shadercross": "default",
     "sdl3": "default",
     "spdlog": "default",
     "stb-image": "default",
+    "stb-truetype": "default",
     "tracy": "default"
   },
   "choices": {
@@ -108,6 +118,10 @@
         "glue/stb-image/stb_image_assets.cpp",
         "glue/stb-image/stb_image_assets_probe.cpp"
       ],
+      "stb-truetype/allocation": [
+        "glue/stb-truetype/stb_truetype_allocation.cpp",
+        "glue/stb-truetype/stb_truetype_allocation_probe.cpp"
+      ],
       "tracy/diagnostics": [
         "glue/tracy/tracy_diagnostics.cpp",
         "glue/tracy/tracy_diagnostics_probe.cpp"
@@ -138,6 +152,9 @@
         "glue/miniaudio/miniaudio_setup.h",
         "glue/miniaudio/miniaudio_setup.cpp"
       ],
+      "nlohmann-json": {
+        "not_applicable": "The nlohmann-json recipe ships no glue."
+      },
       "sdl-shadercross": [
         "glue/sdl-shadercross/shadercross_setup.h",
         "glue/sdl-shadercross/shadercross_setup.cpp"
@@ -152,15 +169,12 @@
       "stb-image": {
         "not_applicable": "The stb-image recipe ships no glue."
       },
+      "stb-truetype": {
+        "not_applicable": "The stb-truetype recipe ships no glue."
+      },
       "tracy": {
         "not_applicable": "The tracy recipe ships no glue."
       }
     }
-  },
-  "private_maps": [
-    {
-      "id": "spintacular",
-      "location": "automap-private"
-    }
-  ]
+  }
 }

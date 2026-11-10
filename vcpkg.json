@@ -15,6 +15,9 @@
       "name": "miniaudio"
     },
     {
+      "name": "nlohmann-json"
+    },
+    {
       "name": "sdl3-shadercross"
     },
     {
@@ -57,6 +60,11 @@
     {
       "name": "miniaudio",
       "version": "0.11.26"
+    },
+    {
+      "name": "nlohmann-json",
+      "version": "3.12.0",
+      "port-version": 2
     },
     {
       "name": "sdl3-shadercross",
