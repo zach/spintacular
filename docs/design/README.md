@@ -47,10 +47,12 @@ Each layer is its own way to build.
 | `tech.md` | How the game is built: C++ with Automap |
 | `session-rubric.md` | How to judge a run, by simulation and by playtest |
 
-Research is in `../research/`. The prototypes are in `../../prototypes/`; `haul/` plays the current design, and can be played by hand.
+Research is in `../research/`. The prototypes are in `../../prototypes/`: `haul/` simulates the current design and checks the rubric, and `web/` is a playable browser version of it.
 
 ## What's tested and what isn't
 
 - **Tested by simulation:** the haul's rules, the round structure, the economy's numbers and the starter content. Together they pass all ten checks of the session rubric. The six rigs and the eight stakes are tested too (`../research/07-haul-design-experiments.md`).
-- **Can't be tested until the game is built:** presentation (`presentation.md`), and the unlocks, collection and daily haul (`progression.md`). These are specified, not proven.
-- **Not testable by simulation:** whether it's fun. The rubric's playtest scorecard is for that, and `python3 prototypes/haul/haul.py play` is the first thing to put in front of a person.
+- **Checked by simulation as well:** seeds (the same seed replays the same run, and rerolling the shop changes neither the deal nor the spins) and the starter content set (`progression.md`).
+- **Built to be played, not yet played by people:** the browser prototype (`../../prototypes/web/`) puts the presentation rules on screen: every wedge face up, each wheel's chance to spoil, the quota line, and step-by-step payouts. It has no sound, and no art beyond shapes and color.
+- **Specified only:** the collection screen and the daily haul (`progression.md`).
+- **Not testable by simulation:** whether it's fun. The rubric's playtest scorecard is for that, and the browser prototype is the thing to put in front of a person.

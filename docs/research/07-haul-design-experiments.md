@@ -153,3 +153,33 @@ Odd Fellow, Even Steven, the Ribbons and Piggy Bank were flagged as rarely bough
 | Leave them, and have engine bots pass on them | 1.00 | 45% | The final tables |
 
 **Finding [Inference].** These items are early-game help and suit play without a factory. A factory is better off without them. That's a fair job for a common item, so they stay, and the telemetry flag is explained, not fixed.
+
+## Final tables, wider margins, seeds and the starter set [Verified by simulation]
+
+**Margins.** At the targets above, the no-engine check passed at 2.9% against a 3% limit. Three target scales were run with 1,000 runs per bot:
+
+| Target scale | Best engine | Best no-engine |
+| --- | --- | --- |
+| 1.00 | 45.7% | 2.6% |
+| 1.05 | 43.8% | 2.4% |
+| 1.10 | 41.4% | 1.7% |
+
+The tables now use the 1.10 scale, rounded: 24, 42, 70, 100, 145, 215, 320, 495, 750, 1,150, 1,820, 2,900. A confirming run of 1,000 passes all ten checks:
+
+- **No-engine play:** wins 1.8% at most.
+- **The best engine:** wins 41.7%.
+- **Each focus's best bot:** color 33%, straight 41%, safety 37%, quota 41%, adaptive 42%.
+
+Both lines now have more than a point of headroom. The rig and stake tables above were measured at the 1.00 scale, so their win rates sit a few points higher than they would now.
+
+**Seeds.** `haul.py selftest` checks that the same seed replays the same run line for line, and that 25 extra shop rerolls change neither the next deal nor the next spins.
+
+**Starter set.** With 14 pieces of content locked (`docs/design/progression.md`), 1,000 runs per bot give:
+
+- **The best engine:** 61%.
+- **No-engine play:** 3.1%.
+- **Round-1 losses:** 0.4% at worst.
+
+A smaller pool makes a build's pieces easier to find, so the first runs are easier for a player who builds and no easier for one who doesn't.
+
+**Browser prototype.** `prototypes/web/` is a playable version built from the same tables. An automated player ran it through several runs, rounds and shops with no script errors, and the page fits a 400-pixel-wide screen. No person has played it yet.

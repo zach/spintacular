@@ -5,7 +5,7 @@ A round works like a blind in Balatro: the player has a fixed number of trips to
 ## A round
 
 - **Trips:** 4 per round. Each trip is a haul (`scoring.md`), with a tank of 10 spins.
-- **Target:** the deliveries of the round add up toward a score target. Targets rise round by round, from 24 in round 1 to 2,650 in round 12. The curve lives in a data table with the rest of the balance numbers.
+- **Target:** the deliveries of the round add up toward a score target. Targets rise round by round, from 24 in round 1 to 2,900 in round 12. The curve lives in a data table with the rest of the balance numbers.
 - **Unused trips:** a round ends as soon as the target is reached. Each trip left over pays $2 (`economy.md`), so finishing early with big loads earns money for the shop.
 - **Quota:** each round has a quota, which doubles any load that reaches it (`scoring.md`).
 
@@ -43,4 +43,4 @@ A run should feel like this (`session-rubric.md`):
 - **Round 1 is almost impossible to lose,** unless the player takes an insane risk. Two or three cargo per trip is plenty, and a first spin can never spoil a load.
 - **By the last rounds it's almost impossible to win without a point factory:** a build that can carry big loads, or make each load pay far more.
 
-In simulation, sensible bots lose round 1 less than 1% of the time, and a bot that never delivers by choice loses it two times in three. Bots with no point factory win at most 3% of runs, and the best point factory wins 45% (`docs/research/07-haul-design-experiments.md`).
+In simulation, sensible bots lose round 1 less than 1% of the time, and a bot that never delivers by choice loses it two times in three. Bots with no point factory win at most 2% of runs, and the best point factory wins 42% (`docs/research/07-haul-design-experiments.md`).

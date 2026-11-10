@@ -1,0 +1,446 @@
+<title>Spintacular Haul</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column like a loading dock. A highway-sign header, the wheels in a row, the truck bed under them. */
+:root {
+  --ground: #e9ecea; --panel: #f7f8f6; --ink: #1c2622; --muted: #5c6a64; --line: #c3cbc6;
+  --sign: #0c6a4d; --sign-ink: #f2f7f3; --warn: #f2b705; --warn-ink: #2a2100; --bad: #b3261e; --ok: #1f7a4c;
+  --c0: #c8382f; --c1: #2f8f4e; --c2: #2f6fc0; --c3: #c79a0a; --wild: #7a5bb5; --blank: #aab3ae;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: "Barlow", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #151b19; --panel: #1f2724; --ink: #e8eeea; --muted: #9aa8a1; --line: #3a4640;
+  --sign: #0f7d5b; --sign-ink: #f2f7f3; --warn: #f2b705; --warn-ink: #2a2100; --bad: #ef6b62; --ok: #58c48a;
+  --c0: #e0584f; --c1: #4fb673; --c2: #5b96e3; --c3: #e0b52a; --wild: #a48be0; --blank: #5d6a64; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --ground: #151b19; --panel: #1f2724; --ink: #e8eeea; --muted: #9aa8a1; --line: #3a4640;
+  --sign: #0f7d5b; --sign-ink: #f2f7f3; --warn: #f2b705; --warn-ink: #2a2100; --bad: #ef6b62; --ok: #58c48a;
+  --c0: #e0584f; --c1: #4fb673; --c2: #5b96e3; --c3: #e0b52a; --wild: #a48be0; --blank: #5d6a64; color-scheme: dark }
+body { background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 28px; }
+#app { max-width: 980px; margin: 0 auto; display: grid; gap: 12px; }
+h1, h2, .num, button { font-family: var(--display); }
+h1 { font-size: 30px; margin: 0; letter-spacing: .02em; text-transform: uppercase; }
+h2 { font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: .04em; }
+.num { font-variant-numeric: tabular-nums; font-weight: 700; }
+.sign { background: var(--sign); color: var(--sign-ink); border-radius: 10px; padding: 12px 16px; display: grid; gap: 8px;
+  border: 3px solid var(--sign-ink); outline: 3px solid var(--sign); }
+.sign .row { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; }
+.sign .k { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; opacity: .85; }
+.sign .v { font-family: var(--display); font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.bar { height: 10px; background: color-mix(in srgb, var(--sign-ink) 25%, transparent); border-radius: 5px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--warn); width: 0; transition: width .4s; }
+.insp { background: var(--warn); color: var(--warn-ink); border-radius: 6px; padding: 4px 10px; font-weight: 600; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; min-width: 0; }
+.wheels { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.wheel { display: grid; gap: 4px; justify-items: center; padding: 8px 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+  color: var(--ink); cursor: pointer; font-family: var(--body); }
+.wheel:hover:not(:disabled), .wheel:focus-visible { border-color: var(--sign); outline: 2px solid var(--sign); }
+.wheel:disabled { cursor: default; opacity: .75; }
+.wheel .odds { font-family: var(--display); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.odds.safe { color: var(--ok); } .odds.risk { color: var(--bad); }
+.wheel .wname { font-size: 12px; color: var(--muted); text-align: center; }
+.wheel svg { width: 132px; height: 132px; overflow: visible; }
+.rot { transform-origin: 66px 66px; transition: transform 1.1s cubic-bezier(.12,.7,.2,1); }
+@media (prefers-reduced-motion: reduce) { .rot { transition: none; } .bar > i { transition: none; } }
+.truck { display: grid; gap: 10px; }
+.bed { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 46px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; border-radius: 6px; border: 2px solid var(--line);
+  font-family: var(--display); font-size: 20px; font-weight: 700; background: var(--panel); color: var(--ink); font-variant-numeric: tabular-nums; }
+.chip.c0 { border-color: var(--c0); } .chip.c1 { border-color: var(--c1); } .chip.c2 { border-color: var(--c2); } .chip.c3 { border-color: var(--c3); }
+.chip.cw { border-color: var(--wild); } .chip.sp { border-style: dashed; font-size: 15px; }
+.chip.slot { border-style: dotted; color: var(--muted); font-size: 14px; font-family: var(--body); font-weight: 400; }
+button.chip { cursor: pointer; } button.chip:hover { outline: 2px solid var(--sign); }
+.c0t { color: var(--c0); } .c1t { color: var(--c1); } .c2t { color: var(--c2); } .c3t { color: var(--c3); } .cwt { color: var(--wild); }
+.quota { display: grid; gap: 4px; }
+.quota .track { position: relative; height: 14px; border-radius: 7px; background: var(--line); overflow: hidden; }
+.quota .track i { position: absolute; inset: 0 auto 0 0; background: var(--sign); transition: width .3s; }
+.quota .track.hit i { background: var(--warn); }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; color: var(--muted); }
+.facts b { color: var(--ink); font-family: var(--display); font-size: 20px; font-variant-numeric: tabular-nums; }
+.btn { font-size: 20px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 8px 18px; border-radius: 8px; border: 0; cursor: pointer;
+  background: var(--sign); color: var(--sign-ink); }
+.btn.alt { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+.btn.warn { background: var(--warn); color: var(--warn-ink); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn:focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.items { display: flex; flex-wrap: wrap; gap: 6px; }
+.item { border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; font-size: 13px; background: var(--panel); max-width: 100%; }
+.item b { font-family: var(--display); font-size: 16px; letter-spacing: .02em; }
+.item .mini { font-size: 12px; padding: 0 6px; margin-left: 4px; border-radius: 4px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font-family: var(--body); }
+#steps { display: grid; gap: 2px; font-size: 14px; min-height: 22px; }
+#steps .big { font-family: var(--display); font-size: 26px; font-weight: 700; }
+#steps .bad { color: var(--bad); font-weight: 600; } #steps .good { color: var(--ok); font-weight: 600; }
+.offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.offer { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 6px; align-content: start; background: var(--panel); }
+.offer .nm { font-family: var(--display); font-size: 19px; font-weight: 700; }
+.offer .rar { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.offer.sold { opacity: .4; }
+.note { color: var(--muted); font-size: 13px; max-width: 70ch; }
+.choice { border: 2px solid var(--warn); border-radius: 8px; padding: 10px; display: grid; gap: 8px; }
+</style>
+<div id="app">
+  <div class="sign">
+    <div class="row"><h1>Spintacular Haul</h1><span id="insp" class="insp" hidden></span></div>
+    <div class="row">
+      <span><span class="k">Round</span> <span class="v" id="hRound"></span></span>
+      <span><span class="k">Score</span> <span class="v" id="hScore"></span></span>
+      <span><span class="k">Trips left</span> <span class="v" id="hTrips"></span></span>
+      <span><span class="k">Money</span> <span class="v" id="hMoney"></span></span>
+      <span><span class="k">Seed</span> <span class="v" id="hSeed"></span></span>
+    </div>
+    <div class="bar"><i id="hBar"></i></div>
+  </div>
+
+  <section id="roundView" class="panel">
+    <div class="wheels" id="wheels"></div>
+    <div class="truck">
+      <h2>Truck</h2>
+      <div class="bed" id="bed"></div>
+      <div class="quota"><div class="facts"><span>Load <b id="tPoints">0</b> points</span><span>Quota <b id="tQuota"></b> pays double</span>
+        <span>Worth now <b id="tWorth">0</b></span><span>Tank <b id="tTank"></b></span><span>Tarps <b id="tTarps">0</b></span></div>
+        <div class="track" id="qTrack"><i id="qFill"></i></div></div>
+      <div id="choice" class="choice" hidden></div>
+      <div class="acts"><button class="btn" id="deliver">Deliver</button><button class="btn alt" id="band" hidden>Use Outer Band on next spin</button>
+        <span class="note" id="hint"></span></div>
+    </div>
+    <div id="steps" aria-live="polite"></div>
+  </section>
+
+  <section id="shopView" class="panel" hidden>
+    <h2>Shop</h2>
+    <div class="note" id="shopNote"></div>
+    <div class="offers" id="offers"></div>
+    <div id="pick" class="choice" hidden></div>
+    <div class="acts"><button class="btn alt" id="reroll"></button><button class="btn" id="next">Next round</button></div>
+    <h2>Your bag</h2><div class="bed" id="bag"></div>
+    <h2>Your wheels</h2><div class="items" id="wheelList"></div>
+  </section>
+
+  <section id="endView" class="panel" hidden><h2 id="endTitle"></h2><div class="note" id="endNote"></div>
+    <div class="acts"><button class="btn" id="again">New run</button></div></section>
+
+  <section class="panel"><h2>Items</h2><div class="items" id="items"></div>
+    <div class="note">Items apply left to right. Additive bonuses before multipliers usually pays more.</div>
+    <h2>Consumables</h2><div class="items" id="cons"></div></section>
+
+  <section class="panel"><h2>How it works</h2>
+    <div class="note">Click a wheel to spin it. What it lands on goes in the truck. <b>No repeats:</b> a wedge that lands twice in one trip, or cargo with a value already in the truck, spoils the whole load. Wedges marked with a cross would spoil it, and each wheel shows its chance.
+    A delivery pays points × mult: every cargo adds its value in points and 1 mult, so bigger loads pay much more. Three or more of one color, or a run of consecutive values, add mult. Reach the quota for double. Six different values is a full truck. Miss a round's score and the run ends.</div></section>
+</div>
+<script>
+const T = {"run": {"rounds": 12, "start_money": 4, "max_items": 5, "max_wheels": 6, "max_consumables": 2, "max_value": 9}, "round": {"mode": "trips", "trips": 4, "tank": 10, "fuel": 10, "deal": "random", "inspections": true, "inspection_every": 3}, "scoring": {"mult_per_cargo": 1, "truck_size": 6, "full_bonus": 1.5, "quota_bonus": 2, "quotas": [10, 12, 13, 15, 17, 19, 21, 23, 26, 29, 32, 36], "flush": [2, 4, 7, 11], "straight": [2, 4, 7, 11], "crate_mult": 1.5, "risky_spin": 0.25}, "targets": [24, 42, 70, 100, 145, 215, 320, 495, 750, 1150, 1820, 2900], "income": {"per_round": 5, "per_unused_fuel": 1, "unused_cap": 4, "interest_per": 5, "interest_cap": 5}, "start": {"bag": ["R1", "G2", "B3", "Y4", "R5", "G6", "B1", "Y2", "R3", "G4", "B5", "Y6"], "wheels": ["plain", "plain", "plain", "plain"]}, "shop": {"offers": 5, "reroll_base": 4, "reroll_step": 1, "sell_fraction": 0.5, "kind_weights": {"item": 36, "wheel": 12, "upgrade": 20, "wedge": 16, "consumable": 10, "zap": 6}, "special_wedge_share": 0.4, "rarity_by_round": [{"from_round": 1, "weights": {"common": 1.0, "uncommon": 0.0, "rare": 0.0}}, {"from_round": 3, "weights": {"common": 0.7, "uncommon": 0.3, "rare": 0.0}}, {"from_round": 5, "weights": {"common": 0.5, "uncommon": 0.32, "rare": 0.18}}, {"from_round": 8, "weights": {"common": 0.4, "uncommon": 0.32, "rare": 0.28}}], "prices": {"item": {"common": 4, "uncommon": 6, "rare": 9}, "wheel": {"common": 5, "uncommon": 7, "rare": 10}, "upgrade": {"common": 3, "uncommon": 5, "rare": 7}, "consumable": {"common": 2, "uncommon": 3, "rare": 4}, "wedge": 2, "tarp": 3, "crate": 4, "zap": 2}}, "wheels": {"plain": {"name": "Plain Wheel", "rarity": "common", "size": 3, "effect": "none", "text": "holds 3 wedges"}, "gilded": {"name": "Gilded Wheel", "rarity": "common", "size": 3, "effect": "gilded", "amount": 3, "text": "+3 points per cargo it lands"}, "bump": {"name": "Bump Wheel", "rarity": "common", "size": 3, "effect": "bump", "text": "+1 to the value of cargo it lands"}, "wide": {"name": "Wide Wheel", "rarity": "uncommon", "size": 5, "effect": "none", "text": "holds 5 wedges"}, "express": {"name": "Express Wheel", "rarity": "uncommon", "size": 3, "effect": "express", "text": "its first spin each round uses no fuel"}, "padded": {"name": "Padded Wheel", "rarity": "rare", "size": 3, "effect": "padded", "text": "a duplicate landed here is thrown out instead of spoiling the load"}}, "items": {"red_ribbon": {"name": "Red Ribbon", "rarity": "common", "effect": "mult_per_color", "color": 0, "amount": 1}, "green_ribbon": {"name": "Green Ribbon", "rarity": "common", "effect": "mult_per_color", "color": 1, "amount": 1}, "blue_ribbon": {"name": "Blue Ribbon", "rarity": "common", "effect": "mult_per_color", "color": 2, "amount": 1}, "yellow_ribbon": {"name": "Yellow Ribbon", "rarity": "common", "effect": "mult_per_color", "color": 3, "amount": 1}, "high_roller": {"name": "High Roller", "rarity": "common", "effect": "points_per_high", "threshold": 5, "amount": 3}, "odd_fellow": {"name": "Odd Fellow", "rarity": "common", "effect": "mult_per_parity", "parity": 1, "amount": 1}, "even_steven": {"name": "Even Steven", "rarity": "common", "effect": "mult_per_parity", "parity": 0, "amount": 1}, "lucky_coin": {"name": "Lucky Coin", "rarity": "common", "effect": "flat_mult", "amount": 2}, "heavy_purse": {"name": "Heavy Purse", "rarity": "common", "effect": "flat_points", "amount": 6}, "color_guard": {"name": "Color Guard", "rarity": "common", "effect": "mult_if_flush", "min": 3, "amount": 4}, "step_counter": {"name": "Step Counter", "rarity": "common", "effect": "mult_if_straight", "min": 3, "amount": 4}, "tip_jar": {"name": "Tip Jar", "rarity": "common", "effect": "tip", "amount": 1}, "spare_tarp": {"name": "Spare Tarp", "rarity": "uncommon", "effect": "spare_tarp", "amount": 1}, "thermos": {"name": "Thermos", "rarity": "uncommon", "effect": "fuel", "amount": 2}, "long_haul": {"name": "Long Haul", "rarity": "uncommon", "effect": "mult_per_cargo_past", "past": 3, "amount": 3}, "convoy": {"name": "Convoy", "rarity": "uncommon", "effect": "xmult_if_size", "min": 5, "amount": 2.0}, "prism": {"name": "Prism", "rarity": "uncommon", "effect": "xmult_if_flush", "min": 4, "amount": 2.0}, "ladder": {"name": "Ladder", "rarity": "uncommon", "effect": "xmult_if_straight", "min": 4, "amount": 2.0}, "daredevil": {"name": "Daredevil", "rarity": "uncommon", "effect": "mult_per_risky", "amount": 4}, "insurance": {"name": "Insurance", "rarity": "uncommon", "effect": "insurance", "amount": 0.3}, "overtime": {"name": "Overtime", "rarity": "uncommon", "effect": "quota_bonus", "amount": 3}, "the_rod": {"name": "The Rod", "rarity": "uncommon", "effect": "rod", "amount": 1}, "piggy_bank": {"name": "Piggy Bank", "rarity": "uncommon", "effect": "piggy", "rate": 0.3, "cap": 10}, "spendthrift": {"name": "Spendthrift", "rarity": "uncommon", "effect": "spendthrift", "rate": 0.5}, "assembly_line": {"name": "Assembly Line", "rarity": "rare", "effect": "scaling_xmult_quota", "amount": 0.2}, "odometer": {"name": "Odometer", "rarity": "rare", "effect": "scaling_mult_size", "min": 5, "amount": 3}, "chromatic": {"name": "Chromatic Engine", "rarity": "rare", "effect": "xmult_per_flush_past", "amount": 0.5}, "hazard_pay": {"name": "Hazard Pay", "rarity": "rare", "effect": "xmult_if_covered", "amount": 2.5}, "double_clutch": {"name": "Double Clutch", "rarity": "rare", "effect": "double_clutch"}, "big_rig": {"name": "Big Rig", "rarity": "rare", "effect": "full_bonus", "amount": 3}}, "upgrades": {"recut": {"name": "Recut", "rarity": "common", "text": "change a wedge to a value from 1 to 6"}, "paint": {"name": "Paint", "rarity": "common", "text": "change a wedge to a color you choose"}, "premium": {"name": "Premium", "rarity": "common", "text": "+1 to a wedge's value (up to 9)"}, "wild": {"name": "Wild Color", "rarity": "uncommon", "text": "the wedge counts as any color"}, "stamp": {"name": "Stamp", "rarity": "uncommon", "text": "+3 points to a wedge"}}, "consumables": {"nudge": {"name": "Nudge", "rarity": "common", "text": "when a spin would spoil the load, move the pointer one wedge"}, "respin": {"name": "Respin", "rarity": "common", "text": "when a spin would spoil the load, spin that wheel again"}, "band": {"name": "Outer Band", "rarity": "uncommon", "text": "for one spin, wedges that would spoil the load are half as wide"}}, "inspections": {"quota_up": {"name": "Weigh Station", "text": "the quota is 25% higher"}, "fuel_down": {"name": "Fuel Shortage", "text": "2 less fuel"}, "no_tarps": {"name": "High Winds", "text": "tarps don't work"}}, "rig": "standard", "stake": 1, "rigs": {"standard": {}, "tanker": {"tank": 2, "item_slots": -1}, "reefer": {"add_wedges": ["TARP", "TARP"], "quota_scale": 1.2}, "flatbed": {"truck_size": 7, "wheels": ["plain", "plain", "plain"]}, "hotshot": {"add_wedges": ["CRATE", "CRATE"], "money": 10, "tank": -3}, "monochrome": {"bag": ["R1", "R2", "R3", "R4", "R5", "R6", "R1", "R2", "R3", "R4", "R5", "R6"], "target_scale": 1.3}}, "stakes": [{"name": "Targets are 15% higher", "target_scale": 1.15}, {"name": "Shop prices are $1 higher", "price_up": 1}, {"name": "Inspections happen every second round", "inspection_every": 2}, {"name": "The tank holds 1 fewer spin", "tank": -1}, {"name": "A spoiled load costs $2", "spoil_cost": 2}, {"name": "Quotas are 20% higher", "quota_scale": 1.2}, {"name": "One fewer item slot", "item_slots": -1}], "content": "all", "locked": ["thermos", "daredevil", "overtime", "the_rod", "spendthrift", "assembly_line", "hazard_pay", "big_rig", "tip_jar", "express", "padded", "stamp", "wild", "band"]};
+const SHAPE = ["●", "▲", "■", "◆"], CNAME = ["Red", "Green", "Blue", "Yellow"];
+const $ = id => document.getElementById(id);
+function rngFrom(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
+function weighted(r, entries) { const tot = entries.reduce((s, e) => s + e[1], 0); let x = r() * tot; for (const [k, w] of entries) { if ((x -= w) < 0) return k; } return entries[entries.length - 1][0]; }
+let S, uid = 0, busy = false;
+
+function newWedge(kind, color, value) { return { kind, color, value, bonus: 0, id: ++uid }; }
+function newRun(seed) {
+  S = { seed, money: T.run.start_money, round: 0, items: [], cons: [], phase: "round",
+    rShop: rngFrom(seed + 1), rDeal: rngFrom(seed + 2), rSpin: rngFrom(seed + 3),
+    bag: T.start.bag.map(w => w === "TARP" || w === "CRATE" ? newWedge(w.toLowerCase()) : newWedge("cargo", "RGBY".indexOf(w[0]), +w[1])),
+    wheels: T.start.wheels.map(id => ({ id, ...T.wheels[id], rot: 0 })) };
+  startRound();
+}
+const has = e => S.items.filter(i => i.effect === e);
+const sum = (arr, f) => arr.reduce((s, x) => s + f(x), 0);
+function emptyLoad() { return { cargo: [], crates: 0, tarps: 0, risky: 0, covered: false, clutch: false, spins: 0, used: new Set(), wedges: [] }; }
+
+function startRound() {
+  const rc = T.round;
+  S.inspection = rc.inspections && (S.round + 1) % rc.inspection_every === 0 ? pick(S.rDeal, Object.keys(T.inspections)) : null;
+  const q = T.scoring.quotas[Math.min(S.round, T.scoring.quotas.length - 1)];
+  S.quota = S.inspection === "quota_up" ? Math.ceil(q * 1.25) : q;
+  S.tank = rc.tank + sum(has("fuel"), i => i.amount) - (S.inspection === "fuel_down" ? 2 : 0);
+  S.spare = S.inspection === "no_tarps" ? 0 : sum(has("spare_tarp"), i => i.amount);
+  S.rods = sum(has("rod"), i => i.amount);
+  S.tripsLeft = rc.trips; S.total = 0; S.load = emptyLoad(); S.freeUsed = new Set(); S.bandOn = false; S.phase = "round";
+  const bag = S.bag.slice();
+  for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(S.rDeal() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+  S.loads = S.wheels.map(() => []);
+  let k = 0;
+  for (let n = 0; n < Math.max(...S.wheels.map(w => w.size)); n++)
+    S.wheels.forEach((w, wi) => { if (S.loads[wi].length < w.size && k < bag.length) S.loads[wi].push(bag[k++]); });
+  S.wheels.forEach((w, wi) => { while (S.loads[wi].length < w.size) S.loads[wi].push(newWedge("blank")); w.rot = 0; });
+  steps([`Round ${S.round + 1}. Score ${T.targets[S.round]} in ${rc.trips} trips.`]);
+  render();
+}
+const landedValue = (wheel, w) => wheel.effect === "bump" ? Math.min(T.run.max_value, w.value + 1) : w.value;
+function clashes(wheel, w) { const L = S.load; if (L.used.has(w.id)) return true; return w.kind === "cargo" && L.cargo.some(c => c.value === landedValue(wheel, w)); }
+function autoCovered(wheel) { const L = S.load; if (wheel.effect === "padded" || (has("double_clutch").length && !L.clutch)) return true; return S.inspection !== "no_tarps" && (L.tarps > 0 || S.spare > 0); }
+function spoilChance(wi) { const wheel = S.wheels[wi]; if (autoCovered(wheel)) return 0; return S.loads[wi].filter(w => clashes(wheel, w)).length / S.loads[wi].length; }
+
+function score(L, commit) {
+  const s = T.scoring, cargo = L.cargo, n = cargo.length, st = [];
+  if (!n) return { total: 0, steps: st, hit: false };
+  let points = sum(cargo, c => c.value + c.bonus), mult = n * s.mult_per_cargo, wild = 0;
+  const by = [0, 0, 0, 0]; cargo.forEach(c => c.color === null ? wild++ : by[c.color]++);
+  const flush = Math.max(...by) + wild, vals = [...new Set(cargo.map(c => c.value))].sort((a, b) => a - b);
+  let straight = 1, run = 1; for (let i = 1; i < vals.length; i++) { run = vals[i] === vals[i - 1] + 1 ? run + 1 : 1; straight = Math.max(straight, run); }
+  st.push(`${n} cargo: ${points} points × ${mult} mult`);
+  if (flush >= 3) { const m = s.flush[Math.min(flush, 6) - 3]; mult += m; st.push(`${Math.min(flush, 6)} of a color: +${m} mult`); }
+  if (straight >= 3) { const m = s.straight[Math.min(straight, 6) - 3]; mult += m; st.push(`Run of ${Math.min(straight, 6)} values: +${m} mult`); }
+  let qb = s.quota_bonus, fb = s.full_bonus;
+  for (const it of S.items) {
+    const e = it.effect, a = it.amount, p0 = points, m0 = mult;
+    if (e === "flat_points") points += a; else if (e === "flat_mult") mult += a;
+    else if (e === "mult_per_color") mult += a * (by[it.color] + wild);
+    else if (e === "points_per_high") points += a * cargo.filter(c => c.value >= it.threshold).length;
+    else if (e === "mult_per_parity") mult += a * cargo.filter(c => c.value % 2 === it.parity).length;
+    else if (e === "mult_if_flush") { if (flush >= it.min) mult += a; }
+    else if (e === "mult_if_straight") { if (straight >= it.min) mult += a; }
+    else if (e === "mult_per_cargo_past") mult += a * Math.max(0, n - it.past);
+    else if (e === "mult_per_risky") mult += a * L.risky;
+    else if (e === "xmult_if_size") { if (n >= it.min) mult *= a; }
+    else if (e === "xmult_if_flush") { if (flush >= it.min) mult *= a; }
+    else if (e === "xmult_if_straight") { if (straight >= it.min) mult *= a; }
+    else if (e === "xmult_per_flush_past") { if (flush >= 3) mult *= 1 + a * (flush - 2); }
+    else if (e === "xmult_if_covered") { if (L.covered) mult *= a; }
+    else if (e === "scaling_mult_size") { if (commit && n >= it.min) it.state = (it.state || 0) + a; mult += it.state || 0; }
+    else if (e === "scaling_xmult_quota") mult *= it.state || 1;
+    else if (e === "quota_bonus") qb = Math.max(qb, a); else if (e === "full_bonus") fb = Math.max(fb, a);
+    if (points !== p0 || mult !== m0) st.push(`${it.name}: ${fmt(points)} × ${fmt(mult)}`);
+  }
+  if (L.crates) { mult *= s.crate_mult ** L.crates; st.push(`${L.crates} crate${L.crates > 1 ? "s" : ""}: × ${fmt(s.crate_mult ** L.crates)}`); }
+  let factor = 1; const hit = points >= S.quota;
+  if (hit) { factor *= qb; st.push(`Quota ${S.quota} reached: × ${qb}`); }
+  if (vals.length >= s.truck_size) { factor *= fb; st.push(`Full truck: × ${fb}`); }
+  const total = Math.floor(points * mult * factor);
+  if (commit && hit) { has("scaling_xmult_quota").forEach(it => it.state = (it.state || 1) + it.amount); S.money += sum(has("tip"), i => i.amount); }
+  return { total, steps: st, hit, points };
+}
+const fmt = x => Number.isInteger(x) ? String(x) : x.toFixed(2).replace(/0$/, "");
+
+function ask(html, options) {
+  return new Promise(res => { const box = $("choice"); box.hidden = false; box.innerHTML = `<div>${html}</div><div class="acts"></div>`;
+    options.forEach(([label, val, cls]) => { const b = document.createElement("button"); b.className = "btn " + (cls || "alt"); b.textContent = label;
+      b.onclick = () => { box.hidden = true; res(val); }; box.lastChild.appendChild(b); }); });
+}
+const wait = ms => new Promise(r => setTimeout(r, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : ms));
+
+async function spin(wi) {
+  if (busy || S.phase !== "round") return;
+  const L = S.load, wheel = S.wheels[wi], wedges = S.loads[wi];
+  if (L.spins >= S.tank) return;
+  busy = true;
+  const key = wi + ":" + S.tripsLeft;
+  if (wheel.effect === "express" && !S.freeUsed.has(key)) S.freeUsed.add(key); else L.spins++;
+  const p = spoilChance(wi);
+  let weights = wedges.map(() => 1);
+  if (S.bandOn) { weights = wedges.map(w => clashes(wheel, w) ? 0.5 : 1); S.bandOn = false; S.cons.splice(S.cons.indexOf("band"), 1); }
+  let idx = weighted(S.rSpin, weights.map((w, i) => [i, w]));
+  await turnTo(wi, idx);
+  let w = wedges[idx], ok = true;
+  if (clashes(wheel, w)) {
+    ok = false; let msg = "";
+    if (wheel.effect === "padded") { ok = true; msg = "Padded Wheel throws the repeat out."; }
+    else if (has("double_clutch").length && !L.clutch) { L.clutch = true; ok = true; msg = "Double Clutch throws the repeat out."; }
+    else if (S.inspection !== "no_tarps" && (L.tarps || S.spare)) { if (L.tarps) L.tarps--; else S.spare--; L.covered = true; ok = true; msg = "A tarp covers the repeat."; }
+    else {
+      const opts = [];
+      if (L.cargo.length && S.cons.includes("nudge")) opts.push(["Use Nudge", "nudge", "warn"]);
+      if (L.cargo.length && S.cons.includes("respin")) opts.push(["Use Respin", "respin", "warn"]);
+      if (opts.length) {
+        const c = await ask(`<b>${label(w)} is a repeat.</b> The load is about to spoil.`, [...opts, ["Let it spoil", "no"]]);
+        if (c === "nudge") {
+          S.cons.splice(S.cons.indexOf("nudge"), 1);
+          const j = [(idx - 1 + wedges.length) % wedges.length, (idx + 1) % wedges.length].find(j => !clashes(wheel, wedges[j]));
+          if (j !== undefined) { idx = j; await turnTo(wi, idx); w = wedges[idx]; take(wheel, w, 0); ok = "taken"; msg = "The Nudge saves the load."; } else msg = "Both neighbors repeat too.";
+        } else if (c === "respin") {
+          S.cons.splice(S.cons.indexOf("respin"), 1); idx = Math.floor(S.rSpin() * wedges.length); await turnTo(wi, idx); w = wedges[idx];
+          if (!clashes(wheel, w)) { take(wheel, w, 0); ok = "taken"; msg = "The Respin saves the load."; }
+        }
+      }
+    }
+    if (msg) steps([msg], ok ? "good" : "bad");
+  } else { take(wheel, w, p); ok = "taken"; }
+  if (!ok) { await spoil(); busy = false; return; }
+  busy = false; render();
+  const full = new Set(L.cargo.map(c => c.value)).size >= T.scoring.truck_size;
+  if (full || L.spins >= S.tank) await deliver(full ? "Full truck!" : "The tank is empty.");
+}
+function take(wheel, w, p) {
+  const L = S.load; L.used.add(w.id);
+  if (w.kind === "crate") L.crates++;
+  else if (w.kind === "tarp") { if (S.inspection !== "no_tarps") L.tarps++; }
+  else if (w.kind === "cargo") { L.cargo.push({ color: w.color, value: landedValue(wheel, w), bonus: w.bonus + (wheel.effect === "gilded" ? wheel.amount : 0) }); L.wedges.push(w);
+    if (p >= T.scoring.risky_spin) L.risky++; }
+}
+async function turnTo(wi, idx) {
+  const w = S.wheels[wi], n = S.loads[wi].length, seg = 360 / n;
+  const base = Math.ceil(w.rot / 360) * 360 + 720; w.rot = base - (idx + 0.5) * seg;
+  const g = document.querySelector(`#w${wi} .rot`); if (g) g.style.transform = `rotate(${w.rot}deg)`;
+  await wait(1150);
+}
+async function spoil() {
+  const L = S.load, ins = sum(has("insurance"), i => i.amount), pay = ins ? Math.floor(ins * score(L, false).total) : 0;
+  S.total += pay;
+  steps([`Spoiled. You lose ${L.cargo.length} cargo worth ${score(L, false).total}.` + (pay ? ` Insurance pays ${pay}.` : "")], "bad");
+  S.load = emptyLoad(); S.tripsLeft--; await endTrip();
+}
+async function deliver(why) {
+  if (busy || S.phase !== "round" || !S.load.cargo.length) { if (!S.load.cargo.length && S.load.spins >= S.tank) { S.load = emptyLoad(); S.tripsLeft--; await endTrip(); } return; }
+  busy = true;
+  const L = S.load, r = score(L, true), lines = (why ? [why] : []).concat(r.steps);
+  $("steps").innerHTML = "";
+  for (const s of lines) { add(s); await wait(260); }
+  add(`Delivered: ${r.total}`, "big"); S.total += r.total;
+  if (S.rods > 0 && L.wedges.some(w => S.bag.includes(w))) {
+    const c = await ask("The Rod: remove one delivered wedge from your bag for good?", [...L.wedges.filter(w => S.bag.includes(w)).map(w => [label(w), w]), ["Keep them all", null]]);
+    if (c) { S.rods--; S.bag.splice(S.bag.indexOf(c), 1); S.loads.forEach(ws => { const i = ws.indexOf(c); if (i >= 0) ws[i] = newWedge("blank"); }); }
+  }
+  S.load = emptyLoad(); S.tripsLeft--; busy = false; await endTrip();
+}
+async function endTrip() {
+  const target = T.targets[S.round];
+  if (S.total >= target) return endRound(true);
+  if (S.tripsLeft <= 0) return endRound(false);
+  render();
+}
+function endRound(won) {
+  if (!won) { S.phase = "over"; return render(); }
+  if (S.round === T.run.rounds - 1) { S.phase = "won"; return render(); }
+  const inc = T.income; let gain = inc.per_round + Math.min(inc.unused_cap, S.tripsLeft * 2 * inc.per_unused_fuel) + Math.min(inc.interest_cap, Math.floor(S.money / inc.interest_per));
+  has("piggy").forEach(it => gain += Math.min(it.cap, Math.floor(S.money * it.rate)));
+  has("spendthrift").forEach(it => gain += Math.floor(S.money * it.rate));
+  S.money += gain; S.gain = gain; S.round++; S.phase = "shop"; S.reroll = T.shop.reroll_base; rollOffers(); render();
+}
+
+function rollOffers() { S.offers = Array.from({ length: T.shop.offers }, rollOffer); S.picking = null; }
+function rollOffer() {
+  const r = S.rShop, sh = T.shop, pr = sh.prices, kind = weighted(r, Object.entries(sh.kind_weights));
+  if (["item", "wheel", "upgrade", "consumable"].includes(kind)) {
+    const pool = T[kind + "s"]; let w = sh.rarity_by_round[0].weights;
+    sh.rarity_by_round.forEach(row => { if (S.round + 1 >= row.from_round) w = row.weights; });
+    const present = new Set(Object.values(pool).map(v => v.rarity));
+    const rar = weighted(r, Object.entries(w).filter(([k, v]) => v > 0 && present.has(k)));
+    const id = pick(r, Object.keys(pool).filter(k => pool[k].rarity === rar));
+    return { kind, id, name: pool[id].name, price: pr[kind][rar], rarity: rar, text: kind === "item" ? describe(pool[id]) : pool[id].text };
+  }
+  if (kind === "wedge") {
+    if (r() < sh.special_wedge_share) { const sp = pick(r, ["tarp", "tarp", "crate"]);
+      return { kind, id: sp, special: sp, name: sp === "tarp" ? "Tarp wedge" : "Crate wedge", price: pr[sp], rarity: "common", text: sp === "tarp" ? "covers one repeat" : "× 1.5 to the load" }; }
+    const c = Math.floor(r() * 4), v = 1 + Math.floor(r() * 6);
+    return { kind, id: "cargo", color: c, value: v, name: `${CNAME[c]} ${v} cargo wedge`, price: pr.wedge, rarity: "common", text: "adds a cargo wedge to your bag" };
+  }
+  return { kind: "zap", id: "zap", name: "Zap", price: pr.zap, rarity: "common", text: "remove a wedge from your bag" };
+}
+function canTake(o) { const r = T.run; return o.kind === "item" ? S.items.length < r.max_items : o.kind === "wheel" ? S.wheels.length < r.max_wheels : o.kind === "consumable" ? S.cons.length < r.max_consumables : true; }
+function buy(i) {
+  const o = S.offers[i]; if (o.sold || o.price > S.money || !canTake(o)) return;
+  if (o.kind === "upgrade" || o.kind === "zap") { S.picking = { i, step: "wedge" }; return render(); }
+  if (o.kind === "item") S.items.push({ ...T.items[o.id], id: o.id, price: o.price });
+  else if (o.kind === "wheel") S.wheels.push({ id: o.id, ...T.wheels[o.id], price: o.price, rot: 0 });
+  else if (o.kind === "consumable") S.cons.push(o.id);
+  else if (o.kind === "wedge") S.bag.push(o.special ? newWedge(o.special) : newWedge("cargo", o.color, o.value));
+  S.money -= o.price; o.sold = true; render();
+}
+function pickWedge(w) {
+  const P = S.picking, o = S.offers[P.i];
+  if (o.kind === "zap") { if (S.bag.length > 1) S.bag.splice(S.bag.indexOf(w), 1); }
+  else if (w.kind !== "cargo") return;
+  else if (o.id === "paint" || o.id === "recut") { if (P.step === "wedge") { P.w = w; P.step = "value"; return render(); } }
+  else if (o.id === "premium") w.value = Math.min(T.run.max_value, w.value + 1);
+  else if (o.id === "wild") w.color = null; else if (o.id === "stamp") w.bonus += 3;
+  S.money -= o.price; o.sold = true; S.picking = null; render();
+}
+function pickValue(v) { const P = S.picking, o = S.offers[P.i]; if (o.id === "paint") P.w.color = v; else P.w.value = v; S.money -= o.price; o.sold = true; S.picking = null; render(); }
+
+function describe(it) { const a = it.amount, e = it.effect; return ({
+  flat_points: `+${a} points`, flat_mult: `+${a} mult`, mult_per_color: `+${a} mult per ${CNAME[it.color]} cargo`,
+  points_per_high: `+${a} points per cargo worth ${it.threshold}+`, mult_per_parity: `+${a} mult per ${it.parity ? "odd" : "even"} cargo`,
+  mult_if_flush: `+${a} mult with ${it.min}+ of a color`, mult_if_straight: `+${a} mult with a run of ${it.min}+ values`,
+  xmult_if_flush: `× ${a} with ${it.min}+ of a color`, xmult_if_straight: `× ${a} with a run of ${it.min}+ values`,
+  mult_per_cargo_past: `+${a} mult per cargo past the third`, xmult_if_size: `× ${a} for loads of ${it.min}+ cargo`,
+  mult_per_risky: `+${a} mult per cargo landed at 25%+ to spoil`, xmult_per_flush_past: `× (1 + ${a} per cargo past two in your biggest color group)`,
+  xmult_if_covered: `× ${a} if a tarp saved this load`, scaling_mult_size: `gains +${a} mult for good per delivery of ${it.min}+ cargo`,
+  scaling_xmult_quota: `gains × ${a} for good per delivery that reaches the quota`, quota_bonus: `the quota pays × ${a}`, full_bonus: `a full truck pays × ${a}`,
+  spare_tarp: "one free tarp each round", double_clutch: "the first repeat in each load is thrown out", fuel: `+${a} to the tank`,
+  insurance: `a spoiled load still pays ${a * 100}%`, tip: `+$${a} per delivery that reaches the quota`, rod: "after a delivery, remove one delivered wedge from the bag",
+  piggy: `+${it.rate * 100}% interest on money held (max $${it.cap})`, spendthrift: `+${it.rate * 100}% of money held each round; money left after the shop is lost` })[e] || e; }
+function label(w) { if (w.kind === "blank") return "empty"; if (w.kind !== "cargo") return w.kind[0].toUpperCase() + w.kind.slice(1);
+  return (w.color === null ? "✱" : SHAPE[w.color]) + w.value + (w.bonus ? "+" : ""); }
+const ccls = c => c === null ? "cw" : "c" + c;
+function chip(w, tag) { const cls = w.kind === "cargo" ? ccls(w.color) : "sp"; const sym = w.kind === "cargo" ? `<span class="${ccls(w.color)}t">${w.color === null ? "✱" : SHAPE[w.color]}</span>${w.value}${w.bonus ? "+" : ""}` : label(w);
+  return `<${tag || "span"} class="chip ${cls}" data-id="${w.id}">${sym}</${tag || "span"}>`; }
+function steps(lines, cls) { $("steps").innerHTML = ""; lines.forEach(l => add(l, cls)); }
+function add(text, cls) { const d = document.createElement("div"); d.textContent = text; if (cls) d.className = cls; $("steps").appendChild(d); }
+
+function wheelSvg(wi) {
+  const wheel = S.wheels[wi], ws = S.loads[wi], n = ws.length, seg = 360 / n, R = 62, cx = 66, cy = 66; let out = "";
+  ws.forEach((w, i) => {
+    const a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180, am = (a0 + a1) / 2;
+    const col = w.kind === "cargo" ? (w.color === null ? "var(--wild)" : `var(--c${w.color})`) : w.kind === "blank" ? "var(--blank)" : "var(--warn)";
+    const bad = clashes(wheel, w);
+    out += `<path d="M${cx},${cy} L${cx + R * Math.cos(a0)},${cy + R * Math.sin(a0)} A${R},${R} 0 0 1 ${cx + R * Math.cos(a1)},${cy + R * Math.sin(a1)} Z" fill="${col}" fill-opacity="${bad ? .18 : .5}" stroke="var(--ink)" stroke-width="1.5"/>`;
+    const tx = cx + R * .62 * Math.cos(am), ty = cy + R * .62 * Math.sin(am), rot = -wheel.rot;  // keep labels upright at rest
+    const txt = w.kind === "cargo" ? (w.color === null ? "✱" : SHAPE[w.color]) + landedValue(wheel, w) : w.kind === "blank" ? "–" : w.kind === "tarp" ? "TARP" : "CRATE";
+    out += `<text x="${tx}" y="${ty}" transform="rotate(${rot} ${tx} ${ty})" text-anchor="middle" dominant-baseline="central" font-family="var(--display)" font-weight="700" font-size="${w.kind === "cargo" ? 20 : 11}" fill="var(--ink)">${txt}</text>`;
+    if (bad) out += `<text x="${cx + R * .3 * Math.cos(am)}" y="${cy + R * .3 * Math.sin(am)}" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="var(--bad)">✕</text>`;
+  });
+  return `<svg viewBox="0 0 132 132" role="img" aria-label="${wheel.name}"><g class="rot" style="transform: rotate(${wheel.rot}deg)">${out}</g><path d="M66,10 l-7,-12 h14 z" fill="var(--ink)"/></svg>`;
+}
+function render() {
+  const target = T.targets[Math.min(S.round, T.targets.length - 1)];
+  $("hRound").textContent = `${Math.min(S.round + 1, T.run.rounds)} / ${T.run.rounds}`; $("hMoney").textContent = "$" + S.money; $("hSeed").textContent = S.seed;
+  $("hScore").textContent = S.phase === "shop" ? "–" : `${S.total} / ${target}`; $("hTrips").textContent = S.phase === "shop" ? "–" : S.tripsLeft;
+  $("hBar").style.width = S.phase === "shop" ? "0" : Math.min(100, 100 * S.total / target) + "%";
+  const insp = S.phase === "round" && S.inspection; $("insp").hidden = !insp; if (insp) $("insp").textContent = `Inspection, ${T.inspections[S.inspection].name}: ${T.inspections[S.inspection].text}`;
+  $("roundView").hidden = S.phase !== "round"; $("shopView").hidden = S.phase !== "shop"; $("endView").hidden = S.phase === "round" || S.phase === "shop";
+  $("items").innerHTML = S.items.map((it, i) => `<span class="item"><b>${it.name}</b> ${describe(it)}${it.state ? ` (now ${fmt(it.state)})` : ""}` +
+    (i ? `<button class="mini" data-mv="${i}" aria-label="Move ${it.name} left">←</button>` : "") + (S.phase === "shop" ? `<button class="mini" data-sell="${i}">Sell $${Math.floor((it.price || 0) * T.shop.sell_fraction)}</button>` : "") + `</span>`).join("") || `<span class="note">None yet. Items multiply what a delivery pays.</span>`;
+  $("cons").innerHTML = S.cons.map(c => `<span class="item"><b>${T.consumables[c].name}</b> ${T.consumables[c].text}</span>`).join("") || `<span class="note">None. A Nudge or Respin can rescue a load.</span>`;
+  if (S.phase === "round") {
+    const L = S.load, r = score(L, false);
+    $("wheels").innerHTML = S.wheels.map((w, wi) => { const p = spoilChance(wi);
+      return `<button class="wheel" id="w${wi}" data-wi="${wi}" ${L.spins >= S.tank ? "disabled" : ""}><span class="odds ${p ? "risk" : "safe"}">${Math.round(p * 100)}% to spoil</span>${wheelSvg(wi)}<span class="wname">${w.name}${w.text && w.effect !== "none" ? ": " + w.text : ""}</span></button>`; }).join("");
+    let bed = L.cargo.map(c => chip({ kind: "cargo", ...c, id: 0 })).join("");
+    for (let i = new Set(L.cargo.map(c => c.value)).size; i < T.scoring.truck_size; i++) bed += `<span class="chip slot">empty</span>`;
+    if (L.crates) bed += `<span class="chip sp">Crate × ${L.crates}</span>`;
+    $("bed").innerHTML = bed;
+    const pts = sum(L.cargo, c => c.value + c.bonus);
+    $("tPoints").textContent = r.points || pts; $("tQuota").textContent = S.quota; $("tWorth").textContent = r.total; $("tTank").textContent = `${S.tank - L.spins} spins`;
+    $("tTarps").textContent = S.inspection === "no_tarps" ? "off" : L.tarps + S.spare;
+    $("qFill").style.width = Math.min(100, 100 * (r.points || pts) / S.quota) + "%"; $("qTrack").classList.toggle("hit", r.hit);
+    $("deliver").disabled = !L.cargo.length; $("band").hidden = !S.cons.includes("band") || S.bandOn;
+    $("hint").textContent = S.bandOn ? "Outer Band is on: repeats are half as wide on the next spin." : !L.cargo.length ? "The first spin of a trip can't spoil anything." : r.hit ? "Quota reached. Deliver, or press on?" : `${S.quota - (r.points || pts)} more points reaches the quota.`;
+  }
+  if (S.phase === "shop") {
+    $("shopNote").textContent = `Round ${S.round} cleared. You earned $${S.gain}. Next: score ${target}, quota ${T.scoring.quotas[S.round]}.` + ((S.round + 1) % T.round.inspection_every === 0 ? " The next round is an inspection." : "");
+    $("offers").innerHTML = S.offers.map((o, i) => `<div class="offer ${o.sold ? "sold" : ""}"><span class="rar">${o.kind} · ${o.rarity}</span><span class="nm">${o.name}</span><span>${o.text || ""}</span>` +
+      `<button class="btn ${o.price > S.money || !canTake(o) || o.sold ? "alt" : ""}" data-buy="${i}" ${o.sold || o.price > S.money || !canTake(o) ? "disabled" : ""}>${o.sold ? "Sold" : !canTake(o) ? "No room" : "$" + o.price}</button></div>`).join("");
+    const P = S.picking, pk = $("pick"); pk.hidden = !P;
+    if (P) { const o = S.offers[P.i];
+      pk.innerHTML = P.step === "wedge" ? `<b>${o.name}:</b> choose a wedge from your bag below. <button class="btn alt" data-cancel="1">Cancel</button>` :
+        `<b>${o.name}</b> for ${label(P.w)}: ` + (o.id === "paint" ? [0, 1, 2, 3].map(c => `<button class="btn alt" data-val="${c}">${SHAPE[c]} ${CNAME[c]}</button>`).join(" ") : [1, 2, 3, 4, 5, 6].map(v => `<button class="btn alt" data-val="${v}">${v}</button>`).join(" ")); }
+    $("bag").innerHTML = S.bag.map(w => chip(w, P && P.step === "wedge" ? "button" : "span")).join("");
+    $("wheelList").innerHTML = S.wheels.map(w => `<span class="item"><b>${w.name}</b> ${w.text || ""}</span>`).join("");
+    $("reroll").textContent = `Reroll $${S.reroll}`; $("reroll").disabled = S.money < S.reroll;
+  }
+  if (S.phase === "over") { $("endTitle").textContent = "Run over"; $("endNote").textContent = `You scored ${S.total} of ${target} in round ${S.round + 1}. Seed ${S.seed}.`; }
+  if (S.phase === "won") { $("endTitle").textContent = "You cleared all 12 rounds"; $("endNote").textContent = `Final round: ${S.total} of ${target}. Seed ${S.seed}.`; }
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return; const d = t.dataset;
+  if (d.wi !== undefined) spin(+d.wi);
+  else if (d.buy !== undefined) buy(+d.buy);
+  else if (d.mv !== undefined) { const i = +d.mv; [S.items[i - 1], S.items[i]] = [S.items[i], S.items[i - 1]]; render(); }
+  else if (d.sell !== undefined) { const it = S.items.splice(+d.sell, 1)[0]; S.money += Math.floor((it.price || 0) * T.shop.sell_fraction); render(); }
+  else if (d.cancel) { S.picking = null; render(); }
+  else if (d.val !== undefined) pickValue(+d.val);
+  else if (d.id && S.picking && S.picking.step === "wedge") pickWedge(S.bag.find(w => w.id === +d.id));
+});
+$("deliver").onclick = () => deliver();
+$("band").onclick = () => { S.bandOn = true; render(); };
+$("reroll").onclick = () => { if (S.money >= S.reroll) { S.money -= S.reroll; S.reroll += T.shop.reroll_step; rollOffers(); render(); } };
+$("next").onclick = () => { if (has("spendthrift").length) S.money = 0; startRound(); };
+$("again").onclick = () => newRun(Math.floor(Math.random() * 900000) + 100000);
+document.addEventListener("keydown", e => { if (S.phase !== "round" || e.target.tagName === "INPUT") return;
+  if (e.key >= "1" && e.key <= "9" && +e.key <= S.wheels.length) spin(+e.key - 1); else if (e.key === " ") { e.preventDefault(); deliver(); } });
+newRun(Math.floor(Math.random() * 900000) + 100000);
+</script>

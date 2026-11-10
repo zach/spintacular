@@ -8,7 +8,7 @@ How a run is structured, and what changes from one run to the next. Rounds, insp
 - **Inspections:** the third stop of each route is an inspection: a round with one extra rule (`rounds.md`). The game shows the route's inspection as soon as the route starts, so the player has two shops to prepare for it.
 - **Winning:** clearing round 12 wins the run. The player can then keep going in an endless mode, where targets and quotas keep rising, to see how far the build goes.
 - **Losing:** missing a round's target ends the run (`rounds.md`).
-- **Seeds:** every run comes from one seed, which the player can see, copy and replay. The shop, the deal and the spins each draw from their own stream, so rerolling the shop never changes what the wheels do.
+- **Seeds:** every run comes from one seed, which the player can see, copy and replay. The shop, the deal and the spins each draw from their own stream, so rerolling the shop never changes what the wheels do. The prototype checks both (`python3 prototypes/haul/haul.py selftest`).
 - **Saving:** a run can be left and resumed at any shop or spin.
 
 ## Rigs
@@ -49,7 +49,9 @@ The ladder falls at every step and never reaches zero. Round 1 stays safe on eve
 
 ## Unlocks and the collection
 
-- **Content unlocks.** The first run uses a starter set of about half the items, wheels and upgrades. The rest unlock by doing things in play, such as "deliver a full truck" or "win without buying a tarp". This follows the same rule as the shop: simple content first, complex content later (`economy.md`).
+- **Content unlocks.** The first run uses a starter set: about two thirds of the items, wheels and upgrades. The rest unlock by doing things in play, such as "deliver a full truck" or "win without buying a tarp". This follows the same rule as the shop: simple content first, complex content later (`economy.md`).
+  - **Locked at first:** Thermos, Daredevil, Overtime, The Rod, Spendthrift, Assembly Line, Hazard Pay, Big Rig, Tip Jar, the Express and Padded wheels, Stamp, Wild Color and the Outer Band.
+  - **The starter set is friendlier.** In simulation the best point factory wins 61% with the starter set, against 42% with everything unlocked, and play without a factory still wins only 3%. A smaller pool makes the pieces of a build easier to find, so a new player's first runs are the gentlest.
 - **The collection** lists every item, wheel, upgrade, wedge and inspection the player has seen, and the best stake won with each rig.
 - **Nothing carries over that makes a run stronger.** Unlocks widen what can appear; they don't add power. Each run starts even.
 

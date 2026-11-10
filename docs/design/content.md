@@ -94,7 +94,7 @@ Always on, and applied in the order the player sets.
 
 ## Point factories
 
-A point factory is a build whose score compounds. These are the kinds the content supports. In simulation, each of the first four wins 36–45% of runs when a bot builds toward it, and a bot that follows whatever the shop offers (43%) does as well as most of them (`docs/research/07-haul-design-experiments.md`).
+A point factory is a build whose score compounds. These are the kinds the content supports. In simulation, each of the first four wins 33–41% of runs when a bot builds toward it, and a bot that follows whatever the shop offers (42%) does as well as any of them (`docs/research/07-haul-design-experiments.md`).
 
 | Factory | Tilts the bag toward | Pays off through | Risk it takes |
 | --- | --- | --- | --- |
