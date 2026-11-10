@@ -1,17 +1,46 @@
 # Rounds
 
-A round works like a blind in Balatro. The player has a fixed number of spins to reach a score target.
+A round works like a blind in Balatro: the player has a fixed number of trips to reach a score target.
 
-- **Wheels:** the player owns their wheels; they aren't drawn. Each is bought in the shop and kept in a row the player arranges. The row stays the same from round to round, and its left-to-right order is the order dice are handed over for placement (`scoring.md`). Each wheel has two attributes:
-  - **Size:** how many wedges it holds.
-  - **Effect:** one effect on the dice it adds, such as "+1 to its dice's values" or "its dice count double in color lines".
-- **Full wheels:** every wheel always holds its full number of wedges. Slots the bag can't fill hold blank wedges, which add no die. So spins stay random however thin the bag gets, and thinning has a cost: past a point, removing a wedge means more blanks rather than more of what you want.
-- **The bag:** the player owns a bag of wedges. At the start of each round, the wheels' wedges are drawn from the bag, the way Balatro deals a hand from a deck. The same build plays out differently from round to round. The shop adds wedges to the bag, and removing a wedge from the bag for good is how the player tilts it (`synergy.md`).
-- **Spins:** each spin turns every wheel once, left to right. The dice they add form that spin's sequence, which scores as described in `scoring.md`.
-- **Target:** the scores of the round's spins add up toward the target. Targets rise round by round. The curve lives in a data table, with the rest of the balance numbers.
-- **Unused spins:** spins left over when the target is reached pay a bonus into the economy (`economy.md`). That makes spins a resource to manage: finishing early earns money for the shop.
-- **Consumables:** respins and nudges (`synergy.md`) are meant for the spin that decides the round.
+## A round
+
+- **Trips:** 4 per round. Each trip is a haul (`scoring.md`), with a tank of 10 spins.
+- **Target:** the deliveries of the round add up toward a score target. Targets rise round by round, from 24 in round 1 to 2,650 in round 12. The curve lives in a data table with the rest of the balance numbers.
+- **Unused trips:** a round ends as soon as the target is reached. Each trip left over pays $2 (`economy.md`), so finishing early with big loads earns money for the shop.
+- **Quota:** each round has a quota, which doubles any load that reaches it (`scoring.md`).
+
+## The bag and the wheels
+
+- **The bag:** the player owns a bag of wedges. A run starts with 12 cargo wedges: values 1 to 6 twice over, three of each color.
+- **Wheels:** the player owns their wheels, and buys more in the shop. A run starts with 4 plain wheels that hold 3 wedges each, and a player can own up to 6. Each wheel has:
+  - **a size:** how many wedges it holds; and
+  - **an effect:** what it does to the cargo it lands, or to the spin. Examples: "+1 to the value of cargo it lands", and "a repeat landed here is thrown out".
+- **The deal:** at the start of each round, the wedges in the bag are dealt onto the wheels at random, face up. The same build plays out differently from round to round, and the player reads the wheels before the first spin.
+  - If the bag is bigger than the wheels, some wedges sit the round out.
+  - If it's smaller, the leftover slots hold empty wedges.
+- **Choosing a wheel** is the player's move on every spin. Wheels differ in what they hold and how risky they are right now, so the choice is where the skill is.
+
+## Inspections
+
+Every third round is an inspection: a round with one extra rule. The player sees it two shops ahead (`progression.md`).
+
+| Inspection | Rule |
+| --- | --- |
+| **Weigh Station** | The quota is 25% higher. |
+| **Fuel Shortage** | The tank holds 2 fewer spins. |
+| **High Winds** | Tarps don't work. |
+
+Each one leans on a different kind of build, so a run can't rely on a single trick.
 
 ## Losing
 
-Missing a round's target ends the run. Because a run can end at any round, choosing when to save and when to spend matters, and each run stays short enough to replay.
+Missing a round's target ends the run. Because a run can end at any round, choosing when to press and when to deliver matters, and each run stays short enough to replay.
+
+## The shape of a run
+
+A run should feel like this (`session-rubric.md`):
+
+- **Round 1 is almost impossible to lose,** unless the player takes an insane risk. Two or three cargo per trip is plenty, and a first spin can never spoil a load.
+- **By the last rounds it's almost impossible to win without a point factory:** a build that can carry big loads, or make each load pay far more.
+
+In simulation, sensible bots lose round 1 less than 1% of the time, a bot that never delivers by choice loses it two times in three, bots with no point factory win 2% of runs, and the best point factories win about 40%.

@@ -1,58 +1,85 @@
-# Scoring: holders and the wall
+# Scoring: the haul
 
-Scoring happens in a middle layer between the wheels and the score. Spinning the wheels produces dice. Each die has one of four colors and a value from 1 to 6. The player places each die in a holder, and full holders score.
+The middle layer of the game is a press-your-luck haul. The player loads a truck one spin at a time. A bigger load pays far more than a small one, but one bad spin spoils the whole load. The core decision, taken on every spin, is: **one more, or deliver?**
 
-The middle layer is where scoring variations get tried. The wheels and the shop sit above it, and the layer below them can change while the rest stays the same. Three layers have been compared so far:
+The haul is where the game's scoring lives. Five other middle layers were tried before it (`docs/research/05-scoring-layer-comparison.md`, `06-haul-first-pass.md`). The numbers below are the prototype's (`prototypes/haul/tables.json`), set by experiment (`docs/research/07-haul-design-experiments.md`).
 
-- runs of adjacent dice;
-- a path traced through recent spins;
-- holders.
+## A trip
 
-Holders were the strongest once spins were kept random (`docs/research/05-scoring-layer-comparison.md`). The reason is that the player decides where each result goes, so a bad spin can be worked around (`docs/research/04-scoring-mechanisms.md`).
+1. The player picks any wheel and spins it.
+2. The wedge it lands on goes into the truck. The wedge stays on its wheel.
+3. The player spins again, on any wheel, or **delivers**. Delivering scores the load and ends the trip.
 
-## Holders
+A trip has a **tank of 10 spins**. When the tank is empty, the load delivers.
 
-- **Lines:** there are lines of three, four and five dice. A line takes its type from the first die placed in it: a **color line** (one color), a **value line** (one value) or a **straight line** (consecutive values, going either way).
-- **Placing dice:** each die goes into a line that accepts it, or onto the **floor**. Dice on the floor cost a few points each, and the cost rises with each die.
-- **Scoring a line:** a full line scores its pattern (see the table below) and empties. Lines carry over between spins within a round.
-- **Leftovers:** the floor is the release valve for dice that fit nowhere. Leftover dice are the main risk of holders (`docs/research/04-scoring-mechanisms.md`), so the floor's cost stays small and capped.
+## What a wedge carries
 
-| Line | Fills with | Size 3 / 4 / 5 |
-| --- | --- | --- |
-| Color | dice of one color | common payouts |
-| Value | dice of one value | rarer, bigger payouts |
-| Straight | consecutive values | rarest, biggest payouts |
+| Wedge | In the truck |
+| --- | --- |
+| **Cargo** | Has a color and a value. It adds its value in points, and makes the load one cargo bigger. |
+| **Tarp** | Covers one repeat (see below), then it's used up. |
+| **Crate** | Multiplies the load by 1.5 when it's delivered. |
+| **Empty** | Nothing. A slot the bag couldn't fill is an empty wedge. |
 
-## The wall
+## No repeats
 
-The wall is a board that lasts the whole run. It has a row for each color and a column for each value.
+**A spin spoils the load if it lands:**
 
-- **Placing a marker:** when a line fills, the die that filled it places a marker on its color-and-value cell, if that cell is free.
-- **Scoring a marker:** it scores the way an Azul tile does. A lone marker scores 1. Otherwise it scores the length of the unbroken chain it joins in its row plus the length of the one in its column. The score is paid as mult.
-- **What the wall rewards:**
-  - **Rows:** consecutive values in one color, so straights build up over a run.
-  - **Columns:** one value in many colors.
-- **Aiming:** a player can hold a line one short and wait for a die whose marker would join a chain. In simulation, aiming lifted the best point factory from 37% of wins to 43% (`docs/research/05-scoring-layer-comparison.md`).
+- **a wedge that has already landed this trip,** whatever it carries; or
+- **cargo whose value is already in the truck.**
 
-## Wedges
+A spoiled load scores nothing, and the trip is over.
 
-Each wedge starts as one fixed die: landing on it adds that die's color and value. The player can see exactly what each spin might add. What a wedge produces can change during a run, and tilting the game (`synergy.md`) works by editing wedges. The first upgrades are:
+Colors never spoil a load, so they're free to build around. The game marks every wedge that would spoil the load, and shows each wheel's chance of spoiling it as a percentage, so the risk is always visible (`presentation.md`).
 
-- **Second die:** the wedge adds two dice, so lines fill faster.
-- **Wild color:** the wedge's die counts as any color.
-- **Value range:** the wedge's value is rolled within a range, such as 3–5, instead of being fixed.
+The first spin on each wheel can only repeat a value, never a wedge. After that, re-spinning a wheel always carries some risk, however the bag is built. That's what keeps the decision alive for every build: scripted builds that tried to remove all risk now spoil most of their loads (`07-haul-design-experiments.md`).
 
-Each one improves the odds without guaranteeing anything, because the wheel still has to land on the wedge.
+### What can save a load
 
-## Resolution order
+When a spin would spoil the load, these apply in order:
 
-Every spin resolves in a fixed order. The player can see the order and rearrange it.
+1. A **Padded Wheel** throws the repeat out.
+2. **Double Clutch** throws out the first repeat of each load.
+3. A **tarp** covers it and is used up.
+4. The player may use a **Nudge** or a **Respin** (`synergy.md`).
 
-1. The wheels spin left to right. Each hands over its dice in turn.
-2. The player places each die in a line or on the floor.
-3. Full lines score, and place their markers on the wall, which score too.
-4. Always-on items apply, in the order the player arranged them.
+If none applies, the load spoils.
 
-The player arranges the items, so building a payout is a skill. For example, putting additive bonuses ahead of multipliers can multiply a score: in Balatro, rearranging jokers that way doubled one example hand (`docs/research/01-design-foundations.md` §1).
+## What a delivery pays
 
-The game shows a payout step by step in this same order, so the player can see how each piece of their build contributed.
+**Points × mult, then bonuses.** Each step is shown as it happens.
+
+1. **Points:** the values of the cargo, plus any bonus points from stamps, wheels and items.
+2. **Mult:** 1 for each cargo in the load. So a load twice as big has twice the points *and* twice the mult.
+3. **Sets** add mult:
+
+   | Size | 3 | 4 | 5 | 6 |
+   | --- | --- | --- | --- | --- |
+   | Cargo of one color | +2 | +4 | +7 | +11 |
+   | A run of consecutive values | +2 | +4 | +7 | +11 |
+
+4. **Items** apply, in the order the player arranged them.
+5. **Crates:** ×1.5 each.
+6. **Quota:** if the load's points reach the round's quota, ×2.
+7. **Full truck:** a truck holding 6 different values is full. It delivers itself and pays ×1.5.
+
+For example, a load of R2, G3, B4 is 9 points × (3 for three cargo + 2 for a run of three) = 45. If the quota is 9 or less, it pays 90.
+
+## The quota
+
+Each round sets a quota, and a load whose points reach it pays double. The quota does three jobs:
+
+- **Temptation.** A truck just short of the quota begs for one more spin.
+- **Rewarding better loads.** Builds that carry more, or carry higher values, reach it far more often.
+- **Scaling.** It's one number that rises round by round: 10 in round 1, 36 in round 12.
+
+Six different values from 1 to 6 add up to 21, so late quotas can't be met with starting cargo. The player has to raise values with Premium, stamps and wheels. In simulation, taking the quota out of the game cut the best point factory's win rate from 51% to 38%.
+
+## Why these rules
+
+Each was tested against alternatives at the same difficulty (`07-haul-design-experiments.md`):
+
+- **Trips with a tank each, not one pool of fuel for the round.** With one pool, the best play was many small safe deliveries. With trips, loads are bigger and spoil more often, which is the game.
+- **A random deal, not placing wedges by hand.** Placing wedges let a careful player take most of the risk out.
+- **A truck of 6 values.** At 5 the truck fills too easily, and reckless play stops being punished. At 7 a full truck is out of reach.
+- **Wedges stay on the wheel,** so a bag can never be thinned until nothing can repeat.

@@ -4,8 +4,8 @@ A synergy pays off on something that already exists in the game. The player's jo
 
 ## The rule
 
-- **Synergies key off broad tags that many items share,** such as "any red wedge" or "any wedge with a multiplier". They never name a specific item. Any build then has several fitting items in a typical shop, so shopping stays a choice (see `economy.md`).
-- **Items shift the odds; they never guarantee outcomes.** No item picks a spin's result, not even a rare one: there's no ace in the hole. Items reshape the bag and the wheels instead, so what you want comes up more often.
+- **Synergies key off broad tags that many things share,** such as "any red cargo", "a load of 5 or more" or "a load that reached the quota". They never name a specific item. Any build then has several fitting offers in a typical shop, so shopping stays a choice (`economy.md`).
+- **Nothing guarantees an outcome.** No item picks a spin's result, not even a rare one: there's no ace in the hole. Items change the odds and the payoff; the wheel still decides.
 
 ## Example: the fishing pond
 
@@ -16,23 +16,27 @@ Say a fishing game gives a bonus on blue fish.
 
 ## In Spintacular
 
-The bag of wedges is the pond, and the wedges drawn from it onto the wheels are the fish (`rounds.md`). Items tilt the bag toward the player's tags by changing what is in it:
+The bag of wedges is the pond. The player tilts it in the shop:
 
-- removing or destroying wedges the player doesn't want;
-- turning a wedge into another color, tag or value;
-- making wedges wider or narrower;
-- adding wedges from the shop, which offers whatever it rolled.
+- **adding** cargo, tarp and crate wedges;
+- **removing** wedges (Zap, and The Rod);
+- **changing** a wedge's value (Recut, Premium), color (Paint, Wild Color) or points (Stamp).
+
+What the player tilts *toward* depends on the build (`content.md`):
+
+- **Fewer repeats.** More different values in the bag means fewer spins that spoil a load.
+- **One color,** for color sets and the items that pay on them. Colors never spoil a load, so this is pure reward.
+- **Higher values,** to reach the quota.
+- **More protection,** such as tarps, for longer loads.
+
+However the bag is tilted, a wedge that lands twice still spoils the load (`scoring.md`), so no bag is ever safe.
 
 ## Consumables
 
-Consumables are one-use effects the player saves and deploys at the right moment. Like other items, they improve the odds without fixing the result:
+Consumables are one-use effects the player saves for the right moment. They improve the odds or rescue a load once; they never choose a result.
 
-- **Respins:** spin again.
-- **Nudges:** move the pointer a short way after it stops.
-- **Outer wheel bands:** a temporary band around the outside of the wheel that favors part of it without guaranteeing a hit.
+- **Nudge:** when a spin would spoil the load, move the pointer one wedge either way. It only helps if a neighbor is safe.
+- **Respin:** when a spin would spoil the load, spin that wheel again. The new result stands.
+- **Outer Band:** before a spin, make every wedge that would spoil the load half as wide for that spin.
 
-Their skill is in the timing, not in what they guarantee.
-
-## Spins stay random
-
-A spin still picks among what is on the wheel. Compounding comes from building a wheel where more of the wedges pay off together, not from forcing one particular wedge to come up.
+Their skill is in the timing: a rescue is worth the most on the biggest load.
