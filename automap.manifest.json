@@ -27,7 +27,6 @@
     "input": "sdl3",
     "logging": "spdlog",
     "math": "glm",
-    "profiling": "tracy",
     "shader-compiler": "sdl-shadercross",
     "text": "stb-truetype",
     "tools-ui": "dear-imgui",
@@ -42,8 +41,7 @@
     "sdl3": "default",
     "spdlog": "default",
     "stb-image": "default",
-    "stb-truetype": "default",
-    "tracy": "default"
+    "stb-truetype": "default"
   },
   "choices": {
     "allocation": {
@@ -54,7 +52,7 @@
     },
     "diagnostics": {
       "log": "logging-slot",
-      "profiler": "profiling-slot"
+      "profiler": "none"
     },
     "math-types": {
       "position_precision": "float"
@@ -121,10 +119,6 @@
       "stb-truetype/allocation": [
         "glue/stb-truetype/stb_truetype_allocation.cpp",
         "glue/stb-truetype/stb_truetype_allocation_probe.cpp"
-      ],
-      "tracy/diagnostics": [
-        "glue/tracy/tracy_diagnostics.cpp",
-        "glue/tracy/tracy_diagnostics_probe.cpp"
       ]
     },
     "pairings": {
@@ -171,9 +165,6 @@
       },
       "stb-truetype": {
         "not_applicable": "The stb-truetype recipe ships no glue."
-      },
-      "tracy": {
-        "not_applicable": "The tracy recipe ships no glue."
       }
     }
   }

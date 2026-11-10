@@ -41,16 +41,14 @@ add_library(automap_glue OBJECT
     ${AUTOMAP_ROOT}/glue/stb-image/stb_image_assets_probe.cpp
     ${AUTOMAP_ROOT}/glue/stb-truetype/stb_truetype_allocation.cpp
     ${AUTOMAP_ROOT}/glue/stb-truetype/stb_truetype_allocation_probe.cpp
-    ${AUTOMAP_ROOT}/glue/tracy/tracy_diagnostics.cpp
-    ${AUTOMAP_ROOT}/glue/tracy/tracy_diagnostics_probe.cpp
 )
 target_include_directories(automap_glue PUBLIC ${AUTOMAP_ROOT}/glue)
 target_compile_features(automap_glue PUBLIC cxx_std_${AUTOMAP_CXX_STANDARD})
 if(AUTOMAP_PROBE)
     target_compile_definitions(automap_glue PUBLIC AUTOMAP_PROBE)
 endif()
-target_compile_definitions(automap_glue PUBLIC AUTOMAP_LIBRARY_DEAR_IMGUI=1 AUTOMAP_LIBRARY_GLM=1 AUTOMAP_LIBRARY_MINIAUDIO=1 AUTOMAP_LIBRARY_NLOHMANN_JSON=1 AUTOMAP_LIBRARY_SDL_SHADERCROSS=1 AUTOMAP_LIBRARY_SDL3=1 AUTOMAP_LIBRARY_SPDLOG=1 AUTOMAP_LIBRARY_STB_IMAGE=1 AUTOMAP_LIBRARY_STB_TRUETYPE=1 AUTOMAP_LIBRARY_TRACY=1)
-target_compile_definitions(automap_glue PUBLIC AUTOMAP_VARIANT_DEAR_IMGUI="docking" AUTOMAP_VARIANT_GLM="default" AUTOMAP_VARIANT_MINIAUDIO="default" AUTOMAP_VARIANT_NLOHMANN_JSON="default" AUTOMAP_VARIANT_SDL_SHADERCROSS="default" AUTOMAP_VARIANT_SDL3="default" AUTOMAP_VARIANT_SPDLOG="default" AUTOMAP_VARIANT_STB_IMAGE="default" AUTOMAP_VARIANT_STB_TRUETYPE="default" AUTOMAP_VARIANT_TRACY="default")
+target_compile_definitions(automap_glue PUBLIC AUTOMAP_LIBRARY_DEAR_IMGUI=1 AUTOMAP_LIBRARY_GLM=1 AUTOMAP_LIBRARY_MINIAUDIO=1 AUTOMAP_LIBRARY_NLOHMANN_JSON=1 AUTOMAP_LIBRARY_SDL_SHADERCROSS=1 AUTOMAP_LIBRARY_SDL3=1 AUTOMAP_LIBRARY_SPDLOG=1 AUTOMAP_LIBRARY_STB_IMAGE=1 AUTOMAP_LIBRARY_STB_TRUETYPE=1)
+target_compile_definitions(automap_glue PUBLIC AUTOMAP_VARIANT_DEAR_IMGUI="docking" AUTOMAP_VARIANT_GLM="default" AUTOMAP_VARIANT_MINIAUDIO="default" AUTOMAP_VARIANT_NLOHMANN_JSON="default" AUTOMAP_VARIANT_SDL_SHADERCROSS="default" AUTOMAP_VARIANT_SDL3="default" AUTOMAP_VARIANT_SPDLOG="default" AUTOMAP_VARIANT_STB_IMAGE="default" AUTOMAP_VARIANT_STB_TRUETYPE="default")
 
 if(NOT TARGET stb::truetype)
     add_subdirectory(${AUTOMAP_ROOT}/third_party/stb-truetype ${CMAKE_BINARY_DIR}/automap-in-repo/stb-truetype)
@@ -64,4 +62,3 @@ include(${CMAKE_CURRENT_LIST_DIR}/sdl3.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/spdlog.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/stb-image.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/stb-truetype.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/tracy.cmake)

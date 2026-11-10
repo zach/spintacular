@@ -43,9 +43,6 @@
     },
     {
       "name": "stb"
-    },
-    {
-      "name": "tracy"
     }
   ],
   "overrides": [
@@ -83,11 +80,6 @@
     {
       "name": "stb",
       "version": "2026-08-02"
-    },
-    {
-      "name": "tracy",
-      "version": "0.14.1",
-      "port-version": 1
     }
   ],
   "builtin-baseline": "d186940b2f0c4e8e5b4ff804af57d2a26fbfa091"

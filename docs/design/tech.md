@@ -33,7 +33,7 @@ From Automap 0.1.0's public map:
 | Math | glm | |
 | Debug and tuning panels | Dear ImGui | For live-editing the balance tables and inspecting a run. Not for the game's own UI. |
 | Logging | spdlog | |
-| Profiling | Tracy | |
+| Profiling | none in the shipped game | Game code marks its frame, render and atlas-baking zones through the engine's profiling facade, which goes nowhere while the profiling slot is empty. For a profiling session, `automap extend tracy` fills the slot. Tracy isn't left in: the map's one Tracy variant records from startup, keeps what it records until a profiler connects, and listens on the network, none of which a player's copy should do. |
 
 Not needed: Jolt (3D physics), fastgltf (3D models). An ECS (flecs is the mapped one) is optional: the game's state is a bag, a few wheels and a truck, which plain structs hold comfortably. Start without one.
 

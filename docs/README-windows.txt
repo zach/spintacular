@@ -24,4 +24,4 @@ The balance numbers are in assets\data\tables.json.
 
 Fonts: Alfa Slab One and Lato, under the SIL Open Font License (assets\fonts).
 The engine is composed with Automap from SDL3, SDL_shadercross, Dear ImGui,
-miniaudio, stb, GLM, spdlog, Tracy and nlohmann/json.
+miniaudio, stb, GLM, spdlog and nlohmann/json.
