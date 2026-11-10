@@ -53,16 +53,16 @@
   "targets": [
     24,
     42,
-    68,
+    70,
     100,
-    140,
-    205,
-    305,
-    465,
-    700,
-    1060,
-    1670,
-    2650
+    145,
+    215,
+    320,
+    495,
+    750,
+    1150,
+    1820,
+    2900
   ],
   "income": {
     "per_round": 5,
@@ -545,5 +545,22 @@
       "name": "One fewer item slot",
       "item_slots": -1
     }
+  ],
+  "content": "all",
+  "locked": [
+    "thermos",
+    "daredevil",
+    "overtime",
+    "the_rod",
+    "spendthrift",
+    "assembly_line",
+    "hazard_pay",
+    "big_rig",
+    "tip_jar",
+    "express",
+    "padded",
+    "stamp",
+    "wild",
+    "band"
   ]
 }

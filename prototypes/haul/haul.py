@@ -117,6 +117,9 @@ class Load:
 class Run:
     def __init__(self, t, rng):
         self.t, self.rng = t, rng
+        # One seed, three streams: rerolling the shop never changes the deal or the spins.
+        seed = rng.getrandbits(64)
+        self.rng_shop, self.rng_deal, self.rng_spin = (random.Random(seed + k) for k in (1, 2, 3))
         self.money = t["run"]["start_money"]
         self.bag = [Wedge(w.lower()) if w in ("TARP", "CRATE") else Wedge("cargo", COLORS.index(w[0]), int(w[1]))
                     for w in t["start"]["bag"]]
@@ -254,7 +257,7 @@ def score(run, L, commit=False, trace=None):
 def deal(run):
     """Fill the wheels from the bag. Slots the bag can't fill hold empty wedges."""
     bag = run.bag[:]
-    run.rng.shuffle(bag)
+    run.rng_deal.shuffle(bag)
     if run.t["round"]["deal"] == "assign":
         # Experiment: the player places wedges freely. A careful player groups each value on one wheel.
         bag.sort(key=lambda w: (w.kind != "cargo", w.value))
@@ -381,7 +384,7 @@ def play_round(run, player, log=None, endless=False):
                         return land(wheel, wedges, j, 0)
             if "respin" in run.consumables:
                 run.consumables.remove("respin")
-                j = run.rng.randrange(len(wedges))
+                j = run.rng_spin.randrange(len(wedges))
                 if not clashes(run, wheel, wedges[j], L):
                     if log:
                         log("    respin saves the load")
@@ -432,7 +435,7 @@ def play_round(run, player, log=None, endless=False):
         if p > 0 and "band" in run.consumables and player.use_band(run, L, p):
             run.consumables.remove("band")
             weights = [0.5 if clashes(run, wheel, w, L) else 1 for w in wedges]
-        idx = run.rng.choices(range(len(wedges)), weights)[0]
+        idx = run.rng_spin.choices(range(len(wedges)), weights)[0]
         if log:
             w = wedges[idx]
             log(f"    wheel {act} ({p:.0%} to spoil): {w.label()}")
@@ -467,12 +470,13 @@ def pick_rarity(t, rng, rnd, pool):
 
 
 def roll_offer(run):
-    t, rng = run.t, run.rng
+    t, rng = run.t, run.rng_shop
     kw = t["shop"]["kind_weights"]
+    locked = set(t["locked"]) if t.get("content") == "starter" else ()
     kind = rng.choices(list(kw), list(kw.values()))[0]
     prices = t["shop"]["prices"]
     if kind in ("item", "wheel", "upgrade", "consumable"):
-        pool = t[kind + "s"]
+        pool = {k: v for k, v in t[kind + "s"].items() if k not in locked}
         rar = pick_rarity(t, rng, run.round, pool)
         cid = rng.choice([k for k, v in pool.items() if v["rarity"] == rar])
         return dict(kind=kind, id=cid, name=pool[cid]["name"], price=prices[kind][rar], rarity=rar)
@@ -836,7 +840,7 @@ class Stats:
 def pick_inspection(run):
     rc = run.t["round"]
     if rc["inspections"] and (run.round + 1) % rc["inspection_every"] == 0:
-        return run.rng.choice(list(run.t["inspections"]))
+        return run.rng_deal.choice(list(run.t["inspections"]))
     return None
 
 
@@ -1010,6 +1014,24 @@ def calibrate(t, runs, wall=0.02):
         else:
             hi = mid
     return hi
+
+
+def selftest():
+    """Seeds: the same seed replays the same run, and shop rerolls don't change the wheels."""
+    t = load_tables()
+    logs = []
+    for _ in range(2):
+        lines = []
+        play_run(t, 99, make_bot("quota/reroller"), Stats(), log=lines.append)
+        logs.append(lines)
+    assert logs[0] == logs[1], "same seed, different run"
+    a, b = Run(t, random.Random(5)), Run(t, random.Random(5))
+    for _ in range(25):
+        roll_offer(b)                      # b rerolls the shop many times
+    da, db = deal(a), deal(b)
+    assert [[w.label() for w in x] for x in da] == [[w.label() for w in x] for x in db], "rerolls changed the deal"
+    assert [a.rng_spin.random() for _ in range(5)] == [b.rng_spin.random() for _ in range(5)], "rerolls changed the spins"
+    print("seeds: same seed replays the same run; shop rerolls change neither the deal nor the spins")
 
 
 def ladder(runs):
@@ -1231,6 +1253,8 @@ if __name__ == "__main__":
         play(n if n is not None else random.randrange(10 ** 6))
     elif mode == "capacity":
         print(capacity(load_tables(ovs), n or 200))
+    elif mode == "selftest":
+        selftest()
     elif mode == "ladder":
         ladder(n or 300)
     elif mode == "experiments":
