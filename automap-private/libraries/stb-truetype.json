@@ -24,13 +24,6 @@
         "commit": "2c980bb59875b0d32144a71867fbdebb2f77cd20",
         "content_hash": "sha512:93db78589d836b5a8924ed0e980c6fd8d1dbc7e2d0489bc5a0fa4dedd73ed94332e5c814adc2976e89fab3f4cd96b5c46beae7b5dd55bc8374a91390d774b2b0"
       },
-      "build_backend": {
-        "vcpkg": {
-          "port": "stb",
-          "registry": "curated",
-          "port_version": 0
-        }
-      },
       "cmake": {
         "package": "Stb",
         "targets": [
@@ -41,7 +34,7 @@
         {
           "name": "default",
           "build_options": {},
-          "description": "stb_truetype from the stb port, the same port and pin as the public map's stb-image. The build fragment defines stb::truetype, and the allocation binding compiles the implementation once."
+          "description": "stb_truetype from the stb port that the public map's stb-image already brings in, at the same pin. This entry names no build backend of its own: two libraries naming one vcpkg port make the CLI write the port twice into vcpkg.json, which vcpkg rejects. The build fragment defines stb::truetype, and the allocation binding compiles the implementation once."
         }
       ],
       "facts": {
