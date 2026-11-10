@@ -1,0 +1,27 @@
+{
+  "kind": "library",
+  "subject": {
+    "library": "stb-truetype"
+  },
+  "applies_to": {
+    "stb-truetype": {
+      "versions": [
+        "2026-08-02"
+      ],
+      "variants": [
+        "default"
+      ]
+    }
+  },
+  "reference_glue": [
+    {
+      "path": "stb-truetype/stb-truetype.cmake",
+      "role": "build-fragment"
+    }
+  ],
+  "probes": [],
+  "adaptation_notes": [
+    "third_party/stb-truetype defines stb::truetype over the header the stb port installs; the build fragment links it into the glue target.",
+    "The allocation binding's glue compiles stb_truetype's implementation, so no other translation unit defines STB_TRUETYPE_IMPLEMENTATION; game code includes <stb_truetype.h> for the declarations."
+  ]
+}
