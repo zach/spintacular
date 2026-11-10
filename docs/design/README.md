@@ -51,6 +51,6 @@ Research is in `../research/`. The prototypes are in `../../prototypes/`; `haul/
 
 ## What's tested and what isn't
 
-- **Tested by simulation:** the haul's rules, the round structure, the economy's numbers and the starter content. Together they pass all ten checks of the session rubric (`../research/07-haul-design-experiments.md`).
-- **Not yet tested:** rigs, stakes, unlocks and the daily haul (`progression.md`), and everything in `presentation.md`.
+- **Tested by simulation:** the haul's rules, the round structure, the economy's numbers and the starter content. Together they pass all ten checks of the session rubric. The six rigs and the eight stakes are tested too (`../research/07-haul-design-experiments.md`).
+- **Can't be tested until the game is built:** presentation (`presentation.md`), and the unlocks, collection and daily haul (`progression.md`). These are specified, not proven.
 - **Not testable by simulation:** whether it's fun. The rubric's playtest scorecard is for that, and `python3 prototypes/haul/haul.py play` is the first thing to put in front of a person.

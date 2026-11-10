@@ -32,14 +32,27 @@ python3 prototypes/haul/haul.py experiments 300
 
 Compares the open design choices, each calibrated to the same difficulty (`docs/research/07-haul-design-experiments.md`).
 
+```bash
+python3 prototypes/haul/haul.py ladder 400
+```
+
+Runs every rig on stake 1, then the Standard rig up the stakes (`docs/design/progression.md`).
+
 Every number and every piece of content is in `tables.json`. Any command takes `key=value` to override one for that run:
 
 ```bash
 python3 prototypes/haul/haul.py calibrate 300 round.tank=14 scoring.quota_bonus=3
 ```
 
+`rig=` and `stake=` pick a rig and a stake:
+
+```bash
+python3 prototypes/haul/haul.py sim 500 rig=hotshot stake=3
+```
+
 ## What the prototype leaves out
 
-- **Rigs, stakes and unlocks** (`docs/design/progression.md`).
+- **Unlocks, the collection and the daily haul** (`docs/design/progression.md`).
+- **Choosing a rig in `play`.** It uses the rig and stake set in `tables.json`.
 - **Seeing the inspection ahead of time.** Bots don't prepare for inspections.
 - **Choosing when to use an Outer Band or a rescue.** Bots use them by simple rules; in `play` you're asked.

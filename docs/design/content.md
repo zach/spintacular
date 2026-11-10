@@ -110,7 +110,6 @@ Money items (Piggy Bank, Spendthrift, Tip Jar) fit beside any of them.
 
 Telemetry from simulated runs flags these (`docs/research/07-haul-design-experiments.md`). They're prompts to look closer, not verdicts:
 
-- **Odd Fellow and Even Steven** are almost never bought by bots building a factory.
-- **Ribbons** are only bought by the matching color build.
+- **Odd Fellow, Even Steven and off-color Ribbons are weak on purpose.** They help in the early rounds and suit play without a factory, but a factory does better without them: when bots were made to buy them, the best factory's win rate fell from 45% to 38%. Making them stronger helped no-factory play most, so they stay as they are. Learning to pass on them is part of the game.
 - **Piggy Bank** is rarely bought.
 - **Premium and tarp wedges** are bought in more than 90% of winning runs. They're bag upgrades, not items, so they don't break the no-must-have rule, but more ways to do the same jobs would spread the choice.

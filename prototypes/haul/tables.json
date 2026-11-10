@@ -466,5 +466,84 @@
       "name": "High Winds",
       "text": "tarps don't work"
     }
-  }
+  },
+  "rig": "standard",
+  "stake": 1,
+  "rigs": {
+    "standard": {},
+    "tanker": {
+      "tank": 2,
+      "item_slots": -1
+    },
+    "reefer": {
+      "add_wedges": [
+        "TARP",
+        "TARP"
+      ],
+      "quota_scale": 1.2
+    },
+    "flatbed": {
+      "truck_size": 7,
+      "wheels": [
+        "plain",
+        "plain",
+        "plain"
+      ]
+    },
+    "hotshot": {
+      "add_wedges": [
+        "CRATE",
+        "CRATE"
+      ],
+      "money": 10,
+      "tank": -3
+    },
+    "monochrome": {
+      "bag": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6"
+      ],
+      "target_scale": 1.3
+    }
+  },
+  "stakes": [
+    {
+      "name": "Targets are 15% higher",
+      "target_scale": 1.15
+    },
+    {
+      "name": "Shop prices are $1 higher",
+      "price_up": 1
+    },
+    {
+      "name": "Inspections happen every second round",
+      "inspection_every": 2
+    },
+    {
+      "name": "The tank holds 1 fewer spin",
+      "tank": -1
+    },
+    {
+      "name": "A spoiled load costs $2",
+      "spoil_cost": 2
+    },
+    {
+      "name": "Quotas are 20% higher",
+      "quota_scale": 1.2
+    },
+    {
+      "name": "One fewer item slot",
+      "item_slots": -1
+    }
+  ]
 }

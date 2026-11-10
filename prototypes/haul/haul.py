@@ -38,6 +38,41 @@ def load_tables(overrides=()):
             d[path[-1]] = json.loads(val)
         except ValueError:
             d[path[-1]] = val
+    return apply_setup(t)
+
+
+def apply_setup(t):
+    """Apply the chosen rig and stake (tables "rig" and "stake") by editing the tables."""
+    if t.get("_setup_done"):
+        return t
+    mods = [t["rigs"][t.get("rig", "standard")]] + [t["stakes"][i] for i in range(int(t.get("stake", 1)) - 1)]
+    for m in mods:
+        if "bag" in m:
+            t["start"]["bag"] = m["bag"]
+        if "add_wedges" in m:
+            t["start"]["bag"] = t["start"]["bag"] + m["add_wedges"]
+        if "wheels" in m:
+            t["start"]["wheels"] = m["wheels"]
+        if "money" in m:
+            t["run"]["start_money"] = m["money"]
+        t["round"]["tank"] += m.get("tank", 0)
+        t["run"]["max_items"] += m.get("item_slots", 0)
+        if "truck_size" in m:
+            t["scoring"]["truck_size"] = m["truck_size"]
+        if m.get("no_interest"):
+            t["income"]["interest_cap"] = 0
+        if "quota_scale" in m:
+            t["scoring"]["quotas"] = [math.ceil(q * m["quota_scale"]) for q in t["scoring"]["quotas"]]
+        if "target_scale" in m:
+            t["targets"] = [t["targets"][0]] + [int(v * m["target_scale"]) for v in t["targets"][1:]]
+        if "price_up" in m:
+            pr = t["shop"]["prices"]
+            for k, v in pr.items():
+                pr[k] = {r: x + m["price_up"] for r, x in v.items()} if isinstance(v, dict) else v + m["price_up"]
+        if "inspection_every" in m:
+            t["round"]["inspection_every"] = m["inspection_every"]
+        t["round"]["spoil_cost"] = t["round"].get("spoil_cost", 0) + m.get("spoil_cost", 0)
+    t["_setup_done"] = True
     return t
 
 
@@ -83,7 +118,8 @@ class Run:
     def __init__(self, t, rng):
         self.t, self.rng = t, rng
         self.money = t["run"]["start_money"]
-        self.bag = [Wedge("cargo", COLORS.index(w[0]), int(w[1])) for w in t["start"]["bag"]]
+        self.bag = [Wedge(w.lower()) if w in ("TARP", "CRATE") else Wedge("cargo", COLORS.index(w[0]), int(w[1]))
+                    for w in t["start"]["bag"]]
         self.wheels = [dict(id=w, **t["wheels"][w]) for w in t["start"]["wheels"]]
         self.items, self.consumables, self.bought = [], [], set()
         self.round = 0
@@ -295,6 +331,7 @@ def play_round(run, player, log=None, endless=False):
         nonlocal total, L, landed, trips_left
         pay = int(insurance * score(run, L)) if insurance else 0
         total += pay
+        run.money = max(0, run.money - rc.get("spoil_cost", 0))
         run.m["spoiled"] += 1
         run.m["spoiled_cargo"] += len(L.cargo)
         if log:
@@ -965,7 +1002,7 @@ def calibrate(t, runs, wall=0.02):
         mid = (lo * hi) ** 0.5
         tt = copy.deepcopy(t)
         tt["targets"] = scaled_targets(t, mid)
-        best = 0
+        best = 0  # noqa
         for name, out, _ in run_bots(tt, ["flat/spender", "random", "passive"], runs):
             best = max(best, sum(1 for o in out if o[0]) / runs)
         if best > wall:
@@ -973,6 +1010,26 @@ def calibrate(t, runs, wall=0.02):
         else:
             hi = mid
     return hi
+
+
+def ladder(runs):
+    """Every rig on stake 1, then the standard rig up the stakes."""
+    def row(label, t):
+        _, checks, d = report(t, runs)
+        worst = max(v for n, v in d["r1"].items() if n != "reckless")
+        fams = defaultdict(float)
+        for n, w in d["win"].items():
+            if "/" in n and not n.startswith("flat"):
+                fams[n.split("/")[0]] = max(fams[n.split("/")[0]], w)
+        print(f"{label:<22}{d['best']:>8.0%}{d['ne']:>8.1%}{worst:>9.1%}{d['r1']['reckless']:>9.0%}"
+              f"{sum(ok for _, _, ok, _ in checks):>6}   " + " ".join(f"{k} {v:.0%}" for k, v in fams.items()), flush=True)
+    head = f"{'':<22}{'engine':>8}{'no-eng':>8}{'worst r1':>9}{'reck r1':>9}{'pass':>6}   best by focus"
+    print(f"{runs} runs per bot. Same targets for every rig.\n\nRigs, stake 1\n" + head)
+    for rig in load_tables()["rigs"]:
+        row(rig, load_tables([f"rig={rig}"]))
+    print("\nStakes, standard rig\n" + head)
+    for st in range(1, len(load_tables()["stakes"]) + 2):
+        row(f"stake {st}", load_tables([f"stake={st}"]))
 
 
 def capacity(t, runs):
@@ -1174,6 +1231,8 @@ if __name__ == "__main__":
         play(n if n is not None else random.randrange(10 ** 6))
     elif mode == "capacity":
         print(capacity(load_tables(ovs), n or 200))
+    elif mode == "ladder":
+        ladder(n or 300)
     elif mode == "experiments":
         experiments(n or 300)
     elif mode == "calibrate":

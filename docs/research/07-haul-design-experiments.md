@@ -103,3 +103,53 @@ Engine bots carry 3.9 cargo per delivery, spoil 34% of their loads, and reach th
   - Ribbons are bought 4% of the time, and Piggy Bank 8%.
   - Premium (95% of wins) and tarp wedges (93%) are near-universal. They're bag upgrades, which E2 doesn't cover, but more ways to do the same jobs would spread the choice.
 - **What simulation can't say:** whether the quota tempts a person, whether a spoiled load stings the right amount, and whether watching the odds is fun. Those need the playtest half of the rubric.
+
+## Rigs and stakes [Verified by simulation]
+
+`python3 prototypes/haul/haul.py ladder 400`, on the final tables. "Engine" is the best point-factory bot's win rate, and "no engine" the best bot without one.
+
+| Rig, stake 1 | Engine | No engine | Worst round-1 loss | Reckless loses round 1 |
+| --- | --- | --- | --- | --- |
+| Standard | 43% | 2.2% | 0.8% | 65% |
+| Tanker | 40% | 1.2% | 0.8% | 65% |
+| Reefer | 36% | 2.0% | 1.0% | 51% |
+| Flatbed | 37% | 1.8% | 0.8% | 100% |
+| Hotshot | 35% | 3.5% | 0.5% | 66% |
+| Monochrome | 48% | 3.8% | 0.8% | 64% |
+
+| Standard rig | Engine | No engine |
+| --- | --- | --- |
+| Stake 1 | 43% | 2.2% |
+| Stake 2: targets +15% | 37% | 1.8% |
+| Stake 3: prices +$1 | 24% | 1.5% |
+| Stake 4: inspections every second round | 22% | 2.0% |
+| Stake 5: tank −1 | 19% | 1.5% |
+| Stake 6: a spoiled load costs $2 | 18% | 1.0% |
+| Stake 7: quotas +20% | 10% | 0.5% |
+| Stake 8: one fewer item slot | 9% | 0.2% |
+
+Two rigs were dropped after testing:
+
+| Dropped rig | Engine | No engine | Reckless loses round 1 |
+| --- | --- | --- | --- |
+| Nine wedges, one of each value 1–9 | 59% | 23.8% | 39% |
+| The same, with targets 60% higher | 32% | 7.8% | 39% |
+| Sixteen wedges, values 1–8 twice, one fewer item slot | 68% | 37.2% | 40% |
+
+**Findings [Inference].**
+
+- **Rigs sit in one band.** Factories win 35–48% and no-engine play at most 3.8%, with round 1 safe throughout. Each rig changes how the game is played without breaking its shape.
+- **The stake ladder falls at every step,** from 43% to 9%, and never reaches zero. Higher prices (stake 3) and higher quotas (stake 7) are the two biggest steps.
+- **The number of different values in the starting bag is the strongest difficulty dial in the game.** More values means fewer repeats, so both dropped rigs made the game far easier for everyone, including reckless play. Raising targets didn't restore the gap between factory and no-factory play. Rigs should vary anything but this.
+
+## Reworking rarely bought items [Verified by simulation]
+
+Odd Fellow, Even Steven, the Ribbons and Piggy Bank were flagged as rarely bought. Two reworks were tried, each re-calibrated with 600 runs per bot:
+
+| Change | Target scale | Best engine | Result |
+| --- | --- | --- | --- |
+| Double their payouts, and have engine bots buy them | 1.29 | 34% | The wall had to rise, because the items helped no-engine play most |
+| Keep their payouts, and have engine bots buy them | 1.01 | 38% | Factories got weaker: the items take slots that better items need |
+| Leave them, and have engine bots pass on them | 1.00 | 45% | The final tables |
+
+**Finding [Inference].** These items are early-game help and suit play without a factory. A factory is better off without them. That's a fair job for a common item, so they stay, and the telemetry flag is explained, not fixed.
