@@ -18,7 +18,7 @@ It is weakest at everything after the testbed: turning the testbed into a game, 
 | Glue I wrote | About 40 lines: stb_truetype's allocation binding and probe, in the private map |
 | Game code on top | About 8,000 lines: rules core, data layer, balance simulation, presentation, tests |
 | Automap commands used | `find`, `show`, `start`, `extend`, `verify`, `verify --seed`, `upgrade`, `eject` |
-| Findings logged | 47 and counting, in `field-notes.md` |
+| Findings logged | 49, in `field-notes.md` |
 
 ## 1. Step by step
 
@@ -68,6 +68,8 @@ It is weakest at everything after the testbed: turning the testbed into a game, 
 - **The facades.** Game code logs, profiles, allocates and reads files through `am::diag`, `am::alloc` and `am::assets`, never through spdlog or Tracy. Taking Tracy out changed no game code. [31, 45]
 - **Contracts as a writing guide.** The allocation contract was clear enough to bind a library the map doesn't know, with a probe and a seeded violation, in about 40 lines. [30]
 - **The released binaries in CI.** One download and a checksum on each runner. [23]
+- **`verify --seed`.** One command showed that the probe I wrote for stb_truetype catches the violation it's meant to. [48]
+- **`eject`.** The ejected repo built and ran with plain CMake and vcpkg; leaving is as cheap as promised. [49]
 
 **Ineffective**
 
@@ -106,6 +108,8 @@ It is weakest at everything after the testbed: turning the testbed into a game, 
 - **System dependencies:** a fact in prose, where every other fact is structured. [8]
 - **`.gitignore`:** `verify` writes `build/automap/`, and `start` doesn't ignore it. [37]
 - **Duplicate failures:** `LOCK_MISMATCH(stb-truetype)` printed twice in one result. [29]
+- **After `eject`:** the `AGENTS.md` section and the router skill stay, still pointing agents at a CLI and manifest that are gone. [49]
+- **`verify --seed`'s result** reports `level: smoke`, which isn't the composition's level. [48]
 
 ## 5. Other opportunities
 

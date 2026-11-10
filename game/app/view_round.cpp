@@ -376,7 +376,7 @@ void draw_wheel(Game& g, int wheel, bool interactive) {
     text(Font::Text, 20, px + pw + 10, ly - 10, tail, rc);
 
     // Its name and key below.
-    float ny = cy + R + 110;
+    float ny = cy + R + 105;
     bool free = def.effect == WheelEffect::Express && std::find(run.free_spun.begin(), run.free_spun.end(), wheel) == run.free_spun.end();
     std::string label = def.name + (free ? ": free spin" : "");
     float lw = text_width(Font::Display, 22, label);
@@ -478,7 +478,7 @@ void draw_wagon(Game& g) {
 void draw_gauges(Game& g) {
     Run& run = g.run;
     // Fuel: spins left in this trip's tank, and trips left this round.
-    float x = 36, y = 700;
+    float x = 36, y = 712;
     panel(x, y, 370, 170, 16, ui::kNight2, ui::kInk, 4);
     text(Font::Display, 24, x + 20, y + 38, "TANK", ui::kCream);
     text(Font::Text, 20, x + 350, y + 36, std::to_string(std::max(0, g.shown_spins)) + " spins", ui::kMuted, Align::Right);
@@ -515,7 +515,7 @@ void draw_gauges(Game& g) {
 
 void draw_load_value(Game& g) {
     Run& run = g.run;
-    float x = 1524, y = 700, w = 360;
+    float x = 1524, y = 712, w = 360;
     panel(x, y, w, 170, 16, ui::kNight2, ui::kInk, 4);
     Score s = run.score(g.shown_load);
     bool any = !g.shown_load.cargo.empty();
