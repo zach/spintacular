@@ -289,7 +289,16 @@ void run_end_screen(Game& g) {
             g.screen = Screen::Title;
         }
     }
-    if (!won) text(Font::Text, 22, kWidth * 0.5f, 940, "Type the seed on the start screen to try this run again.", ui::kMuted, Align::Center);
+    // A result to share: the daily haul's is the same seed for everyone.
+    if (ui::button(kWidth * 0.5f - 170, 920, 340, 60, run.config.daily ? "COPY DAILY RESULT" : "COPY RESULT", ui::Style::Dark, true, 24)) {
+        std::string result = std::string("Spintacular ") + (run.config.daily ? "daily haul " : "seed ") + std::to_string(run.config.seed) + ": " +
+                             (won ? "won" : "reached round " + std::to_string(run.round + 1)) + " on the " + (rig ? rig->name : run.config.rig) +
+                             " rig, stake " + std::to_string(run.config.stake) + ". Best delivery " + ui::number(m.best_delivery) + ", " +
+                             std::to_string(m.spoiled) + " loads spoiled.";
+        SDL_SetClipboardText(result.c_str());
+        toast(g, "Copied", "Paste it anywhere to share.");
+    }
+    if (!won) text(Font::Text, 22, kWidth * 0.5f, 1020, "Type the seed on the start screen to try this run again.", ui::kMuted, Align::Center);
 }
 
 void collection_screen(Game& g) {

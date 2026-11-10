@@ -18,7 +18,7 @@ Rules for the rules core:
 - **Steps, not results.** A delivery returns the list of steps that made its score, such as "+4 mult from Color Guard". The presentation plays those steps back, so what the player sees can't drift from what the rules did.
 - **Headless.** The core runs without the presentation. The balance simulation and the session rubric (`session-rubric.md`) run against the real rules in CI, so a content change that breaks the difficulty curve fails a check.
 
-The Python prototype is the reference for the rules until the C++ core passes the same rubric on the same tables.
+The C++ core passes the same rubric as the Python prototype on the same tables, bot for bot within sampling noise, so `game/rules` is the reference for the rules. The prototype stays for design experiments.
 
 ## Libraries
 
@@ -27,9 +27,9 @@ From Automap 0.1.0's public map:
 | Job | Library | Notes |
 | --- | --- | --- |
 | Window, input, GPU | SDL3 | One library for all three. A 2D game of wheels and cargo asks little of the GPU. |
-| Shaders | SDL_shadercross | Needed to render through SDL's GPU API. |
+| Shaders | SDL_shadercross | Turns the game's SPIR-V shaders into what each GPU backend takes. `tools/compile_shaders.py` makes the SPIR-V from HLSL. |
 | Sound | miniaudio | The whole audio layer: wheel ticks, the quota tone, music in layers. |
-| Images | stb_image | Sprites and textures. |
+| Images | stb_image | The window icon. The game's art is drawn from shapes, so it has no sprites. |
 | Math | glm | |
 | Debug and tuning panels | Dear ImGui | For live-editing the balance tables and inspecting a run. Not for the game's own UI. |
 | Logging | spdlog | |
@@ -37,17 +37,16 @@ From Automap 0.1.0's public map:
 
 Not needed: Jolt (3D physics), fastgltf (3D models). An ECS (flecs is the mapped one) is optional: the game's state is a bag, a few wheels and a truck, which plain structs hold comfortably. Start without one.
 
-## Gaps to fill
+## Libraries from the private map
 
-The 0.1.0 public map has no library for these, so each needs a private-map entry or a proposal to the public map:
+The 0.1.0 public map has no library for text or for data files. Both come from a private map in `automap-private/`, layered over the public one:
 
-| Gap | Why the game needs it | Candidates |
+| Job | Library | Notes |
 | --- | --- | --- |
-| **Text and fonts** | Scores, odds and item text are on screen all the time. | SDL3_ttf, stb_truetype |
-| **Data files** | Loading the balance tables and saving runs. | nlohmann/json, yyjson |
-| **Tweening** | The spin, the payout steps and the truck all animate. | A small in-house module is enough |
+| **Text and fonts** | stb_truetype | Bakes the two fonts into a glyph atlas at the window's scale. It has an allocation binding and a probe of its own, like stb_image's in the public map. |
+| **Data files** | nlohmann/json | Balance tables, saved runs and the profile. Only the data layer (`game/data`) includes it. |
 
-Adding a library to a map is a decision about what the map covers, so it's the product owner's call under Automap's own rules.
+Tweening is a small in-house timeline in `game/app`: a queue of timed cues that the spin, the payout steps and the wagon all play through.
 
 ## Build order
 

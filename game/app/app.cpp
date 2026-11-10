@@ -15,6 +15,7 @@
 #include "data/save.h"
 #include "data/tables_json.h"
 #include "game.h"
+#include "stb-image/stb_image_assets.h"
 
 namespace spin {
 
@@ -333,7 +334,13 @@ void draw_top_bar(Game& g, bool shop) {
              std::to_string(r.config.stake),
          ui::kMuted);
     text(Font::Text, 20, 392, 86, (r.config.daily ? "Daily haul " : "Seed ") + std::to_string(r.config.seed), ui::kMuted);
-    if (ui::hover(392, 66, 300, 28)) ui::tooltip("Seed", "Every run comes from one seed. Type it on the start screen to replay this run.");
+    if (!ui::input().blocked && ui::hover(392, 66, 300, 28)) {
+        ui::tooltip("Seed", "Every run comes from one seed. Type it on the start screen to replay this run. Click to copy it.");
+        if (ui::input().pressed) {
+            SDL_SetClipboardText(std::to_string(r.config.seed).c_str());
+            toast(g, "Seed copied", std::to_string(r.config.seed));
+        }
+    }
 
     // Score against the target.
     float bx = 800, bw = 560, by = 40, bh = 44;
@@ -507,6 +514,18 @@ bool App::init(am::Context& ctx, const AppOptions& options) {
     if (!gfx::init(ctx.sdl3.gpu_device, ctx.sdl3.window, g->asset_dir)) {
         log(am::diag::Level::error, "the renderer couldn't start");
         return false;
+    }
+    {
+        // The window's icon, decoded by stb_image through the assets interface.
+        int w = 0, h = 0, channels = 0;
+        std::string icon = g->asset_dir + "/icon.png";
+        if (stbi_uc* pixels = am_stb_image_load(icon.c_str(), &w, &h, &channels, 4)) {
+            if (SDL_Surface* surface = SDL_CreateSurfaceFrom(w, h, SDL_PIXELFORMAT_RGBA32, pixels, w * 4)) {
+                SDL_SetWindowIcon(ctx.sdl3.window, surface);
+                SDL_DestroySurface(surface);
+            }
+            stbi_image_free(pixels);
+        }
     }
     if (!audio::init(ctx.miniaudio.engine)) log(am::diag::Level::warn, "no sound: the audio layer couldn't start");
     ui::click_sound() = &on_click;

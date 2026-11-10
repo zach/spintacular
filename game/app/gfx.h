@@ -7,6 +7,8 @@
 #include <string>
 #include <string_view>
 
+#include <glm/vec2.hpp>
+
 struct SDL_GPUDevice;
 struct SDL_Window;
 struct SDL_GPUCommandBuffer;
@@ -28,9 +30,7 @@ Color mix(Color a, Color b, float t);
 Color darken(Color c, float amount);  // 0..1
 Color lighten(Color c, float amount); // 0..1
 
-struct Vec2 {
-    float x = 0, y = 0;
-};
+using Vec2 = glm::vec2;
 
 enum class Font { Display, Text };
 enum class Align { Left, Center, Right };

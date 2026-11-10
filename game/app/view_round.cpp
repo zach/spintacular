@@ -105,7 +105,7 @@ void resolve_landing(Game& g, SpinResult r, Load after) {
         view.flash_color = ui::kSafe;
         if (r.landing == Landing::Blank) {
             sfx(g, audio::Sfx::LandBlank, 0.7f);
-            popup(g, "Empty", cx, cy - rad - 70, ui::kMuted, 36, 0.8f);
+            popup(g, "Empty", cx, cy + 20, ui::kMuted, 40, 0.8f);
             cue(g, 0.25f, nullptr, nullptr, [&g, after] {
                 g.shown_load = after;
                 finish_action(g);
@@ -131,7 +131,7 @@ void resolve_landing(Game& g, SpinResult r, Load after) {
         f.dur = 0.32f * std::max(g.speed, 0.01f);
         if (g.speed > 0) g.flyers.push_back(f);
         bool near = r.near_miss;
-        cue(g, 0.32f, nullptr, nullptr, [&g, r, after, near, cx, cy, rad] {
+        cue(g, 0.32f, nullptr, nullptr, [&g, r, after, near, cx, cy] {
             Run& run = g.run;
             long long before_points = 0, after_points = 0;
             for (auto& c : g.shown_load.cargo) before_points += c.value + c.bonus;
@@ -158,7 +158,7 @@ void resolve_landing(Game& g, SpinResult r, Load after) {
             } else {
                 sfx(g, audio::Sfx::LandCrate, 0.9f);
             }
-            if (near) popup(g, "Close!", cx, cy - rad - 70, ui::kWarn, 40, 0.9f);
+            if (near) popup(g, "Close!", cx, cy + 20, ui::kWarn, 46, 0.9f);
             finish_action(g);
         });
         break;

@@ -145,3 +145,66 @@ jobs:
         with:
           name: Spintacular-windows-x64
           path: ${{ runner.temp }}/dist
+
+  # Two more Automap features, tried for the record (docs/automap/): does the
+  # private map's probe catch its seeded violation, and does the game still
+  # build and run after `automap eject`? Neither gates the build.
+  automap-extras:
+    name: Automap seed check and eject
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build clang pkg-config autoconf autoconf-archive automake libtool libltdl-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libxtst-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols libegl-dev \
+            mesa-vulkan-drivers libvulkan1 libasound2-dev libpulse-dev
+          sudo apt-get install -y "libclang-rt-$(clang --version | sed -n 's/.*clang version \([0-9]*\).*/\1/p')-dev"
+      - name: vcpkg
+        run: |
+          git clone -q --filter=blob:none https://github.com/microsoft/vcpkg "$RUNNER_TEMP/vcpkg"
+          "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          echo "VCPKG_ROOT=$RUNNER_TEMP/vcpkg" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/vcpkg-archives"
+          echo "VCPKG_DEFAULT_BINARY_CACHE=$RUNNER_TEMP/vcpkg-archives" >> "$GITHUB_ENV"
+      - name: vcpkg binary cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-archives
+          key: vcpkg-Linux-${{ hashFiles('automap.lock.json') }}
+          restore-keys: vcpkg-Linux-
+      - name: Automap CLI
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin" && cd "$RUNNER_TEMP/bin"
+          base="https://github.com/zach/automap/releases/download/$AUTOMAP_CLI"
+          curl -fsSL -o automap "$base/automap-0.1.0-linux-amd64"
+          chmod +x automap
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/extras"
+      - name: Seeded violation of the stb_truetype allocation probe
+        run: |
+          automap verify --seed allocation.routed-through-facade:stb-truetype --json | tee "$RUNNER_TEMP/extras/seed.json" || true
+      - name: Eject, then build and run without Automap
+        run: |
+          cp -r . "$RUNNER_TEMP/ejected" && cd "$RUNNER_TEMP/ejected"
+          automap eject --json | tee "$RUNNER_TEMP/extras/eject.json" || true
+          git status --short | tee "$RUNNER_TEMP/extras/eject-changes.txt"
+          cmake -S . -B build/ejected -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" 2>&1 | tail -n 40
+          cmake --build build/ejected --target spintacular 2>&1 | tail -n 20
+          cd build/ejected
+          SDL_VIDEO_DRIVER=offscreen AUTOMAP_MINIAUDIO_BACKEND=null ./spintacular --frames 120
+          echo "ejected build ran: exit $?" | tee "$RUNNER_TEMP/extras/eject-run.txt"
+      - name: Keep the results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automap-extras
+          path: ${{ runner.temp }}/extras
