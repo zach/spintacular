@@ -465,7 +465,7 @@ void risk(float chance) {
 void volumes(float master, float music_volume, float sfx_volume) {
     if (!s.engine) return;
     ma_engine_set_volume(s.engine, master);
-    ma_sound_group_set_volume(&s.music_group, music_volume * 0.7f);
+    ma_sound_group_set_volume(&s.music_group, music_volume * 0.5f);
     ma_sound_group_set_volume(&s.sfx_group, sfx_volume);
 }
 

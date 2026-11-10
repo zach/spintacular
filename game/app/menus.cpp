@@ -199,11 +199,13 @@ void title_screen(Game& g) {
         ui::tooltip("The daily haul", "One seed a day, the same for everyone: the Standard rig on stake 1." +
                                           (p.daily_date == daily_date() ? "\nToday: " + p.daily_result + "." : std::string()));
     by += 98;
-    if (ui::button(bx, by, bw * 0.5f - 10, 72, "COLLECTION", ui::Style::Cream, true, 30)) {
+    float tw3 = (bw - 28) / 3;
+    if (ui::button(bx, by, tw3, 72, "HOW TO PLAY", ui::Style::Cream, true, 24)) g.help_open = true;
+    if (ui::button(bx + tw3 + 14, by, tw3, 72, "COLLECTION", ui::Style::Cream, true, 24)) {
         g.screen = Screen::Collection;
         g.collection_scroll = 0;
     }
-    if (ui::button(bx + bw * 0.5f + 10, by, bw * 0.5f - 10, 72, "SETTINGS", ui::Style::Cream, true, 30)) g.settings_open = true;
+    if (ui::button(bx + 2 * (tw3 + 14), by, tw3, 72, "SETTINGS", ui::Style::Cream, true, 24)) g.settings_open = true;
     by += 92;
     if (ui::button(bx, by, bw, 64, "QUIT", ui::Style::Dark, true, 28)) g.quit = true;
 
@@ -410,7 +412,8 @@ void pause_menu(Game& g) {
         g.paused = false;
         std::fill(std::begin(in.key), std::end(in.key), false);
     }
-    if (ui::button(x + 60, by + 92, w - 120, 76, "SETTINGS", ui::Style::Cream, true, 32)) g.settings_open = true;
+    if (ui::button(x + 60, by + 92, (w - 134) * 0.5f, 76, "SETTINGS", ui::Style::Cream, true, 26)) g.settings_open = true;
+    if (ui::button(x + 74 + (w - 134) * 0.5f, by + 92, (w - 134) * 0.5f, 76, "HOW TO PLAY", ui::Style::Cream, true, 26)) g.help_open = true;
     if (ui::button(x + 60, by + 184, w - 120, 76, "SAVE AND LEAVE", ui::Style::Dark, true, 32)) {
         save_run(g);
         g.paused = false;
@@ -455,6 +458,44 @@ void settings_panel(Game& g) {
     if (before.master != s.master || before.music != s.music || before.sfx != s.sfx || before.speed != s.speed || before.fullscreen != s.fullscreen) {
         apply_settings(g);
         if (before.sfx != s.sfx || before.master != s.master) audio::play(audio::Sfx::LandCargo, 0.8f);
+    }
+}
+
+void help_panel(Game& g) {
+    ui::Input& in = ui::input();
+    rect(0, 0, kWidth, kHeight, rgb(0x050817, 0.8f));
+    float w = 1320, h = 860, x = (kWidth - w) * 0.5f, y = 110;
+    panel(x, y, w, h, 20, ui::kCream, ui::kInk, 6);
+    ui::stripes(x, y, w, 18, 44);
+    text(Font::Display, 48, x + w * 0.5f, y + 92, "HOW TO PLAY", ui::kInk, Align::Center);
+    struct Line {
+        const char* head;
+        const char* body;
+    } lines[] = {
+        {"A run", "is 12 rounds. Miss a round's score target and the run is over."},
+        {"A round", "is 4 trips. Each trip, you spin wheels to load cargo onto the wagon, then deliver it for points."},
+        {"The catch", "no repeats. Land a cargo value you already hold, or the same wedge twice, and the load spoils: it pays nothing."},
+        {"The pull", "a load twice as big pays about four times as much. A load whose points reach the quota pays double, "
+                     "and every cargo past the third pays a dollar."},
+        {"The odds", "are always on show. Every wedge is face up, wedges that would spoil the load are crossed out, "
+                     "and each wheel shows its chance to spoil the load."},
+        {"The payout", "is points x mult. Points are the cargo's values; mult is 1 per cargo, plus sets: cargo of one color, "
+                       "or a run of consecutive values. Then your items apply, in order."},
+        {"The shop", "comes between rounds. Reshape your bag of wedges, add wheels, and collect items that multiply what a delivery pays."},
+        {"Saves", "tarps cover one repeat. Nudge and Respin can rescue a load when a spin goes wrong. Nothing ever picks a result for you."},
+    };
+    float ly = y + 150;
+    for (auto& l : lines) {
+        text(Font::Display, 26, x + 60, ly, l.head, rgb(0xA3271F));
+        float used = text_wrapped(Font::Text, 24, x + 250, ly, w - 310, l.body, ui::kInk, Align::Left, 1.25f);
+        ly += std::max(46.0f, used + 16);
+    }
+    text(Font::Text, 22, x + w * 0.5f, y + h - 124, "Mouse: click a wheel to spin, click DELIVER to deliver. Keys: 1 to 6 spin, Space delivers, Esc pauses.",
+         rgb(0x6B5F70), Align::Center);
+    if (ui::button(x + w * 0.5f - 140, y + h - 96, 280, 70, "GOT IT", ui::Style::Gold, true, 32) || in.key[SDL_SCANCODE_ESCAPE] ||
+        in.key[SDL_SCANCODE_RETURN]) {
+        g.help_open = false;
+        std::fill(std::begin(in.key), std::end(in.key), false);
     }
 }
 

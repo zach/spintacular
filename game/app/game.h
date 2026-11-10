@@ -116,7 +116,7 @@ struct Game {
     bool dragging = false;
 
     // ---- menus
-    bool paused = false, settings_open = false, debug_open = false;
+    bool paused = false, settings_open = false, help_open = false, debug_open = false;
     int rig_index = 0, stake = 1;
     std::string seed_text;
     bool seed_focus = false;
@@ -178,6 +178,7 @@ void run_end_screen(Game& g);
 void collection_screen(Game& g);
 void pause_menu(Game& g);
 void settings_panel(Game& g);
+void help_panel(Game& g);
 void draw_backdrop(Game& g, bool booth);
 
 // debug_panel.cpp

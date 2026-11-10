@@ -136,6 +136,11 @@ jobs:
           dist="$RUNNER_TEMP/dist/Spintacular"
           mkdir -p "$dist"
           cp build/release/spintacular.exe build/release/*.dll "$dist/"
+          # The Visual C++ runtime, beside the game, so it runs on a PC that doesn't have it installed.
+          if [ -n "$VCToolsRedistDir" ]; then
+            cp "$(cygpath -u "$VCToolsRedistDir")"/x64/Microsoft.VC*.CRT/*.dll "$dist/" || echo "::warning::Visual C++ runtime not copied"
+          fi
+          ls -la "$dist"
           cp -r assets "$dist/assets"
           cp LICENSE "$dist/LICENSE.txt"
           cp docs/README-windows.txt "$dist/README.txt"

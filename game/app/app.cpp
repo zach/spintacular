@@ -156,10 +156,21 @@ void draw_effects(Game& g) {
     if (!g.toasts.empty()) {
         const Toast& t = g.toasts.front();
         float in = std::min(1.0f, t.t / 0.25f), out = std::min(1.0f, (4.0f - t.t) / 0.4f);
-        float x = kWidth - 520 + (1 - in * out) * 560, y = 118;
-        ui::ticket(x, y, 490, 104, ui::kGold);
-        text(Font::Display, 30, x + 24, y + 42, t.title, ui::kInk);
-        text(Font::Text, 24, x + 24, y + 80, t.body, ui::kInk);
+        if (g.screen == Screen::Round) {
+            // In a round, the free band between the wheels and the wagon.
+            float w = 860, x = (kWidth - w) * 0.5f, y = 712 - (1 - in * out) * 20;
+            push_alpha(in * out);
+            ui::ticket(x, y, w, 60, ui::kGold);
+            float tw = text_width(Font::Display, 26, t.title);
+            text(Font::Display, 26, x + 28, y + 40, t.title, ui::kInk);
+            text(Font::Text, 22, x + 44 + tw, y + 39, t.body, ui::kInk);
+            pop_alpha();
+        } else {
+            float x = kWidth - 520 + (1 - in * out) * 560, y = 118;
+            ui::ticket(x, y, 490, 104, ui::kGold);
+            text(Font::Display, 30, x + 24, y + 42, t.title, ui::kInk);
+            text(Font::Text, 24, x + 24, y + 80, t.body, ui::kInk);
+        }
     }
 }
 
@@ -626,7 +637,7 @@ bool App::frame() {
     run_cues(game);
     update_effects(game);
 
-    bool modal = game.paused || game.settings_open;
+    bool modal = game.paused || game.settings_open || game.help_open;
     in.blocked = !game.cues.empty() || modal;
 
     gfx::begin_frame();
@@ -645,13 +656,17 @@ bool App::frame() {
     }
     draw_effects(game);
     pop();
-    if (game.paused && !game.settings_open) {
+    if (game.paused && !game.settings_open && !game.help_open) {
         in.blocked = false;
         pause_menu(game);
     }
     if (game.settings_open) {
         in.blocked = false;
         settings_panel(game);
+    }
+    if (game.help_open) {
+        in.blocked = false;
+        help_panel(game);
     }
     ui::end_frame();
     present(game);

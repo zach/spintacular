@@ -3,6 +3,7 @@
 //
 //   --script tour   one run with a cautious policy; screenshots of every screen
 //   --script soak   several whole runs at instant speed, buying everything
+//   --script late   one run with the soak's policy; screenshots from round 8 on
 #include <algorithm>
 #include <set>
 
@@ -61,7 +62,7 @@ void play_round(Game& g, bool tour) {
     case Phase::Rod: act_rod(g, 0); break;
     case Phase::Trip: {
         int cargo = static_cast<int>(r.load.cargo.size());
-        int want = tour ? (r.round >= 3 ? 99 : 3 + (r.round >= 2 ? 1 : 0)) : 4;
+        int want = g.opt.script == "tour" ? (r.round >= 3 ? 99 : 3 + (r.round >= 2 ? 1 : 0)) : 4;
         int wheel = safest_wheel(g);
         bool stop = cargo >= want || (cargo >= 2 && r.spoil_chance(wheel) > 0.45 && want < 99);
         if (tour && cargo == 0 && r.load.spins == 0) {
@@ -110,7 +111,7 @@ void play_shop(Game& g, bool tour) {
         }
         if (shop_buy(g, i)) return;
     }
-    if (!tour && r.money >= r.reroll_price + 6 && r.m.rerolls < 40 && r.reroll()) {
+    if (g.opt.script != "tour" && r.money >= r.reroll_price + 6 && r.m.rerolls < 40 && r.reroll()) {
         for (auto& o : r.offers) see(g, o.id);
         return;
     }
@@ -121,9 +122,14 @@ void play_shop(Game& g, bool tour) {
 } // namespace
 
 void script_update(Game& g) {
-    bool tour = g.opt.script == "tour";
+    bool late = g.opt.script == "late";
+    if (late && g.has_run && g.run.round >= 7 && g.profile.settings.speed == 0) {
+        g.profile.settings.speed = 1;
+        apply_settings(g);
+    }
+    bool tour = g.opt.script == "tour" || (late && g.has_run && g.run.round >= 7);
     if (g.script_step == 0) { // first frame: settle the settings
-        g.profile.settings.speed = tour ? 1 : 0;
+        g.profile.settings.speed = g.opt.script == "tour" ? 1 : 0;
         apply_settings(g);
         g.script_step = 1;
         g.script_wait = 0.3f;
@@ -151,7 +157,7 @@ void script_update(Game& g) {
             g.script_step = 2;
             start_run(g, g.opt.seed ? g.opt.seed : 20261110, false);
         } else if (g.script_step == 3) {
-            if (tour) {
+            if (g.opt.script == "tour") {
                 g.screen = Screen::Collection;
                 g.script_step = 4;
             } else {
@@ -170,7 +176,7 @@ void script_update(Game& g) {
                           .c_str());
         g.has_run = false;
         g.screen = Screen::Title;
-        if (!tour && soak_runs < 6) {
+        if (g.opt.script == "soak" && soak_runs < 6) {
             g.rig_index = soak_runs % static_cast<int>(g.tables.rigs.size());
             g.profile.wins = 10; // every rig, for coverage
             start_run(g, (g.opt.seed ? g.opt.seed : 777) + soak_runs * 101, false);
@@ -187,6 +193,11 @@ void script_update(Game& g) {
     }
     if (g.script_step == 5 && g.screen == Screen::Title) {
         if (shot(g, "settings")) return;
+        g.settings_open = false;
+        g.help_open = true;
+        g.script_step = 6;
+    } else if (g.script_step == 6) {
+        if (shot(g, "how-to-play")) return;
         g.quit = true;
     }
 }

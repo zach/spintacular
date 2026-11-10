@@ -769,6 +769,7 @@ void act_deliver(Game& g) {
         return;
     }
     g.payout = d;
+    g.popups.clear();
     g.payout_open = true;
     g.payout_step = -1;
     int count = static_cast<int>(d.steps.size());
@@ -873,6 +874,14 @@ void round_screen(Game& g) {
         pop();
         if (g.spoiled_value > 0) ui::sign(54, 960, 650, ui::number(g.spoiled_value) + " lost", ui::kCream);
         pop_alpha();
+    }
+
+    // A first run gets one line of direction, in the free band above the wagon.
+    if (idle && g.profile.wins == 0 && run.round == 0 && g.toasts.empty()) {
+        const char* hint = g.shown_load.cargo.empty() ? "Click a wheel to spin it and load the wagon."
+                           : g.shown_load.cargo.size() < 3 ? "Spin again for a bigger load, but a crossed-out wedge would spoil it."
+                                                           : "Deliver to bank the load, or press your luck for more.";
+        text(Font::Display, 28, 960, 752, hint, ui::kCream, Align::Center);
     }
 
     draw_payout(g);
