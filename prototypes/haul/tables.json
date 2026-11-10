@@ -1,0 +1,470 @@
+{
+  "run": {
+    "rounds": 12,
+    "start_money": 4,
+    "max_items": 5,
+    "max_wheels": 6,
+    "max_consumables": 2,
+    "max_value": 9
+  },
+  "round": {
+    "mode": "fuel",
+    "fuel": 10,
+    "trips": 4,
+    "max_spins_per_trip": 12,
+    "deal": "random",
+    "inspections": true,
+    "inspection_every": 3
+  },
+  "scoring": {
+    "mult_per_cargo": 1,
+    "truck_size": 6,
+    "full_bonus": 1.5,
+    "quota_bonus": 2,
+    "quotas": [
+      8,
+      9,
+      10,
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      27
+    ],
+    "flush": [
+      2,
+      4,
+      7,
+      11
+    ],
+    "straight": [
+      2,
+      4,
+      7,
+      11
+    ],
+    "crate_mult": 1.5,
+    "risky_spin": 0.25
+  },
+  "targets": [
+    24,
+    45,
+    80,
+    130,
+    200,
+    320,
+    520,
+    850,
+    1400,
+    2300,
+    4000,
+    7000
+  ],
+  "income": {
+    "per_round": 5,
+    "per_unused_fuel": 1,
+    "unused_cap": 4,
+    "interest_per": 5,
+    "interest_cap": 5
+  },
+  "start": {
+    "bag": [
+      "R1",
+      "G2",
+      "B3",
+      "Y4",
+      "R5",
+      "G6",
+      "B1",
+      "Y2",
+      "R3",
+      "G4",
+      "B5",
+      "Y6"
+    ],
+    "wheels": [
+      "plain",
+      "plain",
+      "plain",
+      "plain"
+    ]
+  },
+  "shop": {
+    "offers": 5,
+    "reroll_base": 4,
+    "reroll_step": 1,
+    "sell_fraction": 0.5,
+    "kind_weights": {
+      "item": 36,
+      "wheel": 12,
+      "upgrade": 20,
+      "wedge": 16,
+      "consumable": 10,
+      "zap": 6
+    },
+    "special_wedge_share": 0.4,
+    "rarity_by_round": [
+      {
+        "from_round": 1,
+        "weights": {
+          "common": 1.0,
+          "uncommon": 0.0,
+          "rare": 0.0
+        }
+      },
+      {
+        "from_round": 3,
+        "weights": {
+          "common": 0.7,
+          "uncommon": 0.3,
+          "rare": 0.0
+        }
+      },
+      {
+        "from_round": 5,
+        "weights": {
+          "common": 0.5,
+          "uncommon": 0.35,
+          "rare": 0.15
+        }
+      },
+      {
+        "from_round": 8,
+        "weights": {
+          "common": 0.4,
+          "uncommon": 0.35,
+          "rare": 0.25
+        }
+      }
+    ],
+    "prices": {
+      "item": {
+        "common": 4,
+        "uncommon": 6,
+        "rare": 9
+      },
+      "wheel": {
+        "common": 5,
+        "uncommon": 7,
+        "rare": 10
+      },
+      "upgrade": {
+        "common": 3,
+        "uncommon": 5,
+        "rare": 7
+      },
+      "consumable": {
+        "common": 2,
+        "uncommon": 3,
+        "rare": 4
+      },
+      "wedge": 2,
+      "tarp": 3,
+      "crate": 4,
+      "zap": 2
+    }
+  },
+  "wheels": {
+    "plain": {
+      "name": "Plain Wheel",
+      "rarity": "common",
+      "size": 3,
+      "effect": "none",
+      "text": "holds 3 wedges"
+    },
+    "gilded": {
+      "name": "Gilded Wheel",
+      "rarity": "common",
+      "size": 3,
+      "effect": "gilded",
+      "amount": 3,
+      "text": "+3 points per cargo it lands"
+    },
+    "bump": {
+      "name": "Bump Wheel",
+      "rarity": "common",
+      "size": 3,
+      "effect": "bump",
+      "text": "+1 to the value of cargo it lands"
+    },
+    "wide": {
+      "name": "Wide Wheel",
+      "rarity": "uncommon",
+      "size": 5,
+      "effect": "none",
+      "text": "holds 5 wedges"
+    },
+    "express": {
+      "name": "Express Wheel",
+      "rarity": "uncommon",
+      "size": 3,
+      "effect": "express",
+      "text": "its first spin each round uses no fuel"
+    },
+    "padded": {
+      "name": "Padded Wheel",
+      "rarity": "rare",
+      "size": 3,
+      "effect": "padded",
+      "text": "a duplicate landed here is thrown out instead of spoiling the load"
+    }
+  },
+  "items": {
+    "red_ribbon": {
+      "name": "Red Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 0,
+      "amount": 1
+    },
+    "green_ribbon": {
+      "name": "Green Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 1,
+      "amount": 1
+    },
+    "blue_ribbon": {
+      "name": "Blue Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 2,
+      "amount": 1
+    },
+    "yellow_ribbon": {
+      "name": "Yellow Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 3,
+      "amount": 1
+    },
+    "high_roller": {
+      "name": "High Roller",
+      "rarity": "common",
+      "effect": "points_per_high",
+      "threshold": 5,
+      "amount": 3
+    },
+    "odd_fellow": {
+      "name": "Odd Fellow",
+      "rarity": "common",
+      "effect": "mult_per_parity",
+      "parity": 1,
+      "amount": 1
+    },
+    "even_steven": {
+      "name": "Even Steven",
+      "rarity": "common",
+      "effect": "mult_per_parity",
+      "parity": 0,
+      "amount": 1
+    },
+    "lucky_coin": {
+      "name": "Lucky Coin",
+      "rarity": "common",
+      "effect": "flat_mult",
+      "amount": 2
+    },
+    "heavy_purse": {
+      "name": "Heavy Purse",
+      "rarity": "common",
+      "effect": "flat_points",
+      "amount": 6
+    },
+    "color_guard": {
+      "name": "Color Guard",
+      "rarity": "common",
+      "effect": "mult_if_flush",
+      "min": 3,
+      "amount": 4
+    },
+    "step_counter": {
+      "name": "Step Counter",
+      "rarity": "common",
+      "effect": "mult_if_straight",
+      "min": 3,
+      "amount": 4
+    },
+    "tip_jar": {
+      "name": "Tip Jar",
+      "rarity": "common",
+      "effect": "tip",
+      "amount": 1
+    },
+    "spare_tarp": {
+      "name": "Spare Tarp",
+      "rarity": "uncommon",
+      "effect": "spare_tarp",
+      "amount": 1
+    },
+    "thermos": {
+      "name": "Thermos",
+      "rarity": "uncommon",
+      "effect": "fuel",
+      "amount": 1
+    },
+    "long_haul": {
+      "name": "Long Haul",
+      "rarity": "uncommon",
+      "effect": "mult_per_cargo_past",
+      "past": 3,
+      "amount": 3
+    },
+    "convoy": {
+      "name": "Convoy",
+      "rarity": "uncommon",
+      "effect": "xmult_if_size",
+      "min": 5,
+      "amount": 2.0
+    },
+    "prism": {
+      "name": "Prism",
+      "rarity": "uncommon",
+      "effect": "xmult_if_flush",
+      "min": 4,
+      "amount": 2.0
+    },
+    "ladder": {
+      "name": "Ladder",
+      "rarity": "uncommon",
+      "effect": "xmult_if_straight",
+      "min": 4,
+      "amount": 2.0
+    },
+    "daredevil": {
+      "name": "Daredevil",
+      "rarity": "uncommon",
+      "effect": "mult_per_risky",
+      "amount": 4
+    },
+    "insurance": {
+      "name": "Insurance",
+      "rarity": "uncommon",
+      "effect": "insurance",
+      "amount": 0.3
+    },
+    "overtime": {
+      "name": "Overtime",
+      "rarity": "uncommon",
+      "effect": "quota_bonus",
+      "amount": 3
+    },
+    "the_rod": {
+      "name": "The Rod",
+      "rarity": "uncommon",
+      "effect": "rod",
+      "amount": 1
+    },
+    "piggy_bank": {
+      "name": "Piggy Bank",
+      "rarity": "uncommon",
+      "effect": "piggy",
+      "rate": 0.3,
+      "cap": 10
+    },
+    "spendthrift": {
+      "name": "Spendthrift",
+      "rarity": "uncommon",
+      "effect": "spendthrift",
+      "rate": 0.5
+    },
+    "assembly_line": {
+      "name": "Assembly Line",
+      "rarity": "rare",
+      "effect": "scaling_xmult_quota",
+      "amount": 0.15
+    },
+    "odometer": {
+      "name": "Odometer",
+      "rarity": "rare",
+      "effect": "scaling_mult_size",
+      "min": 5,
+      "amount": 2
+    },
+    "chromatic": {
+      "name": "Chromatic Engine",
+      "rarity": "rare",
+      "effect": "xmult_per_flush_past",
+      "amount": 0.5
+    },
+    "hazard_pay": {
+      "name": "Hazard Pay",
+      "rarity": "rare",
+      "effect": "xmult_if_covered",
+      "amount": 2.5
+    },
+    "double_clutch": {
+      "name": "Double Clutch",
+      "rarity": "rare",
+      "effect": "double_clutch"
+    },
+    "big_rig": {
+      "name": "Big Rig",
+      "rarity": "rare",
+      "effect": "full_bonus",
+      "amount": 3
+    }
+  },
+  "upgrades": {
+    "recut": {
+      "name": "Recut",
+      "rarity": "common",
+      "text": "change a wedge to a value from 1 to 6"
+    },
+    "paint": {
+      "name": "Paint",
+      "rarity": "common",
+      "text": "change a wedge to a color you choose"
+    },
+    "premium": {
+      "name": "Premium",
+      "rarity": "common",
+      "text": "+1 to a wedge's value (up to 9)"
+    },
+    "wild": {
+      "name": "Wild Color",
+      "rarity": "uncommon",
+      "text": "the wedge counts as any color"
+    },
+    "sealed": {
+      "name": "Sealed",
+      "rarity": "uncommon",
+      "text": "the wedge can never spoil a load"
+    }
+  },
+  "consumables": {
+    "nudge": {
+      "name": "Nudge",
+      "rarity": "common",
+      "text": "when a spin would spoil the load, move the pointer one wedge"
+    },
+    "respin": {
+      "name": "Respin",
+      "rarity": "common",
+      "text": "when a spin would spoil the load, spin that wheel again"
+    },
+    "band": {
+      "name": "Outer Band",
+      "rarity": "uncommon",
+      "text": "for one spin, wedges that would spoil the load are half as wide"
+    }
+  },
+  "inspections": {
+    "quota_up": {
+      "name": "Weigh Station",
+      "text": "the quota is 25% higher"
+    },
+    "fuel_down": {
+      "name": "Fuel Shortage",
+      "text": "2 less fuel"
+    },
+    "no_tarps": {
+      "name": "High Winds",
+      "text": "tarps don't work"
+    }
+  }
+}
