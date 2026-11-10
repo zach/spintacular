@@ -18,10 +18,10 @@ A rig is a starting loadout, like a deck in Balatro. Each one pushes a different
 | Rig | Starts with | Pushes toward |
 | --- | --- | --- |
 | **Standard** | 12 cargo wedges (values 1–6, twice), 4 plain wheels | Anything |
-| **Tanker** | +2 fuel, but one fewer item slot | Many small, safe deliveries |
+| **Tanker** | +2 to the tank, but one fewer item slot | Longer trips |
 | **Reefer** | 2 tarp wedges, but quotas are 20% higher | Long, protected loads |
 | **Flatbed** | A truck that holds 7 values, but only 3 wheels | Full-truck bonuses |
-| **Hotshot** | 2 crate wedges and $10, but 2 less fuel | High-risk, high-multiplier loads |
+| **Hotshot** | 2 crate wedges and $10, but 2 less in the tank | High-risk, high-multiplier loads |
 | **Rainbow** | Every wedge a different value and color (1–9), but no interest | Runs of values, with few duplicates |
 
 ## Stakes
@@ -34,7 +34,7 @@ A stake is a difficulty level. Winning on one stake unlocks the next for that ri
 | 2 | Targets are 15% higher |
 | 3 | Shop prices are $1 higher |
 | 4 | Inspections happen every second round |
-| 5 | 1 less fuel each round |
+| 5 | The tank holds 1 fewer spin |
 | 6 | Spoiled loads cost $2 |
 | 7 | Quotas are 20% higher |
 | 8 | Tarps wear out: each one works only in the round it's landed |
