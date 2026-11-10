@@ -1,0 +1,103 @@
+name: Build
+
+# Verifies the Automap composition (build, smoke test, probes) on Windows and
+# Linux with the released Automap CLI, then builds the game for release, runs
+# the rules tests and the balance rubric, and packages the Windows build.
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  AUTOMAP_CLI: cli-v0.1.0
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            platform: windows-x64-msvc
+            cli: automap-0.1.0-windows-amd64.exe
+          - name: Linux
+            os: ubuntu-latest
+            platform: linux-x64-clang
+            cli: automap-0.1.0-linux-amd64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: System packages (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          # SDL3's system_dependencies fact in the map, plus a software Vulkan driver.
+          sudo apt-get update
+          sudo apt-get install -y ninja-build clang pkg-config autoconf autoconf-archive automake libtool libltdl-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libxtst-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols libegl-dev \
+            mesa-vulkan-drivers libvulkan1 libasound2-dev libpulse-dev
+          sudo apt-get install -y "libclang-rt-$(clang --version | sed -n 's/.*clang version \([0-9]*\).*/\1/p')-dev"
+      - name: MSVC developer environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Ninja (Windows)
+        if: runner.os == 'Windows'
+        run: choco install -y ninja
+      - name: vcpkg
+        run: |
+          filter=--filter=blob:none
+          [ "$RUNNER_OS" = Windows ] && filter=
+          git clone -q $filter https://github.com/microsoft/vcpkg "$RUNNER_TEMP/vcpkg"
+          if [ "$RUNNER_OS" = Windows ]; then
+            cmd //c "$(cygpath -w "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.bat")" -disableMetrics
+          else
+            "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+          echo "VCPKG_ROOT=$RUNNER_TEMP/vcpkg" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/vcpkg-archives"
+          echo "VCPKG_DEFAULT_BINARY_CACHE=$RUNNER_TEMP/vcpkg-archives" >> "$GITHUB_ENV"
+      - name: vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-archives
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('automap.lock.json') }}
+          restore-keys: vcpkg-${{ runner.os }}-
+      - name: Automap CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin" && cd "$RUNNER_TEMP/bin"
+          base="https://github.com/zach/automap/releases/download/$AUTOMAP_CLI"
+          curl -fsSL -o "${{ matrix.cli }}" "$base/${{ matrix.cli }}"
+          curl -fsSL -o sums "$base/automap-0.1.0.sha256"
+          grep " ${{ matrix.cli }}\$" sums | sha256sum -c -
+          exe=automap; [ "$RUNNER_OS" = Windows ] && exe=automap.exe
+          mv "${{ matrix.cli }}" "$exe" && chmod +x "$exe"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Automap verify
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          automap verify --json | tee "$RUNNER_TEMP/verify.json"
+          rc=${PIPESTATUS[0]}
+          mkdir -p "$RUNNER_TEMP/out"
+          cp "$RUNNER_TEMP/verify.json" "$RUNNER_TEMP/out/"
+          cp build/automap/*.log build/automap/*.json "$RUNNER_TEMP/out/" 2>/dev/null
+          cp -r evidence "$RUNNER_TEMP/out/" 2>/dev/null
+          # The tail of a failing log, where the job log can show it.
+          if [ $rc -ne 0 ]; then for f in build/automap/*.log; do echo "::group::$f"; tail -n 150 "$f"; echo "::endgroup::"; done; fi
+          exit $rc
+      - name: Keep Automap's logs and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automap-${{ matrix.platform }}
+          path: ${{ runner.temp }}/out

@@ -1,0 +1,160 @@
+{
+  "$schema": "https://github.com/zach/automap/schemas/manifest.schema.json",
+  "format": "automap-manifest/1",
+  "map_release": "map-2026.11.07",
+  "build_backend": "vcpkg",
+  "platforms": [
+    "windows-x64-msvc",
+    "linux-x64-clang"
+  ],
+  "executable": {
+    "target": "testbed",
+    "sources": [
+      "main.cpp"
+    ]
+  },
+  "slots": {
+    "audio": "miniaudio",
+    "gpu": "sdl3",
+    "image-decode": "stb-image",
+    "input": "sdl3",
+    "logging": "spdlog",
+    "math": "glm",
+    "profiling": "tracy",
+    "shader-compiler": "sdl-shadercross",
+    "tools-ui": "dear-imgui",
+    "windowing": "sdl3"
+  },
+  "variants": {
+    "dear-imgui": "docking",
+    "glm": "default",
+    "miniaudio": "default",
+    "sdl-shadercross": "default",
+    "sdl3": "default",
+    "spdlog": "default",
+    "stb-image": "default",
+    "tracy": "default"
+  },
+  "choices": {
+    "allocation": {
+      "allocator": "system"
+    },
+    "build-flags": {
+      "cxx_standard": 20
+    },
+    "diagnostics": {
+      "log": "logging-slot",
+      "profiler": "profiling-slot"
+    },
+    "math-types": {
+      "position_precision": "float"
+    }
+  },
+  "glue": {
+    "interfaces": "glue/automap",
+    "choices_header": "glue/automap/choices.h",
+    "startup": [
+      "glue/automap/context.h",
+      "glue/automap/startup.h",
+      "glue/automap/startup.cpp"
+    ],
+    "bindings": {
+      "dear-imgui/allocation": [
+        "glue/dear-imgui/imgui_allocation.cpp",
+        "glue/dear-imgui/imgui_allocation_probe.cpp"
+      ],
+      "dear-imgui/diagnostics": {
+        "not_applicable": "Dear ImGui has no runtime log or assert hook; IM_ASSERT is compile-time only."
+      },
+      "dear-imgui/math-types": [
+        "glue/dear-imgui/imgui_math_glm.h",
+        "glue/dear-imgui/imgui_math_glm_probe.cpp"
+      ],
+      "glm/math-types": {
+        "not_applicable": "GLM is the math library in the math slot: the other libraries' adapters convert to its types."
+      },
+      "miniaudio/allocation": [
+        "glue/miniaudio/miniaudio_allocation.cpp",
+        "glue/miniaudio/miniaudio_allocation_probe.cpp"
+      ],
+      "miniaudio/diagnostics": [
+        "glue/miniaudio/miniaudio_diagnostics.cpp",
+        "glue/miniaudio/miniaudio_diagnostics_probe.cpp"
+      ],
+      "sdl-shadercross/assets": [
+        "glue/sdl-shadercross/shadercross_assets.h",
+        "glue/sdl-shadercross/shadercross_assets.cpp",
+        "glue/sdl-shadercross/shadercross_assets_probe.cpp"
+      ],
+      "sdl3/allocation": [
+        "glue/sdl3/sdl3_allocation.h",
+        "glue/sdl3/sdl3_allocation.cpp",
+        "glue/sdl3/sdl3_allocation_probe.cpp"
+      ],
+      "sdl3/diagnostics": [
+        "glue/sdl3/sdl3_diagnostics.cpp",
+        "glue/sdl3/sdl3_diagnostics_probe.cpp"
+      ],
+      "spdlog/diagnostics": [
+        "glue/spdlog/spdlog_diagnostics.cpp",
+        "glue/spdlog/spdlog_diagnostics_probe.cpp"
+      ],
+      "stb-image/allocation": [
+        "glue/stb-image/stb_image_allocation.cpp",
+        "glue/stb-image/stb_image_allocation_probe.cpp"
+      ],
+      "stb-image/assets": [
+        "glue/stb-image/stb_image_assets.h",
+        "glue/stb-image/stb_image_assets.cpp",
+        "glue/stb-image/stb_image_assets_probe.cpp"
+      ],
+      "tracy/diagnostics": [
+        "glue/tracy/tracy_diagnostics.cpp",
+        "glue/tracy/tracy_diagnostics_probe.cpp"
+      ]
+    },
+    "pairings": {
+      "dear-imgui/sdl3": [
+        "glue/dear-imgui--sdl3/imgui_sdl3_gpu.h",
+        "glue/dear-imgui--sdl3/imgui_sdl3_gpu.cpp",
+        "glue/dear-imgui--sdl3/imgui_sdl3_gpu_probe.cpp"
+      ],
+      "sdl-shadercross/sdl3": [
+        "glue/sdl-shadercross--sdl3/shadercross_sdl3.h",
+        "glue/sdl-shadercross--sdl3/shadercross_sdl3.cpp",
+        "glue/sdl-shadercross--sdl3/shadercross_sdl3_probe.cpp"
+      ]
+    },
+    "setup": {
+      "dear-imgui": [
+        "glue/dear-imgui/imgui_setup.h",
+        "glue/dear-imgui/imgui_setup.cpp",
+        "glue/dear-imgui/imgui_build_flags_probe.cpp"
+      ],
+      "glm": {
+        "not_applicable": "The glm recipe ships no glue."
+      },
+      "miniaudio": [
+        "glue/miniaudio/miniaudio_setup.h",
+        "glue/miniaudio/miniaudio_setup.cpp"
+      ],
+      "sdl-shadercross": [
+        "glue/sdl-shadercross/shadercross_setup.h",
+        "glue/sdl-shadercross/shadercross_setup.cpp"
+      ],
+      "sdl3": [
+        "glue/sdl3/sdl3_setup.h",
+        "glue/sdl3/sdl3_setup.cpp"
+      ],
+      "spdlog": {
+        "not_applicable": "The spdlog recipe ships no glue."
+      },
+      "stb-image": {
+        "not_applicable": "The stb-image recipe ships no glue."
+      },
+      "tracy": {
+        "not_applicable": "The tracy recipe ships no glue."
+      }
+    }
+  }
+}

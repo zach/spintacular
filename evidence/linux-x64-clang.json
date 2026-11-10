@@ -1,0 +1,197 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "predicate": {
+    "conditions": {
+      "build_type": "Debug",
+      "compiler": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+      "environment": {
+        "AUTOMAP_MINIAUDIO_BACKEND": "null",
+        "SDL_VIDEO_DRIVER": "offscreen"
+      },
+      "sanitizers": {}
+    },
+    "level": "none",
+    "map_release": "map-2026.11.07",
+    "platform": "linux-x64-clang",
+    "produced_at": "2026-11-10T07:33:04Z",
+    "results": [
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "dear-imgui",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "miniaudio",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "sdl3",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "stb-image",
+        "status": "not-applicable",
+        "reason": "stb_image's hooks are compile-time macros in its implementation: no stb_image code runs without them."
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "dear-imgui",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "miniaudio",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "sdl3",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "stb-image",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "assets.reads-through-interface",
+        "library": "sdl-shadercross",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "assets.reads-through-interface",
+        "library": "stb-image",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "assets.output-identical",
+        "library": "sdl-shadercross",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "assets.output-identical",
+        "library": "stb-image",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "build-flags.abi-defines-match",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "build-flags.language-settings-agree",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "dear-imgui",
+        "status": "not-applicable",
+        "reason": "Dear ImGui has no runtime log or assert hook; IM_ASSERT is compile-time only."
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "miniaudio",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "sdl3",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "spdlog",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "tracy",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "lifecycle.init-order",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "lifecycle.shutdown-reverse",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "math-types.precision-agrees",
+        "status": "not-applicable",
+        "reason": "No library in the composition exposes world positions."
+      },
+      {
+        "rule": "math-types.adapters-round-trip",
+        "library": "dear-imgui",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "math-types.adapters-round-trip",
+        "library": "glm",
+        "status": "not-applicable",
+        "reason": "GLM is the math library in the math slot: the other libraries' adapters convert to its types."
+      },
+      {
+        "rule": "platform.targets-supported",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "dear-imgui--sdl3.events-forwarded",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "sdl-shadercross--sdl3.formats-match-backend",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      },
+      {
+        "rule": "sdl-shadercross--sdl3.reflection-matches",
+        "status": "unverifiable",
+        "reason": "No probe ran: the composition reached none."
+      }
+    ],
+    "subject_detail": {
+      "lock_hash": "sha256:ab9533ad3102f91796a51ea4c28caee66c8c515ac7a19d3824e900ea333aedd3"
+    },
+    "subject_kind": "composition",
+    "verifier": {
+      "id": "local",
+      "kind": "developer-local",
+      "signed": false
+    }
+  },
+  "predicateType": "https://github.com/zach/automap/evidence/v1",
+  "subject": [
+    {
+      "digest": {
+        "sha256": "59500480c2d2183de7ecdf7f48f7cf19aaf5fb621ce7d4b255d99e40efadeff0"
+      },
+      "name": "automap.lock.json"
+    }
+  ]
+}
