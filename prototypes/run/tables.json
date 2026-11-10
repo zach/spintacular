@@ -1,0 +1,575 @@
+{
+  "run": {
+    "rounds": 12,
+    "spins_per_round": 5,
+    "start_money": 4,
+    "max_items": 5,
+    "max_wheels": 7,
+    "max_consumables": 2,
+    "blank_wedges": true
+  },
+  "scoring": {
+    "layer": "wall",
+    "path_rows": 3,
+    "holder_sizes": [
+      3,
+      4,
+      5
+    ],
+    "floor_penalties": [
+      1,
+      1,
+      2,
+      2,
+      2,
+      3,
+      3
+    ],
+    "wall_mult_per_point": 1,
+    "wall_passive_mult_per_marker": 0,
+    "wall_aware_bots": true
+  },
+  "targets": [
+    30,
+    52,
+    86,
+    135,
+    211,
+    342,
+    586,
+    1061,
+    2072,
+    3740,
+    8989,
+    28080
+  ],
+  "income": {
+    "per_round": 5,
+    "per_unused_spin": 1,
+    "interest_per": 5,
+    "interest_cap": 5
+  },
+  "start": {
+    "bag_values": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "wheels": [
+      "plain",
+      "plain",
+      "plain",
+      "plain"
+    ]
+  },
+  "patterns": {
+    "color": {
+      "3": [
+        10,
+        2
+      ],
+      "4": [
+        25,
+        4
+      ],
+      "5": [
+        60,
+        10
+      ]
+    },
+    "value": {
+      "3": [
+        20,
+        3
+      ],
+      "4": [
+        50,
+        6
+      ],
+      "5": [
+        120,
+        15
+      ]
+    },
+    "straight": {
+      "3": [
+        25,
+        3
+      ],
+      "4": [
+        60,
+        7
+      ],
+      "5": [
+        150,
+        14
+      ]
+    },
+    "color_straight": {
+      "3": [
+        60,
+        6
+      ],
+      "4": [
+        150,
+        15
+      ],
+      "5": [
+        400,
+        30
+      ]
+    }
+  },
+  "shop": {
+    "offers": 4,
+    "reroll_base": 3,
+    "reroll_step": 1,
+    "sell_fraction": 0.5,
+    "kind_weights": {
+      "item": 38,
+      "wheel": 14,
+      "upgrade": 20,
+      "wedge": 10,
+      "consumable": 10,
+      "zap": 8
+    },
+    "rarity_by_round": [
+      {
+        "from_round": 1,
+        "weights": {
+          "common": 1.0,
+          "uncommon": 0.0,
+          "rare": 0.0
+        }
+      },
+      {
+        "from_round": 3,
+        "weights": {
+          "common": 0.7,
+          "uncommon": 0.3,
+          "rare": 0.0
+        }
+      },
+      {
+        "from_round": 5,
+        "weights": {
+          "common": 0.5,
+          "uncommon": 0.35,
+          "rare": 0.15
+        }
+      },
+      {
+        "from_round": 8,
+        "weights": {
+          "common": 0.45,
+          "uncommon": 0.3,
+          "rare": 0.25
+        }
+      }
+    ],
+    "prices": {
+      "item": {
+        "common": 4,
+        "uncommon": 6,
+        "rare": 9
+      },
+      "wheel": {
+        "common": 5,
+        "uncommon": 7,
+        "rare": 10
+      },
+      "upgrade": {
+        "common": 3,
+        "uncommon": 5,
+        "rare": 7
+      },
+      "wedge": 2,
+      "zap": 2,
+      "consumable": {
+        "common": 2,
+        "uncommon": 3,
+        "rare": 4
+      }
+    }
+  },
+  "wheels": {
+    "plain": {
+      "name": "Plain Wheel",
+      "rarity": "common",
+      "size": 4,
+      "effect": "none"
+    },
+    "bump": {
+      "name": "Bump Wheel",
+      "rarity": "common",
+      "size": 4,
+      "effect": "bump",
+      "text": "+1 to its dice's values (max 6)"
+    },
+    "gilded": {
+      "name": "Gilded Wheel",
+      "rarity": "common",
+      "size": 4,
+      "effect": "gilded",
+      "amount": 4,
+      "text": "+4 points per die it adds"
+    },
+    "wide": {
+      "name": "Wide Wheel",
+      "rarity": "uncommon",
+      "size": 6,
+      "effect": "none"
+    },
+    "heavy": {
+      "name": "Heavy Wheel",
+      "rarity": "uncommon",
+      "size": 4,
+      "effect": "heavy",
+      "text": "its dice count double in color lines and runs"
+    },
+    "twin": {
+      "name": "Twin Wheel",
+      "rarity": "rare",
+      "size": 4,
+      "effect": "twin",
+      "text": "lands twice each spin"
+    }
+  },
+  "items": {
+    "red_ribbon": {
+      "name": "Red Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 0,
+      "amount": 2
+    },
+    "green_ribbon": {
+      "name": "Green Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 1,
+      "amount": 2
+    },
+    "blue_ribbon": {
+      "name": "Blue Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 2,
+      "amount": 2
+    },
+    "yellow_ribbon": {
+      "name": "Yellow Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_color",
+      "color": 3,
+      "amount": 2
+    },
+    "high_roller": {
+      "name": "High Roller",
+      "rarity": "common",
+      "effect": "points_per_high",
+      "threshold": 5,
+      "amount": 8
+    },
+    "odd_fellow": {
+      "name": "Odd Fellow",
+      "rarity": "common",
+      "effect": "mult_per_parity",
+      "parity": 1,
+      "amount": 1
+    },
+    "even_steven": {
+      "name": "Even Steven",
+      "rarity": "common",
+      "effect": "mult_per_parity",
+      "parity": 0,
+      "amount": 1
+    },
+    "run_starter": {
+      "name": "Run Starter",
+      "rarity": "common",
+      "effect": "mult_per_pattern",
+      "family": "color",
+      "amount": 4
+    },
+    "pair_finder": {
+      "name": "Pair Finder",
+      "rarity": "common",
+      "effect": "mult_per_pattern",
+      "family": "value",
+      "amount": 6
+    },
+    "step_counter": {
+      "name": "Step Counter",
+      "rarity": "common",
+      "effect": "mult_per_pattern",
+      "family": "straight",
+      "amount": 6
+    },
+    "lucky_coin": {
+      "name": "Lucky Coin",
+      "rarity": "common",
+      "effect": "flat_mult",
+      "amount": 2
+    },
+    "heavy_purse": {
+      "name": "Heavy Purse",
+      "rarity": "common",
+      "effect": "flat_points",
+      "amount": 15
+    },
+    "prism": {
+      "name": "Prism",
+      "rarity": "uncommon",
+      "effect": "xmult_if_pattern",
+      "family": "color",
+      "min": 4,
+      "amount": 2.5
+    },
+    "mirror_ball": {
+      "name": "Mirror Ball",
+      "rarity": "uncommon",
+      "effect": "xmult_if_pattern",
+      "family": "value",
+      "min": 3,
+      "amount": 2.5
+    },
+    "ladder": {
+      "name": "Ladder",
+      "rarity": "uncommon",
+      "effect": "xmult_if_pattern",
+      "family": "straight",
+      "min": 3,
+      "amount": 2.0
+    },
+    "the_rod": {
+      "name": "The Rod",
+      "rarity": "common",
+      "effect": "rod",
+      "amount": 4
+    },
+    "piggy_bank": {
+      "name": "Piggy Bank",
+      "rarity": "uncommon",
+      "effect": "piggy",
+      "rate": 0.3,
+      "cap": 10
+    },
+    "spendthrift": {
+      "name": "Spendthrift",
+      "rarity": "uncommon",
+      "effect": "spendthrift",
+      "rate": 0.5
+    },
+    "chromatic": {
+      "name": "Chromatic Engine",
+      "rarity": "rare",
+      "effect": "xmult_longest",
+      "family": "color",
+      "amount": 1.0
+    },
+    "assembly_line": {
+      "name": "Assembly Line",
+      "rarity": "rare",
+      "effect": "scaling_xmult",
+      "family": "color",
+      "min": 4,
+      "amount": 0.4
+    },
+    "echo_chamber": {
+      "name": "Echo Chamber",
+      "rarity": "rare",
+      "effect": "scaling_mult",
+      "family": "value",
+      "amount": 3
+    },
+    "stairway": {
+      "name": "Stairway",
+      "rarity": "rare",
+      "effect": "scaling_xmult",
+      "family": "straight",
+      "min": 3,
+      "amount": 0.3
+    },
+    "jackpot": {
+      "name": "Jackpot",
+      "rarity": "rare",
+      "effect": "xmult_if_pattern",
+      "family": "color_straight",
+      "min": 3,
+      "amount": 5.0
+    },
+    "high_ribbon": {
+      "name": "High Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_value",
+      "values": [
+        5,
+        6
+      ],
+      "amount": 2
+    },
+    "low_ribbon": {
+      "name": "Low Ribbon",
+      "rarity": "common",
+      "effect": "mult_per_value",
+      "values": [
+        1,
+        2
+      ],
+      "amount": 2
+    },
+    "spare_tarp": {
+      "name": "Spare Tarp",
+      "rarity": "uncommon",
+      "effect": "spare_tarp",
+      "amount": 1,
+      "layers": [
+        "haul"
+      ]
+    },
+    "overtime": {
+      "name": "Overtime",
+      "rarity": "rare",
+      "effect": "overtime",
+      "amount": 0.5,
+      "layers": [
+        "haul"
+      ]
+    }
+  },
+  "upgrades": {
+    "range": {
+      "name": "Value Range",
+      "rarity": "common",
+      "text": "value rolls within 1 of its value"
+    },
+    "wild": {
+      "name": "Wild Color",
+      "rarity": "uncommon",
+      "text": "die counts as any color"
+    },
+    "second_die": {
+      "name": "Second Die",
+      "rarity": "uncommon",
+      "text": "adds two dice"
+    },
+    "paint": {
+      "name": "Paint",
+      "rarity": "common",
+      "text": "changes the wedge to a color you choose"
+    },
+    "recut": {
+      "name": "Recut",
+      "rarity": "common",
+      "text": "changes the wedge to a value you choose"
+    }
+  },
+  "consumables": {
+    "respin": {
+      "name": "Respin",
+      "rarity": "common",
+      "text": "spin again and keep the new result"
+    },
+    "nudge": {
+      "name": "Nudge",
+      "rarity": "common",
+      "text": "move one wheel's pointer one wedge"
+    },
+    "band": {
+      "name": "Outer Band",
+      "rarity": "uncommon",
+      "text": "next spin, wedges of one color are three times as wide"
+    }
+  },
+  "haul": {
+    "trips_per_round": 4,
+    "truck_size": 6,
+    "mult_per_cargo": 0.5,
+    "quota_bonus": 2,
+    "full_bonus": 1.5,
+    "quotas": [
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      25,
+      28,
+      32,
+      36
+    ],
+    "special_wedge_share": 0.35,
+    "prices": {
+      "tarp": 3,
+      "crate": 4
+    },
+    "max_value": 9,
+    "patterns": {
+      "color": {
+        "3": [
+          10,
+          2
+        ],
+        "4": [
+          25,
+          4
+        ],
+        "5": [
+          60,
+          8
+        ]
+      },
+      "value": {
+        "3": [
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0
+        ]
+      },
+      "straight": {
+        "3": [
+          5,
+          1
+        ],
+        "4": [
+          15,
+          2
+        ],
+        "5": [
+          30,
+          4
+        ]
+      },
+      "color_straight": {
+        "3": [
+          40,
+          4
+        ],
+        "4": [
+          100,
+          10
+        ],
+        "5": [
+          250,
+          20
+        ]
+      }
+    },
+    "wedges_stay": true,
+    "max_spins_per_trip": 12
+  }
+}
