@@ -139,7 +139,7 @@ select, input { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px
 
   <section class="panel"><h2>How it works</h2>
     <div class="note">Click a wheel to spin it. What it lands on goes in the truck. <b>No repeats:</b> a wedge that lands twice in one trip, or cargo with a value already in the truck, spoils the whole load. Wedges marked with a cross would spoil it, and each wheel shows its chance.
-    A delivery pays points × mult: every cargo adds its value in points and 1 mult, so bigger loads pay much more. Three or more of one color, or a run of consecutive values, add mult. Reach the quota for double. Six different values is a full truck. Miss a round's score and the run ends.</div></section>
+    Every cargo past the third in a delivery also pays $1. A delivery pays points × mult: every cargo adds its value in points and 1 mult, so bigger loads pay much more. Three or more of one color, or a run of consecutive values, add mult. Reach the quota for double. Six different values is a full truck. Miss a round's score and the run ends.</div></section>
 </div>
 <script>
 const BASE = /*TABLES*/;
@@ -324,7 +324,8 @@ async function deliver(why) {
   const L = S.load, r = score(L, true), lines = (why ? [why] : []).concat(r.steps);
   $("steps").innerHTML = "";
   for (const s of lines) { add(s); await wait(260); }
-  add(`Delivered: ${r.total}`, "big"); S.total += r.total;
+  const freight = (T.income.freight_bonus || 0) * Math.max(0, L.cargo.length - (T.income.freight_past || 3)); S.money += freight;
+  add("Delivered: " + r.total + (freight ? "  ·  freight bonus +$" + freight : ""), "big"); S.total += r.total;
   if (S.rods > 0 && L.wedges.some(w => S.bag.includes(w))) {
     const c = await ask("The Rod: remove one delivered wedge from your bag for good?", [...L.wedges.filter(w => S.bag.includes(w)).map(w => [label(w), w]), ["Keep them all", null]]);
     if (c) { S.rods--; S.bag.splice(S.bag.indexOf(c), 1); S.loads.forEach(ws => { const i = ws.indexOf(c); if (i >= 0) ws[i] = newWedge("blank"); }); }

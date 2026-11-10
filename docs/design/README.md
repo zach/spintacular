@@ -9,7 +9,7 @@ It sits in the line of Luck be a Landlord, Balatro and CloverPit (`../research/0
 - **A run** is 12 rounds. Miss a round's score target and the run is over.
 - **A round** is 4 trips. Each trip, you spin wheels to load cargo into your truck, then deliver it for points.
 - **The catch:** no repeats. Land a cargo value you already hold, or the same wedge twice, and the load spoils.
-- **The pull:** a load twice as big pays about four times as much, and a load that reaches the round's quota pays double.
+- **The pull:** a load twice as big pays about four times as much, a load that reaches the round's quota pays double, and every cargo past the third pays a dollar.
 - **The shop** comes between rounds. You reshape your bag of wedges, add wheels, and collect items that multiply what a delivery pays.
 - **The arc:** round 1 is almost impossible to lose. The last rounds are almost impossible to win without a point factory.
 
@@ -53,6 +53,5 @@ Research is in `../research/`. The prototypes are in `../../prototypes/`: `haul/
 
 - **Tested by simulation:** the haul's rules, the round structure, the economy's numbers and the starter content. Together they pass all ten checks of the session rubric. The six rigs and the eight stakes are tested too (`../research/07-haul-design-experiments.md`).
 - **Checked by simulation as well:** seeds (the same seed replays the same run, and rerolling the shop changes neither the deal nor the spins) and the starter content set (`progression.md`).
-- **Built to be played, not yet played by people:** the browser prototype (`../../prototypes/web/`) puts the presentation rules on screen: every wedge face up, each wheel's chance to spoil, the quota line, and step-by-step payouts. It has no sound, and no art beyond shapes and color.
-- **Specified only:** the collection screen and the daily haul (`progression.md`).
+- **Played by its author, not yet by anyone else:** the opening of a run was played by hand, which found one gap and led to the freight bonus (`../research/07-haul-design-experiments.md`). The browser prototype (`../../prototypes/web/`) puts the presentation rules on screen: every wedge face up, each wheel's chance to spoil, the quota line, and step-by-step payouts. It also has the start screen, rigs, stakes, the daily haul, unlocks and the collection. It has no sound, and no art beyond shapes and color.
 - **Not testable by simulation:** whether it's fun. The rubric's playtest scorecard is for that, and the browser prototype is the thing to put in front of a person.

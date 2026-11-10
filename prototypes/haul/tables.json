@@ -53,23 +53,25 @@
   "targets": [
     24,
     42,
-    70,
-    100,
-    145,
-    215,
-    320,
-    495,
-    750,
-    1150,
-    1820,
-    2900
+    71,
+    105,
+    155,
+    230,
+    345,
+    545,
+    835,
+    1300,
+    2100,
+    3350
   ],
   "income": {
     "per_round": 5,
     "per_unused_fuel": 1,
     "unused_cap": 4,
     "interest_per": 5,
-    "interest_cap": 5
+    "interest_cap": 5,
+    "freight_bonus": 1,
+    "freight_past": 3
   },
   "start": {
     "bag": [

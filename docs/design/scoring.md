@@ -65,6 +65,8 @@ If none applies, the load spoils.
 
 For example, a load of R2, G3, B4 is 9 points × (3 for three cargo + 2 for a run of three) = 45. If the quota is 9 or less, it pays 90.
 
+A delivery also pays money: $1 for each cargo past the third (`economy.md`).
+
 ## The quota
 
 Each round sets a quota, and a load whose points reach it pays double. The quota does three jobs:

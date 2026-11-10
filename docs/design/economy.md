@@ -55,9 +55,12 @@ Rarity also sets *when* things appear. The first shops offer only common, simple
 | --- | --- |
 | Winning a round | $5 |
 | Each trip left unused | $2, up to $4 |
+| Freight bonus | $1 for each cargo past the third in a delivery |
 | Interest | $1 for every $5 held, up to $5 |
 
 A run starts with $4. Interest is capped, as in Balatro, so saving can't snowball.
+
+The freight bonus is there so that every trip has a reason to go one further. In the early rounds one good load beats the target several times over, and score past the target is worth nothing. Without the bonus there was no reason to press on once the round was won (`docs/research/07-haul-design-experiments.md`). With it, a fourth, fifth and sixth cargo each pay a dollar, at the usual risk of losing the load.
 
 ## Tuning
 

@@ -1,6 +1,6 @@
 # Progression: runs, rigs and stakes
 
-How a run is structured, and what changes from one run to the next. Rounds, inspections, rigs and stakes are in the prototype and tested by simulation. Unlocks, the collection, seeds and the daily haul are design to build.
+How a run is structured, and what changes from one run to the next. Rounds, inspections, rigs and stakes are in the prototype and tested by simulation. Seeds are checked by a self-test. Unlocks, the collection and the daily haul are in the browser prototype (`prototypes/web/`), with a simplified unlock rule.
 
 ## A run
 

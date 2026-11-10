@@ -403,10 +403,14 @@ def play_round(run, player, log=None, endless=False):
                 trace = [] if log else None
                 value = score(run, L, commit=True, trace=trace)
                 total += value
+                inc = t["income"]
+                freight = inc.get("freight_bonus", 0) * max(0, len(L.cargo) - inc.get("freight_past", 3))
+                run.money += freight
+                run.m["freight"] += freight
                 run.m["deliveries"] += 1
                 run.m["delivered_cargo"] += len(L.cargo)
                 if log:
-                    log(f"  DELIVER {' | '.join(trace)}   (round {total}/{target})")
+                    log(f"  DELIVER {' | '.join(trace)}   (round {total}/{target})" + (f"  freight bonus +${freight}" if freight else ""))
                 if rods > 0:
                     victim = player.zap_choice(run, [w for w in landed if w in run.bag])
                     if victim is not None:
@@ -542,6 +546,7 @@ class Player:
     """Buys nothing. Presses its luck by expected value, one spin ahead."""
     name = "passive"
     caution = 1.0
+    freight_risk = 0.0      # the most risk it takes for a freight bonus once the round is already won
 
     def __init__(self, rng):
         self.rng = rng
@@ -576,7 +581,8 @@ class Player:
         """Returns the wheel to spin next, or None to deliver."""
         now = score(run, L) if L.cargo else 0
         need = target - total
-        if L.cargo and now >= need and self.caution > 0:
+        free_money = run.t["income"].get("freight_bonus", 0) > 0 and len(L.cargo) >= run.t["income"].get("freight_past", 3)
+        if L.cargo and now >= need and self.caution > 0 and not free_money:
             return None
         ins = sum(i["amount"] for i in run.has("insurance"))
         best, best_ev, best_p = None, -1.0, 0.0
@@ -603,6 +609,8 @@ class Player:
                 best, best_ev, best_p = wi, ev, p
         if not L.cargo or self.caution == 0:
             return best
+        if now >= need:                       # the round is won on delivery: press on only for the freight bonus
+            return best if best_p <= self.freight_risk else None
         if fuel is None:                      # trips: delivering doesn't free up spins
             return best if best_ev > self.caution * now else None
         fresh = self.fresh(run, loads)

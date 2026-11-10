@@ -183,3 +183,33 @@ Both lines now have more than a point of headroom. The rig and stake tables abov
 A smaller pool makes a build's pieces easier to find, so the first runs are easier for a player who builds and no easier for one who doesn't.
 
 **Browser prototype.** `prototypes/web/` is a playable version built from the same tables. An automated player ran it through several runs, rounds and shops with no script errors, and the page fits a 400-pixel-wide screen. No person has played it yet.
+
+## Playing it by hand, and the freight bonus
+
+**What was played.** The author played the opening of a run in the text prototype (seed 42): round 1, the first shop, and two trips of round 2, choosing every spin. This is one session by the designer, not a playtest by a new player.
+
+**What it showed [Inference].**
+
+- **The risk reads clearly.** With every wedge face up, repeats in brackets and a percentage on each wheel, each choice took a glance. A mistake (spinning a 33% wheel when a 0% wheel was open) was plainly the player's own.
+- **Losing a load stings.** In round 2 a three-cargo load worth 168 was pressed on a 67% wheel and lost.
+- **The first shop was a real choice:** a flat Lucky Coin, or two Paints toward a color build.
+- **The early rounds had no reason to press on.** Round 1's load scored 112 against a target of 24, and round 2's 168 against 42. Score past the target is worth nothing, so once a load beats the target the only sensible move is to deliver. The game's central decision was switched off for the first few rounds. Bots could not show this: they deliver as soon as the round is won.
+
+**The fix, tested [Verified by simulation].** A freight bonus pays $1 for each cargo past the third in a delivery, so a bigger load is always worth something. Bots take it only when a spin can't spoil the load. Each variant was calibrated with 500 runs per bot:
+
+| Variant | Target scale | Best engine | No engine | Color focus | Cargo per delivery | Checks |
+| --- | --- | --- | --- | --- | --- | --- |
+| No freight bonus | 1.12 | 39.8% | 1.6% | 29% | 3.9 | 9 |
+| Freight bonus of $1 | 1.16 | 43.0% | 1.6% | 40% | 4.1 | 10 |
+
+The bonus is in the final tables, with targets raised to match: 24, 42, 71, 105, 155, 230, 345, 545, 835, 1,300, 2,100, 3,350. A confirming run of 1,000 passes all ten checks:
+
+- **No-engine play:** wins 1.6% at most.
+- **The best engine:** wins 42.6%.
+- **Each focus's best bot:** color 38%, straight 41%, safety 40%, quota 43%, adaptive 41%.
+
+The bonus also lifts the color build, the weakest focus, to the level of the others.
+
+## The quota level: a decision
+
+The quota list stays at 10, 12, 13, 15, 17, 19, 21, 23, 26, 29, 32, 36. Bots reach it on about 78% of deliveries. Raising it 25% makes it a harder stretch (45%) but costs point factories about 7 points of win rate, and the freight bonus now supplies the reason to go one further in every trip. The quota's job is to reward better loads, which it does at this level. It remains the first dial to turn if playtests find the quota too easy to matter.
