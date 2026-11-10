@@ -1,0 +1,15 @@
+{
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/zach/automap",
+      "reference": "registry",
+      "baseline": "e751a641825c844d6543ec47e21c20be27d92421",
+      "packages": [
+        "miniaudio",
+        "sdl3-shadercross",
+        "sdl3"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "id": "stb-truetype",
+  "name": "stb_truetype",
+  "license": {
+    "spdx": "MIT OR Unlicense",
+    "class": "permissive"
+  },
+  "contribution_policy": {
+    "ai_generated_contributions": "not-applicable",
+    "source": "An in-repo wrapper target; the header is upstream's, from the stb port."
+  },
+  "slots": [
+    "text"
+  ],
+  "source": {
+    "kind": "path",
+    "path": "third_party/stb-truetype"
+  },
+  "versions": [
+    {
+      "version": "2026-08-02",
+      "released": "2026-08-02",
+      "cmake": {
+        "package": "Stb",
+        "targets": [
+          "stb::truetype"
+        ]
+      },
+      "variants": [
+        {
+          "name": "default",
+          "build_options": {},
+          "description": "stb_truetype from the stb port that the public map's stb-image already brings in. third_party/stb-truetype defines the stb::truetype target over the port's header, and the allocation binding compiles the implementation once."
+        }
+      ],
+      "facts": {
+        "allocation": {
+          "hook_style": "build-flag-gated",
+          "hooks": [
+            {
+              "api": "STBTT_malloc",
+              "signature": "void*(size_t size, void* userdata)"
+            },
+            {
+              "api": "STBTT_free",
+              "signature": "void(void* block, void* userdata)"
+            }
+          ],
+          "aligned": false,
+          "install_before": "the translation unit that defines STB_TRUETYPE_IMPLEMENTATION compiles: the macros are read there",
+          "query": null
+        },
+        "lifecycle": {
+          "init_steps": [],
+          "shutdown_steps": [],
+          "reloadable": true
+        },
+        "build-flags": {
+          "abi_defines": [],
+          "self_check": null,
+          "min_language_standard": "C99",
+          "exceptions": "never-thrown",
+          "rtti": "no-constraint",
+          "consumer_flags": "Exactly one translation unit defines STB_TRUETYPE_IMPLEMENTATION, with the allocation macros; the others include stb_truetype.h for its declarations."
+        },
+        "platform": {
+          "targets": [
+            "windows-x64-msvc",
+            "linux-x64-clang"
+          ],
+          "headless": "",
+          "web": true
+        }
+      }
+    }
+  ]
+}

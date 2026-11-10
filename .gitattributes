@@ -1,0 +1,5 @@
+# Keep line endings as committed on every platform: Automap pins in-repo
+# libraries by the bytes of their files, and a CRLF checkout changes them.
+* text=auto eol=lf
+*.ttf binary
+*.png binary

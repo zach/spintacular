@@ -1,0 +1,7 @@
+{
+  "id": "text",
+  "description": "Rasterizes fonts into glyph bitmaps for on-screen text.",
+  "examples": [
+    "stb-truetype"
+  ]
+}

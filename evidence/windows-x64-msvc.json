@@ -1,0 +1,179 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "predicate": {
+    "conditions": {
+      "build_type": "Debug",
+      "compiler": "Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64",
+      "environment": {
+        "AUTOMAP_MINIAUDIO_BACKEND": "null"
+      },
+      "runner_image": "win25-vs2026 20261103.298.1",
+      "sanitizers": {}
+    },
+    "level": "probed",
+    "map_release": "map-2026.11.07",
+    "platform": "windows-x64-msvc",
+    "produced_at": "2026-11-10T08:41:48Z",
+    "results": [
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "dear-imgui",
+        "status": "pass"
+      },
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "miniaudio",
+        "status": "pass"
+      },
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "sdl3",
+        "status": "pass"
+      },
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "stb-image",
+        "status": "not-applicable",
+        "reason": "stb_image's hooks are compile-time macros in its implementation: no stb_image code runs without them."
+      },
+      {
+        "rule": "allocation.hooks-before-first-allocation",
+        "library": "stb-truetype",
+        "status": "not-applicable",
+        "reason": "stb_truetype's hooks are compile-time macros in its implementation: no stb_truetype code runs without them."
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "dear-imgui",
+        "status": "pass"
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "miniaudio",
+        "status": "pass"
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "sdl3",
+        "status": "pass"
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "stb-image",
+        "status": "pass"
+      },
+      {
+        "rule": "allocation.routed-through-facade",
+        "library": "stb-truetype",
+        "status": "pass"
+      },
+      {
+        "rule": "assets.reads-through-interface",
+        "library": "sdl-shadercross",
+        "status": "pass"
+      },
+      {
+        "rule": "assets.reads-through-interface",
+        "library": "stb-image",
+        "status": "pass"
+      },
+      {
+        "rule": "assets.output-identical",
+        "library": "sdl-shadercross",
+        "status": "pass"
+      },
+      {
+        "rule": "assets.output-identical",
+        "library": "stb-image",
+        "status": "pass"
+      },
+      {
+        "rule": "build-flags.abi-defines-match",
+        "status": "pass"
+      },
+      {
+        "rule": "build-flags.language-settings-agree",
+        "status": "pass"
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "dear-imgui",
+        "status": "not-applicable",
+        "reason": "Dear ImGui has no runtime log or assert hook; IM_ASSERT is compile-time only."
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "miniaudio",
+        "status": "pass"
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "sdl3",
+        "status": "pass"
+      },
+      {
+        "rule": "diagnostics.routed-through-facade",
+        "library": "spdlog",
+        "status": "pass"
+      },
+      {
+        "rule": "lifecycle.init-order",
+        "status": "pass"
+      },
+      {
+        "rule": "lifecycle.shutdown-reverse",
+        "status": "pass"
+      },
+      {
+        "rule": "math-types.precision-agrees",
+        "status": "not-applicable",
+        "reason": "No library in the composition exposes world positions."
+      },
+      {
+        "rule": "math-types.adapters-round-trip",
+        "library": "dear-imgui",
+        "status": "pass"
+      },
+      {
+        "rule": "math-types.adapters-round-trip",
+        "library": "glm",
+        "status": "not-applicable",
+        "reason": "GLM is the math library in the math slot: the other libraries' adapters convert to its types."
+      },
+      {
+        "rule": "platform.targets-supported",
+        "status": "pass"
+      },
+      {
+        "rule": "dear-imgui--sdl3.events-forwarded",
+        "status": "pass"
+      },
+      {
+        "rule": "sdl-shadercross--sdl3.formats-match-backend",
+        "status": "pass"
+      },
+      {
+        "rule": "sdl-shadercross--sdl3.reflection-matches",
+        "status": "pass"
+      }
+    ],
+    "subject_detail": {
+      "lock_hash": "sha256:5d8576cf2d7f3523f0eaeb571425012bc748ef9ad0b21bf8242068e74e39aeca"
+    },
+    "subject_kind": "composition",
+    "verifier": {
+      "id": "https://github.com/zach/spintacular/.github/workflows/build.yml@refs/heads/claude/gallant-hypatia-y25sjs",
+      "kind": "developer-ci",
+      "signed": false
+    }
+  },
+  "predicateType": "https://github.com/zach/automap/evidence/v1",
+  "subject": [
+    {
+      "digest": {
+        "sha256": "61d86e82162dcbd261687d42693efc3f16f7571953171b6f9e2a94c7060a480b"
+      },
+      "name": "automap.lock.json"
+    }
+  ]
+}

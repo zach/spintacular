@@ -1,0 +1,27 @@
+{
+  "kind": "library",
+  "subject": {
+    "library": "nlohmann-json"
+  },
+  "applies_to": {
+    "nlohmann-json": {
+      "versions": [
+        "3.12.0"
+      ],
+      "variants": [
+        "default"
+      ]
+    }
+  },
+  "reference_glue": [
+    {
+      "path": "nlohmann-json/nlohmann-json.cmake",
+      "role": "build-fragment"
+    }
+  ],
+  "probes": [],
+  "adaptation_notes": [
+    "Header-only: the build fragment links nlohmann_json::nlohmann_json. Only the game's data layer (game/data) includes it; the rules core stays on the standard library.",
+    "The library throws on malformed input: the data layer catches nlohmann::json::exception at its boundary and reports the reason."
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "nlohmann-json",
+  "name": "JSON for Modern C++",
+  "license": {
+    "spdx": "MIT",
+    "class": "permissive"
+  },
+  "contribution_policy": {
+    "ai_generated_contributions": "unknown",
+    "source": "https://github.com/nlohmann/json"
+  },
+  "slots": [
+    "data-files"
+  ],
+  "source": {
+    "kind": "git",
+    "url": "https://github.com/nlohmann/json"
+  },
+  "versions": [
+    {
+      "version": "3.12.0",
+      "released": "2025-04-11",
+      "pin": {
+        "tag": "v3.12.0",
+        "commit": "55f93686c01528224f448c19128836e7df245f72",
+        "content_hash": "sha512:6cc1e86261f8fac21cc17a33da3b6b3c3cd5c116755651642af3c9e99bb3538fd42c1bd50397a77c8fb6821bc62d90e6b91bcdde77a78f58f2416c62fc53b97d"
+      },
+      "build_backend": {
+        "vcpkg": {
+          "port": "nlohmann-json",
+          "registry": "curated",
+          "port_version": 2
+        }
+      },
+      "cmake": {
+        "package": "nlohmann_json",
+        "targets": [
+          "nlohmann_json::nlohmann_json"
+        ]
+      },
+      "variants": [
+        {
+          "name": "default",
+          "build_options": {},
+          "description": "The header-only library as the nlohmann-json port installs it."
+        }
+      ],
+      "facts": {
+        "lifecycle": {
+          "init_steps": [],
+          "shutdown_steps": [],
+          "reloadable": true
+        },
+        "build-flags": {
+          "abi_defines": [],
+          "self_check": null,
+          "min_language_standard": "C++11",
+          "exceptions": "thrown",
+          "rtti": "no-constraint"
+        },
+        "platform": {
+          "targets": [
+            "windows-x64-msvc",
+            "linux-x64-clang"
+          ],
+          "headless": "",
+          "web": true
+        }
+      }
+    }
+  ]
+}

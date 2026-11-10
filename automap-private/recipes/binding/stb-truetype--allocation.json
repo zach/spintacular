@@ -1,0 +1,48 @@
+{
+  "kind": "binding",
+  "subject": {
+    "library": "stb-truetype",
+    "contract": "allocation",
+    "contract_version": "1.0.0"
+  },
+  "applies_to": {
+    "stb-truetype": {
+      "versions": [
+        "2026-08-02"
+      ],
+      "variants": [
+        "default"
+      ]
+    }
+  },
+  "reference_glue": [
+    {
+      "path": "stb-truetype--allocation/stb_truetype_allocation.cpp",
+      "role": "glue"
+    },
+    {
+      "path": "stb-truetype--allocation/stb_truetype_allocation_probe.cpp",
+      "role": "probe"
+    }
+  ],
+  "probes": [
+    {
+      "rule": "allocation.routed-through-facade",
+      "check": "am_probe_stb_truetype_allocation(): opening a glyph packing context allocates through the facade, tagged stb-truetype.",
+      "seeded_violation": {
+        "description": "Compile stb_truetype's implementation without the STBTT_malloc and STBTT_free macros, so it uses the C runtime.",
+        "patch": "stb-truetype--allocation/seeded/allocation.routed-through-facade.patch"
+      }
+    }
+  ],
+  "not_applicable": [
+    {
+      "rule": "allocation.hooks-before-first-allocation",
+      "reason": "stb_truetype's hooks are compile-time macros in its implementation: no stb_truetype code runs without them."
+    }
+  ],
+  "adaptation_notes": [
+    "stb_truetype's allocation hooks are macros its implementation reads: the binding's glue is the one translation unit that defines STB_TRUETYPE_IMPLEMENTATION, with STBTT_malloc and STBTT_free calling the facade before it includes stb_truetype.h.",
+    "Bitmaps stb_truetype returns are released with stbtt_FreeBitmap, never free."
+  ]
+}
