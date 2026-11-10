@@ -1,0 +1,105 @@
+# 07 — Experiments that set the haul's design
+
+**Scope.** This note covers the experiments behind the haul's rules and numbers (`docs/design/scoring.md`, `rounds.md`, `economy.md`, `content.md`): the round structure, the deal, the truck, the quota, the loopholes found and closed, and the final rubric result. It follows `06-haul-first-pass.md`.
+
+Run: 2026-11-10, with `prototypes/haul/` and the `tables.json` committed alongside this note.
+
+**Method.** Three kinds of test:
+
+- **Variants at equal difficulty.** `haul.py experiments 300` changes one rule at a time. For each variant it first scales the score targets until bots with no point factory win about 2% of runs, then runs the full rubric with 300 runs per bot. The scaling uses 150 runs per step, so a variant's wall can sit a point or two off 2%.
+- **Scripted builds.** A hand-made end-of-run build plays round 12 four hundred times with no target, to find a build's ceiling and look for strategies that bots don't discover.
+- **The rubric** (`docs/design/session-rubric.md`), on the final tables with 1,000 runs per bot.
+
+Bots weigh one more spin against delivering, by expected value, and play to the round's target.
+
+## Variants at equal difficulty [Verified by simulation]
+
+Columns:
+
+- **Engine:** the best point-factory bot's win rate.
+- **Reckless r1:** how often the bot that never delivers by choice loses round 1.
+- **Cargo:** mean cargo per delivery.
+- **Spoiled:** share of loads spoiled.
+- **Quota:** share of deliveries that reach the quota.
+
+| Variant | Checks | Engine | Reckless r1 | Cargo | Spoiled | Quota | Fails |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **Baseline: 4 trips, tank of 10, quota ×2, truck of 6** | 10 | 42% | 66% | 3.9 | 34% | 75% | – |
+| 3 trips | 8 | 39% | 72% | 3.7 | 31% | 77% | A1, B2 |
+| 5 trips | 10 | 40% | 56% | 4.0 | 37% | 74% | – |
+| Tank of 7 | 10 | 40% | 66% | 3.7 | 29% | 67% | – |
+| Tank of 14 | 10 | 45% | 66% | 3.9 | 34% | 76% | – |
+| One pool of 10 fuel for the round, no trips | 8 | 20% | 49% | 2.8 | 15% | 49% | A2, B2 |
+| The player places wedges on wheels | 8 | 31% | 41% | 4.1 | 34% | 83% | A2, B2 |
+| No quota bonus | 9 | 22% | 64% | 4.1 | 32% | 0% | B2 |
+| Quotas 25% higher | 9 | 50% | 67% | 3.9 | 32% | 42% | B1 |
+| Quotas 50% higher | 9 | 27% | 65% | 4.1 | 33% | 19% | B2 |
+| Quota bonus ×3 | 9 | 35% | 65% | 3.8 | 35% | 79% | B2 |
+| Truck holds 5 values | 9 | 42% | 24% | 3.9 | 32% | 70% | A2 |
+| Truck holds 7 values | 10 | 40% | 100% | 3.9 | 32% | 74% | – |
+| No full-truck bonus | 10 | 41% | 66% | 3.9 | 32% | 74% | – |
+| No inspections | 9 | 37% | 66% | 3.9 | 34% | 81% | B2 |
+
+A larger run of "quotas 25% higher" (600 runs per bot, calibrated with 300) gave an engine win rate of 35%, with 45% of deliveries reaching the quota. The 50% in the table came from a wall set too low: its no-engine bots won 4.3%.
+
+## What the variants show [Inference]
+
+- **Trips, not a pool of fuel.** With one pool, the best play is many small, safe deliveries: 2.8 cargo each, with 15% of loads spoiled. Point factories fall to 20%, and recklessness goes unpunished. With trips, loads are bigger and a third of them spoil. Trips are what make it a press-your-luck game.
+- **A random deal, not placement.** Letting the player place wedges takes risk out (the reckless bot survives round 1 more often) and weakens factories.
+- **The quota earns its place.** Without it, the best factory wins 22% instead of 42%. The quota is what separates a build that carries better loads from one that doesn't.
+  - Raising quotas by 25% makes the quota a real stretch (45% of deliveries reach it, against 75%), at a cost of about 7 points of factory win rate.
+  - A ×3 bonus is worse than ×2.
+  - The quota level is the main dial for how tempting "one more spin" is, and it needs playtests: bots press by arithmetic, not temptation.
+- **A truck of 6.** At 5 the truck fills so easily that never delivering is nearly safe (24%). At 7 the reckless bot always loses round 1, which is fine, but a full truck becomes very rare. 6 keeps the full truck as a reachable high point.
+- **4 trips and a tank of 10.** Three trips make round 1 too swingy (A1 fails). The tank's size matters little between 7 and 14.
+- **The full-truck bonus and inspections are neutral for balance.** They stay for what they add to play: a goal to chase, and rounds that ask different things of a build.
+
+## Loopholes found with scripted builds [Verified by simulation]
+
+Round 12, no target, 400 plays each. A loophole is a build that scores well and never spoils.
+
+| Build | Rule set | Median score | Loads spoiled |
+| --- | --- | --- | --- |
+| A bag of 12 "sealed" wedges that can never spoil a load | With the Sealed upgrade | 7,696 | 0% |
+| 6 unique wedges on 6 wheels, 2 Thermoses, load-size items | Empty slots are free spins | 13,878 | 0% |
+| The same build | With the no-repeats rule | 0 | 91% |
+| 6 unique wedges and 6 crates | With the no-repeats rule | 803 | 57% |
+| A realistic Convoy build | With the no-repeats rule | 10,464 | 37% |
+
+Three fixes came out of this:
+
+- **The Sealed upgrade is gone.** Enough of them made a risk-free bag.
+- **No repeats.** A wedge that lands twice in a trip spoils the load, whatever it carries. Before this, empty slots, tarps and crates were free spins, so a bag thinned to one cargo wedge per wheel could fill the truck with no risk. Now every re-spin of a wheel carries risk, however the bag is built.
+- **Tarps and crates count once per trip,** which follows from no repeats.
+
+The first haul's own loophole, a bag with one wedge per value, was closed earlier by keeping landed wedges on the wheel (`06-haul-first-pass.md`).
+
+## Final rubric result [Verified by simulation]
+
+`python3 prototypes/haul/haul.py sim 1000`: **10 of 10 checks pass.**
+
+| Check | Result |
+| --- | --- |
+| A1 Round 1 safe | Worst bot loses round 1 0.4% of the time |
+| A2 An insane risk can lose round 1 | Reckless loses it 64.6% |
+| B1 No win without a point factory | Best no-engine bot wins 2.9% |
+| B2 A point factory can win | Best engine bot wins 45.3% |
+| B3 A point factory is risky | No bot wins 90% |
+| C1 Many factories | color 36%, straight 42%, safety 41%, quota 45%, adaptive 43% |
+| C2 No dominant spending style | spender 37%, saver 32%, reroller 41%, bargain 5% |
+| D1 No cliff | Round 12 causes 21% of engine-bot losses |
+| E1 Shopping is a choice | 61% of shops with a good fit have two or more |
+| E2 No must-have | High Roller, the most-bought item, is in 46% of wins |
+
+Engine bots carry 3.9 cargo per delivery, spoil 34% of their loads, and reach the quota on 75% of deliveries.
+
+## Notes on the result [Inference]
+
+- **Every kind of factory works,** and following the shop (adaptive) is as good as committing to one. That's the "adapt to circumstances" goal.
+- **The margins on B1 and B2 are thin** (2.9% against 3%, 45% against 40%). The target curve is one scale factor away from either line, so it should be re-calibrated after any content change.
+- **The bargain style is weak alone** (5%), as in every earlier layer. Bots never switch styles, so this doesn't show the strategy is bad, only that it can't be the whole plan.
+- **Telemetry to act on:**
+  - Odd Fellow and Even Steven are never bought by engine bots.
+  - Ribbons are bought 4% of the time, and Piggy Bank 8%.
+  - Premium (95% of wins) and tarp wedges (93%) are near-universal. They're bag upgrades, which E2 doesn't cover, but more ways to do the same jobs would spread the choice.
+- **What simulation can't say:** whether the quota tempts a person, whether a spoiled load stings the right amount, and whether watching the odds is fun. Those need the playtest half of the rubric.

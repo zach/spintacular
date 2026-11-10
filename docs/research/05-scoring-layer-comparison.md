@@ -2,7 +2,7 @@
 
 **Scope.** This note compares three scoring layers from `04-scoring-mechanisms.md`, all run on the same prototype, rubric and bots:
 
-- **adjacent:** the current design. Dice score as runs of adjacent dice, in the order the wheels add them.
+- **adjacent:** the design at the time. Dice score as runs of adjacent dice, in the order the wheels add them.
 - **path:** reading order. Dice stay on a grid for 3 spins, with one row per spin. Each spin, the player traces one run of 3–5 orthogonally adjacent dice that touches the newest row, and those dice are used up. The traced order is the reading order, in either direction.
 - **holders:** Azul-style. Lines hold 3, 4 and 5 dice. A line becomes a color, value or straight line when its first die goes in. The player places each die in a line that accepts it, or on the floor. A full line scores its pattern and empties. Floor penalties are 1, 1, 2, 2, 2, 3, 3 points, and lines carry over between spins within a round.
 

@@ -73,7 +73,7 @@ Each round sets a quota, and a load whose points reach it pays double. The quota
 - **Rewarding better loads.** Builds that carry more, or carry higher values, reach it far more often.
 - **Scaling.** It's one number that rises round by round: 10 in round 1, 36 in round 12.
 
-Six different values from 1 to 6 add up to 21, so late quotas can't be met with starting cargo. The player has to raise values with Premium, stamps and wheels. In simulation, taking the quota out of the game cut the best point factory's win rate from 51% to 38%.
+Six different values from 1 to 6 add up to 21, so late quotas can't be met with starting cargo. The player has to raise values with Premium, stamps and wheels. In simulation, taking the quota out of the game cut the best point factory's win rate from 42% to 22%.
 
 ## Why these rules
 

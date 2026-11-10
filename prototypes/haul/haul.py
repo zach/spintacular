@@ -355,6 +355,7 @@ def play_round(run, player, log=None, endless=False):
     while True:
         full = len({v for _, v, _ in L.cargo}) >= t["scoring"]["truck_size"]
         can_spin = (fuel > 0 if fuel_mode else L.spins < tank) and not full
+        run.hud = f"fuel {fuel}" if fuel_mode else f"trip {rc['trips'] - trips_left + 1} of {rc['trips']}, tank {tank - L.spins}"
         act = player.choose(run, loads, L, total, target, fuel if fuel_mode else None) if can_spin else None
         if act is None:
             had = bool(L.cargo)
@@ -1057,10 +1058,11 @@ class Human(Player):
     def choose(self, run, loads, L, total, target, fuel):
         now = score(run, L) if L.cargo else 0
         print(f"\n  truck: {L.label()}  tarps {L.tarps + run.spare}  crates {L.crates}  worth {now} now"
-              f" | round {total}/{target} | quota {run.quota} | fuel {fuel}")
+              f" | round {total}/{target} | quota {run.quota} | {run.hud}")
         for wi, (wheel, wedges) in enumerate(zip(run.wheels, loads)):
             p = spoil_chance(run, wheel, wedges, L)
-            print(f"   {wi}: {wheel['name']:<14} {p:>4.0%} to spoil   " + " ".join(w.label() for w in wedges))
+            print(f"   {wi}: {wheel['name']:<14} {p:>4.0%} to spoil   "
+                  + " ".join(f"[{w.label()}]" if clashes(run, wheel, w, L) else f" {w.label()} " for w in wedges))
         while True:
             s = input("  spin which wheel, or d to deliver? ").strip().lower()
             if s == "d" and L.cargo:
@@ -1097,7 +1099,8 @@ def play(seed):
     run = Run(t, rng)
     human = Human(rng)
     print(f"Spintacular haul prototype, seed {seed}. Cargo is color+value; * is wild, + is stamped, __ is blank.")
-    print("Landing a value already in the truck spoils the load. Deliver before that happens.")
+    print("No repeats: a wedge that lands twice in a trip, or a cargo value already in the truck, spoils the load.")
+    print("Wedges in [brackets] would spoil it. Deliver before that happens.")
     for r in range(t["run"]["rounds"]):
         run.round = r
         run.inspection = pick_inspection(run)
@@ -1111,7 +1114,7 @@ def play(seed):
         if r == t["run"]["rounds"] - 1:
             print("\nYou win the run!")
             return
-        print(f"  Round won with {unused} fuel left; +${round_income(run, unused)}")
+        print(f"  Round won; +${round_income(run, unused)}")
         offers = [roll_offer(run) for _ in range(t["shop"]["offers"])]
         reroll = t["shop"]["reroll_base"]
         while True:

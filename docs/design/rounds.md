@@ -43,4 +43,4 @@ A run should feel like this (`session-rubric.md`):
 - **Round 1 is almost impossible to lose,** unless the player takes an insane risk. Two or three cargo per trip is plenty, and a first spin can never spoil a load.
 - **By the last rounds it's almost impossible to win without a point factory:** a build that can carry big loads, or make each load pay far more.
 
-In simulation, sensible bots lose round 1 less than 1% of the time, a bot that never delivers by choice loses it two times in three, bots with no point factory win 2% of runs, and the best point factories win about 40%.
+In simulation, sensible bots lose round 1 less than 1% of the time, and a bot that never delivers by choice loses it two times in three. Bots with no point factory win at most 3% of runs, and the best point factory wins 45% (`docs/research/07-haul-design-experiments.md`).
