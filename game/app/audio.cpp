@@ -87,7 +87,7 @@ void noise(Buf& b, float at, float dur, float amp, float cutoff, float attack, f
 void finish(Buf& b, float gain = 1.0f) {
     float peak = 0.001f;
     for (float v : b) peak = std::max(peak, std::fabs(v));
-    float g = gain * std::min(1.0f, 0.9f / peak);
+    float g = gain * 0.9f / peak;
     for (float& v : b) v *= g;
     // A short fade so no buffer ends on a click.
     std::size_t fade = std::min<std::size_t>(b.size(), 200);

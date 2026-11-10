@@ -11,7 +11,7 @@ namespace spin {
 using json = nlohmann::json;
 
 std::string read_file(const std::string& path) {
-    std::ifstream f(path, std::ios::binary);
+    std::ifstream f(fs_path(path), std::ios::binary);
     if (!f) return {};
     std::ostringstream ss;
     ss << f.rdbuf();
@@ -19,7 +19,7 @@ std::string read_file(const std::string& path) {
 }
 
 bool write_file(const std::string& path, const std::string& text) {
-    std::ofstream f(path, std::ios::binary | std::ios::trunc);
+    std::ofstream f(fs_path(path), std::ios::binary | std::ios::trunc);
     if (!f) return false;
     f << text;
     return static_cast<bool>(f);

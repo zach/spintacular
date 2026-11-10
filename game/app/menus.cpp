@@ -6,6 +6,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "data/tables_json.h"
 #include "game.h"
 
 namespace spin {
@@ -31,7 +32,7 @@ std::string stake_text(const Tables& t, int stake) {
 
 bool has_saved_run(const Game& g) {
     std::error_code ec;
-    return !g.save_dir.empty() && std::filesystem::exists(g.save_dir + "run.json", ec);
+    return !g.save_dir.empty() && std::filesystem::exists(fs_path(g.save_dir + "run.json"), ec);
 }
 
 std::uint64_t random_seed() {

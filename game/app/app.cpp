@@ -33,8 +33,8 @@ std::string find_assets() {
     const char* base = SDL_GetBasePath();
     std::string beside = std::string(base ? base : "") + "assets";
     std::error_code ec;
-    if (std::filesystem::exists(beside + "/data/tables.json", ec)) return beside;
-    if (std::filesystem::exists("assets/data/tables.json", ec)) return "assets";
+    if (std::filesystem::exists(fs_path(beside + "/data/tables.json"), ec)) return beside;
+    if (std::filesystem::exists(fs_path("assets/data/tables.json"), ec)) return "assets";
     return beside;
 }
 
@@ -224,7 +224,7 @@ void save_run(Game& g) {
     if (g.has_run && g.run.phase != Phase::Lost)
         write_file(g.save_dir + "run.json", run_to_json(g.run));
     else
-        std::filesystem::remove(g.save_dir + "run.json", ec);
+        std::filesystem::remove(fs_path(g.save_dir + "run.json"), ec);
 }
 
 void see(Game& g, const std::string& id) {
@@ -545,7 +545,7 @@ bool App::init(am::Context& ctx, const AppOptions& options) {
         g->save_dir = options.profile_dir;
         if (g->save_dir.back() != '/' && g->save_dir.back() != '\\') g->save_dir += '/';
         std::error_code ec;
-        std::filesystem::create_directories(g->save_dir, ec);
+        std::filesystem::create_directories(fs_path(g->save_dir), ec);
     } else if (!options.headless) {
         char* pref = SDL_GetPrefPath("Spintacular", "Spintacular");
         if (pref) {
