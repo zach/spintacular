@@ -7,7 +7,7 @@ A session is one run, from the first round to a win or a loss. This rubric judge
 
 The rubric has two parts:
 
-- **Simulated runs:** bots play thousands of runs in the prototype, and `prototypes/run/spintacular.py sim` checks the shape automatically.
+- **Simulated runs:** bots play thousands of runs in the prototype, and `python3 prototypes/haul/haul.py sim` checks the shape automatically.
 - **Playtests:** people score a run by hand.
 
 ## Part 1: simulated runs
@@ -18,11 +18,13 @@ The prototype's bots stand in for kinds of players:
 | --- | --- |
 | `passive` | Buys nothing. |
 | `random` | Buys at random. |
-| `flat/spender` | Buys whatever adds points now: flat bonuses and more wheels, with no synergy. |
-| `reckless` | Takes an insane risk: sells three of the four starting wheels before round 1. |
-| `<focus>/<style>` | Builds a point factory. The focus is `color`, `value`, `straight` or `adaptive` (it follows what the shop offers). The style is `spender`, `saver`, `reroller` or `bargain`, the shop strategies in `economy.md`. |
+| `flat/spender` | Buys whatever adds points now: flat bonuses and more wheels. It never reshapes its bag or builds toward anything. |
+| `reckless` | Takes an insane risk: never delivers by choice. Only a full truck or an empty tank ends its load. |
+| `<focus>/<style>` | Builds a point factory. The focus is `color`, `straight`, `safety`, `quota` or `adaptive` (it follows what the shop offers). The style is `spender`, `saver`, `reroller` or `bargain`, the shop strategies in `economy.md`. |
 
 The first three are the **no-engine** bots; the `<focus>/<style>` bots are the **engine** bots.
+
+During a trip, every bot except `reckless` weighs one more spin against delivering, and plays to the round's target: it banks a load when it's comfortably on pace, and gambles when playing safe can't get there.
 
 | Check | What it asks | Pass when |
 | --- | --- | --- |
@@ -55,10 +57,11 @@ After a run, the player scores each line from 1 (no) to 5 (yes). The observer no
 | 2 | In the last rounds, I could tell I needed a point factory, and I knew which pieces it would take. |
 | 3 | When my factory worked, the payout felt huge and earned, not lucky. |
 | 4 | When I lost, I could see why, and what I'd try next time. |
-| 5 | I could follow every payout step by step: dice, patterns, items. |
+| 5 | I could follow every payout step by step: cargo, sets, items, bonuses. |
 | 6 | Each shop gave me a real choice; I never felt there was only one thing to buy. |
 | 7 | I changed how I spent money during the run because of how it was going. |
 | 8 | The spins felt random but fair. I chose the odds; the wheel chose the result. |
-| 9 | I want to start another run right now. |
+| 9 | I felt the pull to spin once more than was wise, and sometimes gave in. |
+| 10 | I want to start another run right now. |
 
-A healthy run scores 4 or more on lines 1, 3, 5 and 9. A low score on 2 or 4 means the wall is unclear, and a low score on 6 or 7 means the shop is too narrow.
+A healthy run scores 4 or more on lines 1, 3, 5, 9 and 10. A low score on 2 or 4 means the wall is unclear, and a low score on 6 or 7 means the shop is too narrow.

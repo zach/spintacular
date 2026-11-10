@@ -1,6 +1,6 @@
-# PROTOTYPE: text-only run
+# PROTOTYPE: text-only run, earlier scoring layers
 
-Throwaway code for tuning Spintacular's numbers before any engine work. It uses only Python 3's standard library.
+Throwaway code that compared the scoring layers tried before the haul: runs of adjacent dice, a traced path, holders, holders with a wall, and a first haul (`docs/research/03` to `06`). The current design is played by `prototypes/haul/`. It uses only Python 3's standard library.
 
 ```bash
 python3 prototypes/run/spintacular.py sim 1000
@@ -26,7 +26,7 @@ python3 prototypes/run/spintacular.py compare 300
 
 Compares the scoring layers. It scales each layer's target curve so that bots without a point factory win about 2% of runs, then runs the rubric on each (`docs/research/05-scoring-layer-comparison.md`).
 
-Every balance number and every piece of content is in `tables.json`. `scoring.layer` picks the scoring layer: `wall` (the current design: Azul-style lines with a floor, plus a run-long wall), `holders` (lines without the wall), `adjacent` (runs of adjacent dice) or `path` (the player traces a run through a grid of recent spins). In `play`, the path or placement is chosen for you by the bots' rules; only `adjacent` has no choices to make.
+Every balance number and every piece of content is in `tables.json`. `scoring.layer` picks the scoring layer: `wall` (Azul-style lines with a floor, plus a run-long wall), `holders` (lines without the wall), `adjacent` (runs of adjacent dice) or `path` (the player traces a run through a grid of recent spins). In `play`, the path or placement is chosen for you by the bots' rules; only `adjacent` has no choices to make.
 
 ## Prototype defaults
 
