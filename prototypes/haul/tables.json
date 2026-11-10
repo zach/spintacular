@@ -10,7 +10,7 @@
   "round": {
     "mode": "trips",
     "trips": 4,
-    "tank": 8,
+    "tank": 10,
     "fuel": 10,
     "deal": "random",
     "inspections": true,
@@ -23,9 +23,8 @@
     "quota_bonus": 2,
     "quotas": [
       10,
-      11,
       12,
-      14,
+      13,
       15,
       17,
       19,
@@ -33,7 +32,8 @@
       23,
       26,
       29,
-      32
+      32,
+      36
     ],
     "flush": [
       2,
@@ -53,16 +53,16 @@
   "targets": [
     24,
     45,
-    80,
-    130,
-    200,
-    320,
-    520,
-    850,
-    1400,
-    2300,
-    4000,
-    7000
+    75,
+    115,
+    170,
+    260,
+    410,
+    650,
+    1030,
+    1630,
+    2700,
+    4500
   ],
   "income": {
     "per_round": 5,
@@ -128,16 +128,16 @@
         "from_round": 5,
         "weights": {
           "common": 0.5,
-          "uncommon": 0.35,
-          "rare": 0.15
+          "uncommon": 0.32,
+          "rare": 0.18
         }
       },
       {
         "from_round": 8,
         "weights": {
           "common": 0.4,
-          "uncommon": 0.35,
-          "rare": 0.25
+          "uncommon": 0.32,
+          "rare": 0.28
         }
       }
     ],
@@ -376,14 +376,14 @@
       "name": "Assembly Line",
       "rarity": "rare",
       "effect": "scaling_xmult_quota",
-      "amount": 0.15
+      "amount": 0.2
     },
     "odometer": {
       "name": "Odometer",
       "rarity": "rare",
       "effect": "scaling_mult_size",
       "min": 5,
-      "amount": 2
+      "amount": 3
     },
     "chromatic": {
       "name": "Chromatic Engine",
@@ -430,10 +430,10 @@
       "rarity": "uncommon",
       "text": "the wedge counts as any color"
     },
-    "sealed": {
-      "name": "Sealed",
+    "stamp": {
+      "name": "Stamp",
       "rarity": "uncommon",
-      "text": "the wedge can never spoil a load"
+      "text": "+3 points to a wedge"
     }
   },
   "consumables": {

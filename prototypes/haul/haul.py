@@ -44,15 +44,15 @@ def load_tables(overrides=()):
 # ---------------------------------------------------------------- model
 
 class Wedge:
-    __slots__ = ("kind", "color", "value", "sealed")
+    __slots__ = ("kind", "color", "value", "bonus")
 
     def __init__(self, kind="cargo", color=None, value=0):
-        self.kind, self.color, self.value, self.sealed = kind, color, value, False
+        self.kind, self.color, self.value, self.bonus = kind, color, value, 0
 
     def label(self):
         if self.kind != "cargo":
             return self.kind.upper()
-        return ("*" if self.color is None else COLORS[self.color]) + str(self.value) + ("!" if self.sealed else "")
+        return ("*" if self.color is None else COLORS[self.color]) + str(self.value) + ("+" if self.bonus else "")
 
 
 class Load:
@@ -248,7 +248,7 @@ def landed_value(run, wheel, w):
 
 
 def clashes(run, wheel, w, values):
-    return w is not None and w.kind == "cargo" and not w.sealed and landed_value(run, wheel, w) in values
+    return w is not None and w.kind == "cargo" and landed_value(run, wheel, w) in values
 
 
 def covered(run, wheel, L):
@@ -284,6 +284,7 @@ def play_round(run, player, log=None, endless=False):
     total = 0
     L = Load()
     landed = []          # wedges in the current load, for The Rod
+    used = set()         # tarp and crate wedges already counted in this load: each works once per load
 
     def spoil():
         nonlocal total, L, landed, trips_left
@@ -294,6 +295,7 @@ def play_round(run, player, log=None, endless=False):
         if log:
             log(f"    SPOILED: lost {L.label()}" + (f", insurance pays {pay}" if pay else ""))
         L, landed = Load(), []
+        used.clear()
         trips_left -= 1
 
     def land(wheel, wedges, idx, p):
@@ -301,17 +303,19 @@ def play_round(run, player, log=None, endless=False):
         w = wedges[idx]
         if w is None:
             return True
-        if w.kind == "tarp":
-            if run.inspection != "no_tarps":
+        if w.kind in ("tarp", "crate"):
+            if id(w) in used:
+                return True
+            used.add(id(w))
+            if w.kind == "crate":
+                L.crates += 1
+            elif run.inspection != "no_tarps":
                 L.tarps += 1
-            return True
-        if w.kind == "crate":
-            L.crates += 1
             return True
         v = landed_value(run, wheel, w)
         values = {x for _, x, _ in L.cargo}
-        if w.sealed or v not in values:
-            L.cargo.append((w.color, v, wheel["amount"] if wheel["effect"] == "gilded" else 0))
+        if v not in values:
+            L.cargo.append((w.color, v, w.bonus + (wheel["amount"] if wheel["effect"] == "gilded" else 0)))
             landed.append(w)
             if p >= risky:
                 L.risky += 1
@@ -372,6 +376,7 @@ def play_round(run, player, log=None, endless=False):
                             while victim in wedges:
                                 wedges[wedges.index(victim)] = None
             L, landed = Load(), []
+            used.clear()
             trips_left -= 1
             if total >= target and not endless:
                 break
@@ -482,8 +487,8 @@ def apply_offer(run, o, wedge=None, choice=None):
             wedge.value = min(run.t["run"]["max_value"], wedge.value + 1)
         elif o["id"] == "wild":
             wedge.color = None
-        elif o["id"] == "sealed":
-            wedge.sealed = True
+        elif o["id"] == "stamp":
+            wedge.bonus += 3
     run.money -= o["price"]
     run.bought.add(o["id"])
 
@@ -524,7 +529,7 @@ class Player:
                 for w in wedges:
                     cnt += 1
                     if w is not None and w.kind == "cargo":
-                        tot += score(run, Load().plus((w.color, landed_value(run, wheel, w), 0)))
+                        tot += score(run, Load().plus((w.color, landed_value(run, wheel, w), w.bonus)))
             self._fresh[key] = tot / max(1, cnt)
         return self._fresh[key]
 
@@ -553,7 +558,7 @@ class Player:
                         ev += ins * now
                 else:
                     ev += score(run, L.plus((w.color, landed_value(run, wheel, w),
-                                             wheel["amount"] if wheel["effect"] == "gilded" else 0)))
+                                             w.bonus + (wheel["amount"] if wheel["effect"] == "gilded" else 0))))
             ev /= len(wedges)
             p /= len(wedges)
             if ev > best_ev + 1e-9 or (abs(ev - best_ev) <= 1e-9 and p < best_p):
@@ -646,14 +651,14 @@ class Builder(Player):
 
     def wedge_ok(self, run, w, kind):
         """Whether a wedge belongs in this build's bag."""
-        if w.kind != "cargo" or w.sealed:
+        if w.kind != "cargo":
             return True
         if kind == "color":
             return w.color in (None, self.color)
         if kind == "flat":
             return w.value >= 3
-        counts = Counter(x.value for x in run.bag if x.kind == "cargo" and not x.sealed)
-        return counts[w.value] <= max(2, min(counts.values()))
+        counts = Counter(x.value for x in run.bag if x.kind == "cargo")
+        return counts[w.value] <= max(1, min(counts.values()))
 
     def fit(self, run, o, kind):
         if not can_take(run, o):
@@ -676,7 +681,7 @@ class Builder(Player):
                     "paint": 3.0 if kind == "color" else 0.2,
                     "premium": 3.5 if kind in ("quota", "safety", "straight") else 2.5,
                     "wild": 3.0 if kind == "color" else 0.3,
-                    "sealed": 4.0 if kind == "safety" else 3.0}[o["id"]]
+                    "stamp": 3.5 if kind == "quota" else 2.0}[o["id"]]
         if k == "wedge":
             if o.get("special"):
                 return 0 if not engine else (3.5 if o["special"] == "tarp" else 3.0)
@@ -691,7 +696,7 @@ class Builder(Player):
     def target_for(self, run, o, kind):
         cargo = [w for w in run.bag if w.kind == "cargo"]
         off = [w for w in cargo if not self.wedge_ok(run, w, kind)]
-        counts = Counter(w.value for w in cargo if not w.sealed)
+        counts = Counter(w.value for w in cargo)
         if o["kind"] == "zap":
             return (max(off, key=lambda w: counts[w.value]) if off else None), None
         oid = o["id"]
@@ -702,7 +707,7 @@ class Builder(Player):
             pool = [w for w in cargo if w.color not in (None, self.color)] or [w for w in cargo if w.color is not None]
             return (self.rng.choice(pool) if pool else None), None
         if oid == "recut":
-            pool = [w for w in cargo if not w.sealed]
+            pool = cargo
             if not pool:
                 return None, None
             w = max(pool, key=lambda x: counts[x.value])
@@ -713,9 +718,8 @@ class Builder(Player):
             if not pool:
                 return None, None
             return max(pool, key=lambda x: (counts[x.value] - counts[x.value + 1], x.value)), None
-        if oid == "sealed":
-            pool = [w for w in cargo if not w.sealed]
-            return (max(pool, key=lambda x: (counts[x.value], x.value)) if pool else None), None
+        if oid == "stamp":
+            return (max(cargo, key=lambda x: (-x.bonus, x.value)) if cargo else None), None
         return None, None
 
     def wants(self, run, o, f):
@@ -1094,7 +1098,7 @@ def play(seed):
     rng = random.Random(seed)
     run = Run(t, rng)
     human = Human(rng)
-    print(f"Spintacular haul prototype, seed {seed}. Cargo is color+value; * is wild, ! is sealed, __ is blank.")
+    print(f"Spintacular haul prototype, seed {seed}. Cargo is color+value; * is wild, + is stamped, __ is blank.")
     print("Landing a value already in the truck spoils the load. Deliver before that happens.")
     for r in range(t["run"]["rounds"]):
         run.round = r
