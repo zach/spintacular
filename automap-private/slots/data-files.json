@@ -1,0 +1,7 @@
+{
+  "id": "data-files",
+  "description": "Reads and writes structured data files: balance tables, saves and settings.",
+  "examples": [
+    "nlohmann-json"
+  ]
+}

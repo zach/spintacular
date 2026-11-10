@@ -156,5 +156,11 @@
         "not_applicable": "The tracy recipe ships no glue."
       }
     }
-  }
+  },
+  "private_maps": [
+    {
+      "id": "spintacular",
+      "location": "automap-private"
+    }
+  ]
 }
