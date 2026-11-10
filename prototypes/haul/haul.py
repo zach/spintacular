@@ -50,6 +50,8 @@ class Wedge:
         self.kind, self.color, self.value, self.bonus = kind, color, value, 0
 
     def label(self):
+        if self.kind == "blank":
+            return "__"
         if self.kind != "cargo":
             return self.kind.upper()
         return ("*" if self.color is None else COLORS[self.color]) + str(self.value) + ("+" if self.bonus else "")
@@ -57,9 +59,10 @@ class Wedge:
 
 class Load:
     """What is in the truck."""
-    __slots__ = ("cargo", "crates", "tarps", "risky", "covered", "clutch_used", "spins")
+    __slots__ = ("cargo", "crates", "tarps", "risky", "covered", "clutch_used", "spins", "used")
 
     def __init__(self):
+        self.used = set()        # ids of the wedges that have landed this trip
         self.cargo = []          # (color or None, value, bonus points)
         self.crates = self.tarps = self.risky = self.spins = 0
         self.covered = self.clutch_used = False
@@ -69,6 +72,7 @@ class Load:
         n.cargo = self.cargo + [cargo] if cargo else self.cargo
         n.crates = self.crates + (1 if crate else 0)
         n.tarps, n.risky, n.covered, n.clutch_used, n.spins = self.tarps, self.risky, self.covered, self.clutch_used, self.spins
+        n.used = self.used
         return n
 
     def label(self):
@@ -212,7 +216,7 @@ def score(run, L, commit=False, trace=None):
 # ---------------------------------------------------------------- a round
 
 def deal(run):
-    """Fill the wheels from the bag. Slots the bag can't fill hold blanks (None)."""
+    """Fill the wheels from the bag. Slots the bag can't fill hold empty wedges."""
     bag = run.bag[:]
     run.rng.shuffle(bag)
     if run.t["round"]["deal"] == "assign":
@@ -239,7 +243,7 @@ def deal(run):
                     loads[wi].append(bag[k])
                     k += 1
     for wi, w in enumerate(run.wheels):
-        loads[wi] += [None] * (w["size"] - len(loads[wi]))
+        loads[wi] += [Wedge("blank") for _ in range(w["size"] - len(loads[wi]))]
     return loads
 
 
@@ -247,8 +251,11 @@ def landed_value(run, wheel, w):
     return min(run.t["run"]["max_value"], w.value + 1) if wheel["effect"] == "bump" else w.value
 
 
-def clashes(run, wheel, w, values):
-    return w is not None and w.kind == "cargo" and landed_value(run, wheel, w) in values
+def clashes(run, wheel, w, L):
+    """No repeats: a wedge that already landed this trip, or cargo whose value is already in the truck."""
+    if id(w) in L.used:
+        return True
+    return w.kind == "cargo" and any(v == landed_value(run, wheel, w) for _, v, _ in L.cargo)
 
 
 def covered(run, wheel, L):
@@ -261,8 +268,7 @@ def covered(run, wheel, L):
 def spoil_chance(run, wheel, wedges, L):
     if covered(run, wheel, L):
         return 0.0
-    values = {v for _, v, _ in L.cargo}
-    return sum(1 for w in wedges if clashes(run, wheel, w, values)) / len(wedges)
+    return sum(1 for w in wedges if clashes(run, wheel, w, L)) / len(wedges)
 
 
 def play_round(run, player, log=None, endless=False):
@@ -284,7 +290,6 @@ def play_round(run, player, log=None, endless=False):
     total = 0
     L = Load()
     landed = []          # wedges in the current load, for The Rod
-    used = set()         # tarp and crate wedges already counted in this load: each works once per load
 
     def spoil():
         nonlocal total, L, landed, trips_left
@@ -295,32 +300,26 @@ def play_round(run, player, log=None, endless=False):
         if log:
             log(f"    SPOILED: lost {L.label()}" + (f", insurance pays {pay}" if pay else ""))
         L, landed = Load(), []
-        used.clear()
         trips_left -= 1
 
     def land(wheel, wedges, idx, p):
         """Resolve the wedge at idx. Returns False if the load spoiled."""
         w = wedges[idx]
-        if w is None:
-            return True
-        if w.kind in ("tarp", "crate"):
-            if id(w) in used:
-                return True
-            used.add(id(w))
+        if not clashes(run, wheel, w, L):
+            L.used.add(id(w))
             if w.kind == "crate":
                 L.crates += 1
-            elif run.inspection != "no_tarps":
-                L.tarps += 1
-            return True
-        v = landed_value(run, wheel, w)
-        values = {x for _, x, _ in L.cargo}
-        if v not in values:
-            L.cargo.append((w.color, v, w.bonus + (wheel["amount"] if wheel["effect"] == "gilded" else 0)))
-            landed.append(w)
-            if p >= risky:
+            elif w.kind == "tarp":
+                if run.inspection != "no_tarps":
+                    L.tarps += 1
+            elif w.kind == "cargo":
+                L.cargo.append((w.color, landed_value(run, wheel, w),
+                                w.bonus + (wheel["amount"] if wheel["effect"] == "gilded" else 0)))
+                landed.append(w)
+            if p >= risky and w.kind == "cargo":
                 L.risky += 1
             return True
-        # A duplicate. Protections, in order.
+        # A repeat. Protections, in order.
         if wheel["effect"] == "padded":
             return True
         if run.has("double_clutch") and not L.clutch_used:
@@ -338,7 +337,7 @@ def play_round(run, player, log=None, endless=False):
         if L.cargo and player.use_fix(run, L):
             if "nudge" in run.consumables:
                 for j in ((idx - 1) % len(wedges), (idx + 1) % len(wedges)):
-                    if not clashes(run, wheel, wedges[j], values):
+                    if not clashes(run, wheel, wedges[j], L):
                         run.consumables.remove("nudge")
                         if log:
                             log("    nudge saves the load")
@@ -346,7 +345,7 @@ def play_round(run, player, log=None, endless=False):
             if "respin" in run.consumables:
                 run.consumables.remove("respin")
                 j = run.rng.randrange(len(wedges))
-                if not clashes(run, wheel, wedges[j], values):
+                if not clashes(run, wheel, wedges[j], L):
                     if log:
                         log("    respin saves the load")
                     return land(wheel, wedges, j, 0)
@@ -374,9 +373,8 @@ def play_round(run, player, log=None, endless=False):
                         run.bag.remove(victim)
                         for wedges in loads:
                             while victim in wedges:
-                                wedges[wedges.index(victim)] = None
+                                wedges[wedges.index(victim)] = Wedge("blank")
             L, landed = Load(), []
-            used.clear()
             trips_left -= 1
             if total >= target and not endless:
                 break
@@ -392,15 +390,14 @@ def play_round(run, player, log=None, endless=False):
             L.spins += 1
         run.m["spins"] += 1
         p = spoil_chance(run, wheel, wedges, L)
-        values = {v for _, v, _ in L.cargo}
         weights = None
         if p > 0 and "band" in run.consumables and player.use_band(run, L, p):
             run.consumables.remove("band")
-            weights = [0.5 if clashes(run, wheel, w, values) else 1 for w in wedges]
+            weights = [0.5 if clashes(run, wheel, w, L) else 1 for w in wedges]
         idx = run.rng.choices(range(len(wedges)), weights)[0]
         if log:
             w = wedges[idx]
-            log(f"    wheel {act} ({p:.0%} to spoil): {'blank' if w is None else w.label()}")
+            log(f"    wheel {act} ({p:.0%} to spoil): {w.label()}")
         if not land(wheel, wedges, idx, p):
             if not fuel_mode and trips_left <= 0:
                 break
@@ -528,7 +525,7 @@ class Player:
             for wheel, wedges in zip(run.wheels, loads):
                 for w in wedges:
                     cnt += 1
-                    if w is not None and w.kind == "cargo":
+                    if w.kind == "cargo":
                         tot += score(run, Load().plus((w.color, landed_value(run, wheel, w), w.bonus)))
             self._fresh[key] = tot / max(1, cnt)
         return self._fresh[key]
@@ -539,23 +536,22 @@ class Player:
         need = target - total
         if L.cargo and now >= need and self.caution > 0:
             return None
-        values = {v for _, v, _ in L.cargo}
         ins = sum(i["amount"] for i in run.has("insurance"))
         best, best_ev, best_p = None, -1.0, 0.0
         for wi, (wheel, wedges) in enumerate(zip(run.wheels, loads)):
             safe = covered(run, wheel, L)
             ev = p = 0.0
             for w in wedges:
-                if w is None or w.kind == "tarp":
-                    ev += now
-                elif w.kind == "crate":
-                    ev += score(run, L.plus(crate=True)) if L.cargo else 0
-                elif clashes(run, wheel, w, values):
+                if clashes(run, wheel, w, L):
                     if safe:
                         ev += now
                     else:
                         p += 1
                         ev += ins * now
+                elif w.kind in ("blank", "tarp"):
+                    ev += now
+                elif w.kind == "crate":
+                    ev += score(run, L.plus(crate=True)) if L.cargo else 0
                 else:
                     ev += score(run, L.plus((w.color, landed_value(run, wheel, w),
                                              w.bonus + (wheel["amount"] if wheel["effect"] == "gilded" else 0))))
@@ -991,14 +987,16 @@ def capacity(t, runs):
 
 
 EXPERIMENTS = [
-    ("baseline: 4 trips, tank 8, quota x2", []),
+    ("baseline: 4 trips, tank 10, quota x2", []),
     ("3 trips", ["round.trips=3"]),
     ("5 trips", ["round.trips=5"]),
-    ("tank 6", ["round.tank=6"]),
-    ("tank 12", ["round.tank=12"]),
+    ("tank 7", ["round.tank=7"]),
+    ("tank 14", ["round.tank=14"]),
     ("one pool of 10 fuel, no trips", ["round.mode=fuel"]),
     ("deal: player places wedges", ["round.deal=assign"]),
     ("no quota bonus", ["scoring.quota_bonus=1"]),
+    ("quotas 25% higher", ["scoring.quotas=[12,15,16,19,21,24,26,29,32,36,40,45]"]),
+    ("quotas 50% higher", ["scoring.quotas=[15,18,20,22,26,28,32,34,39,44,48,54]"]),
     ("quota bonus x3", ["scoring.quota_bonus=3"]),
     ("truck holds 5 values", ["scoring.truck_size=5"]),
     ("truck holds 7 values", ["scoring.truck_size=7"]),
@@ -1062,7 +1060,7 @@ class Human(Player):
               f" | round {total}/{target} | quota {run.quota} | fuel {fuel}")
         for wi, (wheel, wedges) in enumerate(zip(run.wheels, loads)):
             p = spoil_chance(run, wheel, wedges, L)
-            print(f"   {wi}: {wheel['name']:<14} {p:>4.0%} to spoil   " + " ".join("__" if w is None else w.label() for w in wedges))
+            print(f"   {wi}: {wheel['name']:<14} {p:>4.0%} to spoil   " + " ".join(w.label() for w in wedges))
         while True:
             s = input("  spin which wheel, or d to deliver? ").strip().lower()
             if s == "d" and L.cargo:
