@@ -44,6 +44,7 @@ Each layer is its own way to build.
 | `content.md` | Every wedge, upgrade, wheel, item and consumable; the kinds of point factory |
 | `progression.md` | Routes, rigs, stakes, unlocks, seeds |
 | `presentation.md` | What the player sees and hears |
+| `art-and-audio.md` | The look and sound: road signs and loading docks |
 | `tech.md` | How the game is built: C++ with Automap |
 | `session-rubric.md` | How to judge a run, by simulation and by playtest |
 
