@@ -269,7 +269,9 @@ def play_round(run, player, log=None, endless=False):
     t, rc = run.t, run.t["round"]
     target = math.inf if endless else t["targets"][run.round]
     fuel_mode = rc["mode"] == "fuel"
-    fuel = rc["fuel"] + sum(i["amount"] for i in run.has("fuel")) - (2 if run.inspection == "fuel_down" else 0)
+    extra = sum(i["amount"] for i in run.has("fuel")) - (2 if run.inspection == "fuel_down" else 0)
+    fuel = rc["fuel"] + extra          # fuel mode: one pool for the round
+    tank = rc["tank"] + extra          # trips mode: fuel for each trip
     trips_left = rc["trips"]
     quota = t["scoring"]["quotas"][min(run.round, len(t["scoring"]["quotas"]) - 1)]
     run.quota = math.ceil(quota * 1.25) if run.inspection == "quota_up" else quota
@@ -349,7 +351,7 @@ def play_round(run, player, log=None, endless=False):
 
     while True:
         full = len({v for _, v, _ in L.cargo}) >= t["scoring"]["truck_size"]
-        can_spin = (fuel > 0 if fuel_mode else L.spins < rc["max_spins_per_trip"]) and not full
+        can_spin = (fuel > 0 if fuel_mode else L.spins < tank) and not full
         act = player.choose(run, loads, L, total, target, fuel if fuel_mode else None) if can_spin else None
         if act is None:
             had = bool(L.cargo)
@@ -377,12 +379,12 @@ def play_round(run, player, log=None, endless=False):
                 break
             continue
         wheel, wedges = run.wheels[act], loads[act]
-        if fuel_mode:
-            if wheel["effect"] == "express" and act not in free_used:
-                free_used.add(act)
-            else:
-                fuel -= 1
-        L.spins += 1
+        if wheel["effect"] == "express" and (act, trips_left if not fuel_mode else 0) not in free_used:
+            free_used.add((act, trips_left if not fuel_mode else 0))
+        elif fuel_mode:
+            fuel -= 1
+        else:
+            L.spins += 1
         run.m["spins"] += 1
         p = spoil_chance(run, wheel, wedges, L)
         values = {v for _, v, _ in L.cargo}
@@ -397,7 +399,7 @@ def play_round(run, player, log=None, endless=False):
         if not land(wheel, wedges, idx, p):
             if not fuel_mode and trips_left <= 0:
                 break
-    return total >= target, max(0, fuel) if fuel_mode else max(0, trips_left), total
+    return total >= target, max(0, fuel) if fuel_mode else max(0, trips_left) * 2, total
 
 
 def round_income(run, unused):
@@ -985,12 +987,17 @@ def capacity(t, runs):
 
 
 EXPERIMENTS = [
-    ("baseline: fuel, random deal, quota x2", []),
-    ("round: 4 trips instead of fuel", ["round.mode=trips"]),
+    ("baseline: 4 trips, tank 8, quota x2", []),
+    ("3 trips", ["round.trips=3"]),
+    ("5 trips", ["round.trips=5"]),
+    ("tank 6", ["round.tank=6"]),
+    ("tank 12", ["round.tank=12"]),
+    ("one pool of 10 fuel, no trips", ["round.mode=fuel"]),
     ("deal: player places wedges", ["round.deal=assign"]),
     ("no quota bonus", ["scoring.quota_bonus=1"]),
     ("quota bonus x3", ["scoring.quota_bonus=3"]),
-    ("mult +0.5 per cargo", ["scoring.mult_per_cargo=0.5"]),
+    ("truck holds 5 values", ["scoring.truck_size=5"]),
+    ("truck holds 7 values", ["scoring.truck_size=7"]),
     ("no full-truck bonus", ["scoring.full_bonus=1"]),
     ("no inspections", ["round.inspections=false"]),
 ]

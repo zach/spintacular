@@ -8,10 +8,10 @@
     "max_value": 9
   },
   "round": {
-    "mode": "fuel",
-    "fuel": 10,
+    "mode": "trips",
     "trips": 4,
-    "max_spins_per_trip": 12,
+    "tank": 8,
+    "fuel": 10,
     "deal": "random",
     "inspections": true,
     "inspection_every": 3
@@ -22,18 +22,18 @@
     "full_bonus": 1.5,
     "quota_bonus": 2,
     "quotas": [
-      8,
-      9,
       10,
+      11,
       12,
-      13,
       14,
-      16,
-      18,
-      20,
-      22,
-      24,
-      27
+      15,
+      17,
+      19,
+      21,
+      23,
+      26,
+      29,
+      32
     ],
     "flush": [
       2,
@@ -305,7 +305,7 @@
       "name": "Thermos",
       "rarity": "uncommon",
       "effect": "fuel",
-      "amount": 1
+      "amount": 2
     },
     "long_haul": {
       "name": "Long Haul",
