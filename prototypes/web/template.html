@@ -78,6 +78,8 @@ button.chip { cursor: pointer; } button.chip:hover { outline: 2px solid var(--si
 .offer .nm { font-family: var(--display); font-size: 19px; font-weight: 700; }
 .offer .rar { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .offer.sold { opacity: .4; }
+select, input { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.item.unseen { color: var(--muted); border-style: dashed; }
 .note { color: var(--muted); font-size: 13px; max-width: 70ch; }
 .choice { border: 2px solid var(--warn); border-radius: 8px; padding: 10px; display: grid; gap: 8px; }
 </style>
@@ -93,6 +95,15 @@ button.chip { cursor: pointer; } button.chip:hover { outline: 2px solid var(--si
     </div>
     <div class="bar"><i id="hBar"></i></div>
   </div>
+
+  <section id="startView" class="panel" hidden>
+    <h2>New run</h2>
+    <div class="acts"><label for="rigSel">Rig</label><select id="rigSel"></select><label for="stakeSel">Stake</label><select id="stakeSel"></select>
+      <label for="seedIn">Seed</label><input id="seedIn" inputmode="numeric" size="8" placeholder="random"></div>
+    <div class="note" id="rigNote"></div>
+    <div class="acts"><button class="btn" id="startBtn">Start run</button><button class="btn alt" id="dailyBtn"></button></div>
+    <h2>Collection</h2><div class="note" id="colNote"></div><div class="items" id="colList"></div>
+  </section>
 
   <section id="roundView" class="panel">
     <div class="wheels" id="wheels"></div>
@@ -131,7 +142,30 @@ button.chip { cursor: pointer; } button.chip:hover { outline: 2px solid var(--si
     A delivery pays points × mult: every cargo adds its value in points and 1 mult, so bigger loads pay much more. Three or more of one color, or a run of consecutive values, add mult. Reach the quota for double. Six different values is a full truck. Miss a round's score and the run ends.</div></section>
 </div>
 <script>
-const T = /*TABLES*/;
+const BASE = /*TABLES*/;
+let T = BASE;
+const RIGS = { standard: ["Standard", "12 cargo wedges, values 1 to 6 twice, and 4 plain wheels."], tanker: ["Tanker", "+2 to the tank, but one fewer item slot."],
+  reefer: ["Reefer", "Starts with 2 tarp wedges, but quotas are 20% higher."], flatbed: ["Flatbed", "The truck holds 7 values, but you start with 3 wheels."],
+  hotshot: ["Hotshot", "Starts with 2 crate wedges and $10, but 3 less in the tank."], monochrome: ["Monochrome", "Every wedge is red, but targets are 30% higher."] };
+function setup(rig, stake) {
+  const t = JSON.parse(JSON.stringify(BASE)), mods = [t.rigs[rig]].concat(t.stakes.slice(0, stake - 1));
+  for (const m of mods) {
+    if (m.bag) t.start.bag = m.bag; if (m.add_wedges) t.start.bag = t.start.bag.concat(m.add_wedges); if (m.wheels) t.start.wheels = m.wheels;
+    if (m.money !== undefined) t.run.start_money = m.money; t.round.tank += m.tank || 0; t.run.max_items += m.item_slots || 0;
+    if (m.truck_size) t.scoring.truck_size = m.truck_size; if (m.no_interest) t.income.interest_cap = 0;
+    if (m.quota_scale) t.scoring.quotas = t.scoring.quotas.map(q => Math.ceil(q * m.quota_scale));
+    if (m.target_scale) t.targets = t.targets.map((v, i) => i ? Math.floor(v * m.target_scale) : v);
+    if (m.price_up) for (const k in t.shop.prices) { const v = t.shop.prices[k]; if (typeof v === "object") for (const r in v) v[r] += m.price_up; else t.shop.prices[k] = v + m.price_up; }
+    if (m.inspection_every) t.round.inspection_every = m.inspection_every; t.round.spoil_cost = (t.round.spoil_cost || 0) + (m.spoil_cost || 0);
+  }
+  return t;
+}
+// The collection lives in this browser only: what you've seen, what's unlocked, and your best stake per rig.
+const store = { get() { try { return JSON.parse(localStorage.getItem("spintacular") || "{}"); } catch (e) { return {}; } }, set(v) { try { localStorage.setItem("spintacular", JSON.stringify(v)); } catch (e) {} } };
+let SAVE = Object.assign({ seen: [], unlocked: [], best: {} }, store.get());
+const lockedNow = () => BASE.locked.filter(id => !SAVE.unlocked.includes(id));
+function see(id) { if (!SAVE.seen.includes(id)) { SAVE.seen.push(id); store.set(SAVE); } }
+function contentName(id) { for (const k of ["items", "wheels", "upgrades", "consumables"]) if (BASE[k][id]) return BASE[k][id].name; return id; }
 const SHAPE = ["●", "▲", "■", "◆"], CNAME = ["Red", "Green", "Blue", "Yellow"];
 const $ = id => document.getElementById(id);
 function rngFrom(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -140,8 +174,9 @@ function weighted(r, entries) { const tot = entries.reduce((s, e) => s + e[1], 0
 let S, uid = 0, busy = false;
 
 function newWedge(kind, color, value) { return { kind, color, value, bonus: 0, id: ++uid }; }
-function newRun(seed) {
-  S = { seed, money: T.run.start_money, round: 0, items: [], cons: [], phase: "round",
+function newRun(seed, rig, stake, daily) {
+  T = setup(rig, stake);
+  S = { seed, rig, stake, daily, money: T.run.start_money, round: 0, items: [], cons: [], phase: "round",
     rShop: rngFrom(seed + 1), rDeal: rngFrom(seed + 2), rSpin: rngFrom(seed + 3),
     bag: T.start.bag.map(w => w === "TARP" || w === "CRATE" ? newWedge(w.toLowerCase()) : newWedge("cargo", "RGBY".indexOf(w[0]), +w[1])),
     wheels: T.start.wheels.map(id => ({ id, ...T.wheels[id], rot: 0 })) };
@@ -279,7 +314,7 @@ async function turnTo(wi, idx) {
 }
 async function spoil() {
   const L = S.load, ins = sum(has("insurance"), i => i.amount), pay = ins ? Math.floor(ins * score(L, false).total) : 0;
-  S.total += pay;
+  S.total += pay; S.money = Math.max(0, S.money - (T.round.spoil_cost || 0));
   steps([`Spoiled. You lose ${L.cargo.length} cargo worth ${score(L, false).total}.` + (pay ? ` Insurance pays ${pay}.` : "")], "bad");
   S.load = emptyLoad(); S.tripsLeft--; await endTrip();
 }
@@ -302,20 +337,27 @@ async function endTrip() {
   if (S.tripsLeft <= 0) return endRound(false);
   render();
 }
+function finish(won) {
+  // Simplified unlocks for the prototype: a run that gets past round 3 unlocks two locked pieces.
+  S.newly = S.round >= 3 ? lockedNow().slice(0, 2) : [];
+  SAVE.unlocked.push(...S.newly);
+  if (won) SAVE.best[S.rig] = Math.max(SAVE.best[S.rig] || 0, S.stake);
+  store.set(SAVE); S.phase = won ? "won" : "over"; render();
+}
 function endRound(won) {
-  if (!won) { S.phase = "over"; return render(); }
-  if (S.round === T.run.rounds - 1) { S.phase = "won"; return render(); }
+  if (!won) return finish(false);
+  if (S.round === T.run.rounds - 1) return finish(true);
   const inc = T.income; let gain = inc.per_round + Math.min(inc.unused_cap, S.tripsLeft * 2 * inc.per_unused_fuel) + Math.min(inc.interest_cap, Math.floor(S.money / inc.interest_per));
   has("piggy").forEach(it => gain += Math.min(it.cap, Math.floor(S.money * it.rate)));
   has("spendthrift").forEach(it => gain += Math.floor(S.money * it.rate));
   S.money += gain; S.gain = gain; S.round++; S.phase = "shop"; S.reroll = T.shop.reroll_base; rollOffers(); render();
 }
 
-function rollOffers() { S.offers = Array.from({ length: T.shop.offers }, rollOffer); S.picking = null; }
+function rollOffers() { S.offers = Array.from({ length: T.shop.offers }, rollOffer); S.picking = null; S.offers.forEach(o => { if (contentName(o.id) !== o.id) see(o.id); }); }
 function rollOffer() {
   const r = S.rShop, sh = T.shop, pr = sh.prices, kind = weighted(r, Object.entries(sh.kind_weights));
   if (["item", "wheel", "upgrade", "consumable"].includes(kind)) {
-    const pool = T[kind + "s"]; let w = sh.rarity_by_round[0].weights;
+    const lock = lockedNow(), pool = Object.fromEntries(Object.entries(T[kind + "s"]).filter(([k]) => !lock.includes(k))); let w = sh.rarity_by_round[0].weights;
     sh.rarity_by_round.forEach(row => { if (S.round + 1 >= row.from_round) w = row.weights; });
     const present = new Set(Object.values(pool).map(v => v.rarity));
     const rar = weighted(r, Object.entries(w).filter(([k, v]) => v > 0 && present.has(k)));
@@ -385,9 +427,19 @@ function wheelSvg(wi) {
   });
   return `<svg viewBox="0 0 132 132" role="img" aria-label="${wheel.name}"><g class="rot" style="transform: rotate(${wheel.rot}deg)">${out}</g><path d="M66,10 l-7,-12 h14 z" fill="var(--ink)"/></svg>`;
 }
+function renderStart() {
+  $("rigNote").textContent = RIGS[$("rigSel").value][1] + ($("stakeSel").value > 1 ? " Stake " + $("stakeSel").value + " adds: " + BASE.stakes.slice(0, $("stakeSel").value - 1).map(s => s.name).join("; ") + "." : "");
+  const all = ["items", "wheels", "upgrades", "consumables"].flatMap(k => Object.keys(BASE[k])), lock = lockedNow();
+  $("colNote").textContent = `Seen ${SAVE.seen.length} of ${all.length}. ${lock.length} still locked. Best stake won: ` +
+    (Object.keys(SAVE.best).length ? Object.entries(SAVE.best).map(([r, s]) => `${RIGS[r][0]} ${s}`).join(", ") : "none yet") + ". Saved in this browser only.";
+  $("colList").innerHTML = all.map(id => SAVE.seen.includes(id) ? `<span class="item"><b>${contentName(id)}</b></span>` : `<span class="item unseen">${lock.includes(id) ? "Locked" : "Not seen yet"}</span>`).join("");
+}
 function render() {
+  $("startView").hidden = S.phase !== "start";
+  if (S.phase === "start") { ["roundView", "shopView", "endView"].forEach(v => $(v).hidden = true); ["hRound", "hScore", "hTrips", "hMoney", "hSeed"].forEach(v => $(v).textContent = "–"); $("insp").hidden = true; $("hBar").style.width = "0";
+    $("items").innerHTML = $("cons").innerHTML = ""; return renderStart(); }
   const target = T.targets[Math.min(S.round, T.targets.length - 1)];
-  $("hRound").textContent = `${Math.min(S.round + 1, T.run.rounds)} / ${T.run.rounds}`; $("hMoney").textContent = "$" + S.money; $("hSeed").textContent = S.seed;
+  $("hRound").textContent = `${Math.min(S.round + 1, T.run.rounds)} / ${T.run.rounds}`; $("hMoney").textContent = "$" + S.money; $("hSeed").textContent = S.daily ? "Daily " + S.seed : S.seed;
   $("hScore").textContent = S.phase === "shop" ? "–" : `${S.total} / ${target}`; $("hTrips").textContent = S.phase === "shop" ? "–" : S.tripsLeft;
   $("hBar").style.width = S.phase === "shop" ? "0" : Math.min(100, 100 * S.total / target) + "%";
   const insp = S.phase === "round" && S.inspection; $("insp").hidden = !insp; if (insp) $("insp").textContent = `Inspection, ${T.inspections[S.inspection].name}: ${T.inspections[S.inspection].text}`;
@@ -422,8 +474,9 @@ function render() {
     $("wheelList").innerHTML = S.wheels.map(w => `<span class="item"><b>${w.name}</b> ${w.text || ""}</span>`).join("");
     $("reroll").textContent = `Reroll $${S.reroll}`; $("reroll").disabled = S.money < S.reroll;
   }
-  if (S.phase === "over") { $("endTitle").textContent = "Run over"; $("endNote").textContent = `You scored ${S.total} of ${target} in round ${S.round + 1}. Seed ${S.seed}.`; }
-  if (S.phase === "won") { $("endTitle").textContent = "You cleared all 12 rounds"; $("endNote").textContent = `Final round: ${S.total} of ${target}. Seed ${S.seed}.`; }
+  const tail = ` ${RIGS[S.rig][0]} rig, stake ${S.stake}, seed ${S.seed}.` + (S.newly && S.newly.length ? ` Unlocked: ${S.newly.map(contentName).join(" and ")}.` : "");
+  if (S.phase === "over") { $("endTitle").textContent = "Run over"; $("endNote").textContent = `You scored ${S.total} of ${target} in round ${S.round + 1}.` + tail; }
+  if (S.phase === "won") { $("endTitle").textContent = "You cleared all 12 rounds"; $("endNote").textContent = `Final round: ${S.total} of ${target}.` + tail; }
 }
 document.addEventListener("click", e => {
   const t = e.target.closest("button"); if (!t) return; const d = t.dataset;
@@ -439,8 +492,15 @@ $("deliver").onclick = () => deliver();
 $("band").onclick = () => { S.bandOn = true; render(); };
 $("reroll").onclick = () => { if (S.money >= S.reroll) { S.money -= S.reroll; S.reroll += T.shop.reroll_step; rollOffers(); render(); } };
 $("next").onclick = () => { if (has("spendthrift").length) S.money = 0; startRound(); };
-$("again").onclick = () => newRun(Math.floor(Math.random() * 900000) + 100000);
-document.addEventListener("keydown", e => { if (S.phase !== "round" || e.target.tagName === "INPUT") return;
+$("again").onclick = () => { S = { phase: "start" }; render(); };
+const today = () => { const d = new Date(); return d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate(); };
+$("rigSel").innerHTML = Object.entries(RIGS).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join("");
+$("stakeSel").innerHTML = Array.from({ length: BASE.stakes.length + 1 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
+$("dailyBtn").textContent = "Play the daily haul";
+$("rigSel").onchange = $("stakeSel").onchange = () => renderStart();
+$("startBtn").onclick = () => newRun(parseInt($("seedIn").value, 10) || Math.floor(Math.random() * 900000) + 100000, $("rigSel").value, +$("stakeSel").value, false);
+$("dailyBtn").onclick = () => newRun(today(), "standard", 1, true);
+document.addEventListener("keydown", e => { if (S.phase !== "round" || /INPUT|SELECT/.test(e.target.tagName)) return;
   if (e.key >= "1" && e.key <= "9" && +e.key <= S.wheels.length) spin(+e.key - 1); else if (e.key === " ") { e.preventDefault(); deliver(); } });
-newRun(Math.floor(Math.random() * 900000) + 100000);
+S = { phase: "start" }; render();
 </script>
