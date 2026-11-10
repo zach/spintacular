@@ -514,7 +514,19 @@ bool App::init(am::Context& ctx, const AppOptions& options) {
     g->ctx = &ctx;
     g->opt = options;
     g->asset_dir = find_assets();
-    if (options.width > 0 && options.height > 0) SDL_SetWindowSize(ctx.sdl3.window, options.width, options.height);
+    if (options.width > 0 && options.height > 0) {
+        SDL_SetWindowSize(ctx.sdl3.window, options.width, options.height);
+    } else if (!options.headless) {
+        // Fit the window to a small screen, keeping 16:9.
+        SDL_Rect area;
+        int w = 0, h = 0;
+        SDL_GetWindowSize(ctx.sdl3.window, &w, &h);
+        if (SDL_GetDisplayUsableBounds(SDL_GetDisplayForWindow(ctx.sdl3.window), &area) && (w > area.w || h > area.h - 40)) {
+            float fit = std::min(area.w * 0.94f / w, (area.h - 40) * 0.94f / h);
+            SDL_SetWindowSize(ctx.sdl3.window, static_cast<int>(w * fit), static_cast<int>(h * fit));
+            SDL_SetWindowPosition(ctx.sdl3.window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        }
+    }
     try {
         g->tables_text = read_file(g->asset_dir + "/data/tables.json");
         g->tables = tables_from_json(g->tables_text);

@@ -18,7 +18,7 @@ It is weakest at everything after the testbed: turning the testbed into a game, 
 | Glue I wrote | About 40 lines: stb_truetype's allocation binding and probe, in the private map |
 | Game code on top | About 8,000 lines: rules core, data layer, balance simulation, presentation, tests |
 | Automap commands used | `find`, `show`, `start`, `extend`, `verify`, `verify --seed`, `upgrade`, `eject` |
-| Findings logged | 49, in `field-notes.md` |
+| Findings logged | 50, in `field-notes.md` |
 
 ## 1. Step by step
 
